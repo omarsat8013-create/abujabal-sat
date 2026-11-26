@@ -276,7 +276,7 @@ const SD_STEPS = [
 ];
 const LOADERS = [
   { family:'sunplus', items:[
-    { name:'Sunplus Loader Tools 1506 / 1507 (v1.5.08)', does:'شحن السوفت وير وملف القنوات لمعالجات صن بلص 1506 و 1507.', conn:'كابل ترقية RS232', steps:CABLE_STEPS, src:'https://dwdvb.com/sunplus-loader-tools-1506-1507-v-1-5-08/', srcName:'dwdvb.com' },
+    { name:'Sunplus Loader Tools 1506 / 1507 (v1.5.08)', does:'شحن السوفت وير وملف القنوات لمعالجات صن بلص 1506 و 1507.', conn:'كابل ترقية RS232', steps:CABLE_STEPS, src:'https://dwdvb.com/sunplus-loader-tools-1506-1507-v-1-5-08/', srcName:'dwdvb.com', dl:'dl/sunplus-loader-1.5.0.8.rar' },
     { name:'اللودر الشامل لكل الصن بلص', does:'سحب وشحن الفلاشة 4 و 8 ميجا، وبيدعم أجهزة الداكي وفانيلا الجديد 1506 / 2507.', conn:'كابل ترقية RS232', steps:CABLE_STEPS, src:'https://www.amalqtsat.com/vb/showthread.php?t=35850', srcName:'منتديات عمالقة السات' },
     { name:'لودرات صن بلص G / C / F / TV', does:'شحن الفلاشة حسب حرف المعالج: G أو C أو F أو TV، كل حرف ليه لودره.', conn:'كابل ترقية RS232', steps:CABLE_STEPS, src:'https://masrysat.com/threads/570/', srcName:'منتدى مصرى سات' },
   ]},
@@ -290,8 +290,8 @@ const LOADERS = [
   ]},
   { family:'ali', items:[
     { name:'لودر علي SD (الشعبي)', does:'الأشهر للأجهزة الميني HD الصينية بمعالج ALi SD زي 3606: بيشحن السوفت وير وملف القنوات عن طريق كارت الميموري SD من غير كمبيوتر، أو بكابل الترقية.', conn:'كارت SD أو كابل الترقية', steps:SD_STEPS, src:'https://www.migosat.com/2025/09/ali-sd.html', srcName:'migosat.com' },
-    { name:'STB EROM Upgrade', does:'حل مشاكل سوفتات معالجات ALi: شحن وسحب الفلاشة وإنقاذ الجهاز بعد سوفت غلط أو لمبة حمرا.', conn:'كابل ترقية RS232', steps:CABLE_STEPS, src:'https://www.east-sat.com/loader-stb-erom-upgrade-tool-free-download/', srcName:'east-sat.com' },
-    { name:'لودرات ALi 3510C / 3510D و 3511 / 3516 / 3606', does:'شحن وسحب الفلاشات العنيدة (زي فلاشات boyamicro) لموديلات علي المختلفة.', conn:'كابل ترقية RS232', steps:CABLE_STEPS, src:'https://www.amalqtsat.com/vb/showthread.php?t=6775', srcName:'منتديات عمالقة السات' },
+    { name:'STB EROM Upgrade', does:'حل مشاكل سوفتات معالجات ALi: شحن وسحب الفلاشة وإنقاذ الجهاز بعد سوفت غلط أو لمبة حمرا.', conn:'كابل ترقية RS232', steps:CABLE_STEPS, src:'https://www.east-sat.com/loader-stb-erom-upgrade-tool-free-download/', srcName:'east-sat.com', dl:'dl/erom-upgrade-ali-351x.rar' },
+    { name:'لودرات ALi 3510C / 3510D و 3511 / 3516 / 3606', does:'شحن وسحب الفلاشات العنيدة (زي فلاشات boyamicro) لموديلات علي المختلفة.', conn:'كابل ترقية RS232', steps:CABLE_STEPS, src:'https://www.amalqtsat.com/vb/showthread.php?t=6775', srcName:'منتديات عمالقة السات', dl:'dl/m3510c-loader.rar' },
   ]},
 ];
 const LOADER_TOTAL = LOADERS.reduce((n,g)=>n+g.items.length,0);
@@ -300,14 +300,18 @@ const LOADER_TOTAL = LOADERS.reduce((n,g)=>n+g.items.length,0);
    البرنامج بدون تسجيل ولا منتديات خارجية. entry.dl فاضي معناه: لسه في قايمة الرفع. */
 const UPD_TYPES=['الكل','سوفت وير','تحويل','ملف قنوات'];
 const UPDATES=[
-  { type:'سوفت وير', name:'سوفتات صن بلص 1506 / 1507 / 2507', family:'sunplus', note:'الأصلية والمعدلة لأجهزة الداكي وفانيلا والشعبي، بالسيرفرات والإضافات', dl:null },
-  { type:'سوفت وير', name:'سوفتات GX6605 (فوريفر / كيوماكس / المنيو الذهبي)', note:'سوفتات عائلة الجي اكس بموديلاتها', dl:null },
-  { type:'سوفت وير', name:'سوفتات علي ALi 3510 / 3511 / 3516 / 3606', family:'ali', note:'لأجهزة الميني HD الاقتصادية', dl:null },
-  { type:'سوفت وير', name:'فلاشات كاملة جاهزة 4 و 8 ميجا', note:'فلاشات مسحوبة وجاهزة للشحن باللودر حسب الموديل', dl:null },
-  { type:'تحويل', name:'تحويلات داكي ↔ فانيلا (نفس المعالج)', family:'sunplus', note:'تحويل السوفت بين الأجهزة اللي شغالة على نفس المعالج', dl:null },
-  { type:'تحويل', name:'تحويلات الشعبي والكومبو صن بلص', family:'sunplus', note:'مينوهات وسوفتات محولة للأجهزة الشعبي والكومبو', dl:null },
-  { type:'ملف قنوات', name:'ملف قنوات نايل سات مرتب (داكي / فانيلا / شعبي)', family:'sunplus', note:'ترتيب محدث بالترددات الجديدة، بيتجدد باستمرار', dl:null },
-  { type:'ملف قنوات', name:'ملفات قنوات GX6605 وعلي ALi جاهزة', note:'ملفات مرتبة بالصيغ اللي بتقبلها الأجهزة دي', dl:null },
+  { type:'ملف قنوات', name:'ملف قنوات نايل سات — عربي (91 قناة)', note:'قائمة عامة: مصري وخليجي وأخبار ورياضة وأطفال ووثائقي. JSON بيفتح مباشرة في محرر البرنامج (ملف ← فتح) + نسخ CSV مختومة بأسماء كل إصدارات الأجهزة الـ24. المصدر: مسح حقيقي بجهاز استقبال، نوفمبر 2026', dl:'dl/channels-arabic.zip', size:'62 ك.ب' },
+  { type:'ملف قنوات', name:'ملف قنوات نايل سات — إسلامي (19 قناة)', note:'قنوات القرآن والسنة: مصر قرآن، القرآن الكريم السعودية، السنة النبوية، أزهري، الرحمة، الشارقة للقرآن + إذاعات قرآن. JSON للمحرر + CSV لكل الإصدارات. مسح نوفمبر 2026', dl:'dl/channels-islamic.zip', size:'21 ك.ب' },
+  { type:'ملف قنوات', name:'ملف قنوات نايل سات — مسيحي (9 قنوات)', note:'سي تي في مصر، أغابي، قنوات الكرمة الخمس، لوجوس، مي سات. JSON للمحرر + CSV لكل الإصدارات. مسح نوفمبر 2026', dl:'dl/channels-christian.zip', size:'15 ك.ب' },
+  { type:'ملف قنوات', name:'ملف قنوات نايل سات — إنجليزي (7 قنوات)', note:'الجزيرة الإنجليزية، فرانس 24 إنجليزي، بي بي سي نيوز، CGTN، TRT World + إذاعة بي بي سي. JSON للمحرر + CSV لكل الإصدارات. مسح نوفمبر 2026', dl:'dl/channels-english.zip', size:'14 ك.ب' },
+  { type:'سوفت وير', name:'Sunplus Loader v1.5.0.8 (صن بلص 1506/1507)', note:'لودر شحن وسحب السوفت وملفات القنوات لمعالجات صن بلص 1506 و1507 (داكي وفانيلا والشعبي). برنامج ويندوز + شرح مصور. أداة فنيين مجانية، مصدرها dwdvb.com', dl:'dl/sunplus-loader-1.5.0.8.rar', size:'404 ك.ب', family:'sunplus' },
+  { type:'سوفت وير', name:'لودر M3510C (معالجات علي)', note:'لودر RS232 كامل بملفات إعداد DDR لكل موديلات علي M35xx/M36xx/M38xx. أداة فنيين مجانية، مصدرها dwdvb.com', dl:'dl/m3510c-loader.rar', size:'824 ك.ب', family:'ali' },
+  { type:'سوفت وير', name:'Erom Upgrade لعلي 351x', note:'أداة إنقاذ وشحن فلاشة معالجات علي 351x بعد سوفت غلط أو لمبة حمرا، مع ملف eromclient.abs. أداة فنيين مجانية، مصدرها dwdvb.com', dl:'dl/erom-upgrade-ali-351x.rar', size:'204 ك.ب', family:'ali' },
+  { type:'سوفت وير', name:'أدوات علي 3510 المهمة (حزمة)', note:'حزمة أدوات معالج علي 3510: برنامج الأدوات الرئيسي + فيديو شرح + صورة التوصيلات. أداة فنيين مجانية، مصدرها dwdvb.com', dl:'dl/ali3510-important-tools.rar', size:'6.6 م.ب', family:'ali' },
+  { type:'سوفت وير', name:'Universal Loader لمعالجات علي', note:'اللودر العام لترقية أجهزة معالجات ALi بالكابل. أداة فنيين مجانية، مصدرها dwdvb.com', dl:'dl/universal-loader-ali-chip.rar', size:'111 ك.ب', family:'ali' },
+  { type:'سوفت وير', name:'GXDownloader boot v1.1.1.2 (جي اكس)', note:'لودر شحن البوت والسوفت لمعالجات GX6605 وعائلة جي اكس. أداة فنيين مجانية، مصدرها dwdvb.com', dl:'dl/gxdownloader-boot-1.1.1.2.rar', size:'1.1 م.ب' },
+  { type:'سوفت وير', name:'GXDownloader boot v1.0.0.8 (جي اكس)', note:'نسخة أقدم من لودر جي اكس مع ملفات بوت 6601/6602/6605، بتنفع مع أجهزة مش بتقبل النسخة الجديدة. مصدرها dwdvb.com', dl:'dl/gxdownloader-boot-1.0.0.8.rar', size:'672 ك.ب' },
+  { type:'سوفت وير', name:'UART Upgrade Tool v2.2.3.113', note:'أداة ترقية عامة عبر منفذ UART/RS232 بمكتباتها الكاملة، بتخدم موديلات كتير. أداة فنيين مجانية، مصدرها dwdvb.com', dl:'dl/uart-upgrade-tool-2.2.3.113.rar', size:'13.2 م.ب' },
 ];
 let updFilter='الكل';
 function viewUpdates(){
