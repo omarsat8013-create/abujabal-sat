@@ -842,7 +842,7 @@ const ARZ={
     'ALGERIA TV':'الجزائر','TUNISIA TV':'تونس','NESSMA':'نسيبة','HANNIBAL':'حنبعل','ATTESSIA':'التاسعة','LIBYA TV':'ليبيا','AL AAN':'الآن','LBC':'إل بي سي','MTV LEBANON':'إم تي في لبنان','FUTURE TV':'المستقبل','NBN':'إن بي إن','TELE LUMIERE':'تيلي لوميير','NOUR SAT':'نور سات'
   },
   words:{
-    'NEWS':'نيوز','SPORT':'سبورت','SPORTS':'سبورت','MOVIE':'موفي','MOVIES':'موفيز','CINEMA':'سينما','MUSIC':'ميوزيك',
+    'SAUDI':'السعودية','SAUDIA':'السعودية','CH':'قناة','FOR':'لـ','KAREEM':'الكريم','KARIM':'الكريم','SHARJAH':'الشارقة','QATAR':'قطر','MAJD3':'المجد 3','KSA':'السعودية','ALMAJD':'المجد','HOLY':'المبارك','MADINA':'المدينة','MAKKAH':'مكة','MECCA':'مكة','AZHAR':'الأزهر','ZAD':'زاد','WESAL':'وصال','HEKMA':'حكمة','SEHA':'صحة','SCHOOL':'مدرسة','EDUCATION':'تعليم','UNIVERSITY':'جامعة','KING':'الملك','ROYAL':'الملكي',    'NEWS':'نيوز','SPORT':'سبورت','SPORTS':'سبورت','MOVIE':'موفي','MOVIES':'موفيز','CINEMA':'سينما','MUSIC':'ميوزيك',
     'KIDS':'كيدز','BABY':'بيبي','DRAMA':'دراما','SERIES':'مسلسلات','COMEDY':'كوميدي','ACTION':'أكشن','CLASSIC':'كلاسيك',
     'WORLD':'وورلد','INTERNATIONAL':'إنترناشيونال','NATIONAL':'ناشيونال','GENERAL':'عامة','PUBLIC':'العامة','EDUCATIONAL':'تعليمية','CULTURE':'ثقافة','CULTURAL':'ثقافية','DOCUMENTARY':'وثائقية','DOCU':'دوكيو',
     'QURAN':'قرآن','KORAN':'قرآن','SUNNAH':'سنة','SUNNA':'سنة','ISLAMIC':'إسلامية','RELIGIOUS':'دينية','FATWA':'فتوى',

@@ -1,5 +1,5 @@
-const CACHE='abujabal-sat-v9';
-const ASSETS=['./','index.html','manifest.webmanifest','sw.js','icon-192.png','icon-512.png','apple-touch-icon.png','hero.jpg','lab.js?v=8','vendor/sql-wasm.js?v=1','vendor/sql-wasm.wasm?v=1'];
+const CACHE='abujabal-sat-v10';
+const ASSETS=['./','index.html','manifest.webmanifest','sw.js','icon-192.png','icon-512.png','apple-touch-icon.png','hero.jpg','lab.js?v=9','vendor/sql-wasm.js?v=1','vendor/sql-wasm.wasm?v=1'];
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
