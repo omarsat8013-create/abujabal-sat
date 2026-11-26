@@ -424,6 +424,14 @@ function viewLab(){
       +'<div id="cmpOut" style="margin-top:10px"></div>'
       +'</div></div>';
   }
+  if(LAB.type==='sqlite'&&LAB.sqlDb&&LAB.sqlTables.indexOf('srv_table')>=0){
+    main+='<div class="toolcard t-gold">'+labToolHead('t-gold','🔀','دمج ملفين مع تقرير التعارضات','يدمج قنوات ملف تاني جوه الملف المفتوح — فحص وتقرير قبل التنفيذ، وتراجع كامل بعده')
+      +'<div class="toolbody">'
+      +'<div class="field"><label>الملف التاني (قاعدة قنوات SQLite)</label><input type="file" id="mrgFile"></div>'
+      +'<button type="button" class="btn btn-primary" id="mrgScan">فحص الدمج (بدون تعديل)</button>'
+      +'<div id="mrgOut" style="margin-top:10px"></div>'
+      +'</div></div>';
+  }
   main+='<div class="toolcard t-teal">'+labToolHead('t-teal','🔄','تحويل واستيراد صيغ القنوات','تحويل موثّق بس — اللي نقدر نقراه ونتحقق منه كامل. الصيغ المغلقة بنرفضها بدل التخمين، حفاظًا على الأجهزة')
     +'<div class="toolbody">'+labConvBody()+'</div></div>';
   main+='<div class="toolcard t-blue">'+labToolHead('t-blue','🆔','مغيّر ID السوفت (من ملف لملف)','بيكتب ID الملف المانح في ملفك — زي ما بيتعمل عشان جهاز يقبل سوفت محوّل')
@@ -625,6 +633,7 @@ function bindLab(){
   }); })();
   (async()=>{ const dbSat=$('#dbSat'); if(!dbSat) return; try{ if(!LAB.satdb) LAB.satdb=await (await fetch('satdb.json')).json(); dbSat.innerHTML='<option value="">📚 قاعدة الترددات المدمجة: اختر قمر…</option>'+LAB.satdb.sats.map((st,i)=>'<option value="'+i+'">'+esc(st.name)+' ('+st.tps.length+')</option>').join(''); }catch(e){} })();
   on('#cmpRun',labCompareFiles);
+  on('#mrgScan',labMergeScan);
   on('#expJson',labExpJson);
   on('#expCsv',labExpCsv);
   on('#impRun',labImportRun);
@@ -1656,6 +1665,134 @@ async function labImportRun(){
   labSqlLoadRows(); labChecks(); render();
   // رجّع النتيجة ظاهرة بعد الريندر
   const out2=$('#impOut'); if(out2) out2.innerHTML=h;
+}
+// ===== Merge two channel files with conflict report =====
+function labCopyRow(srcDb, table, srcDbId, newDbId, overrides){
+  const dstCols=LAB.sqlDb.exec('PRAGMA table_info('+table+')')[0].values.map(v=>v[1]);
+  const srcCols=srcDb.exec('PRAGMA table_info('+table+')')[0].values.map(v=>v[1]);
+  const common=dstCols.filter(c=>c!=='db_id'&&srcCols.indexOf(c)>=0);
+  const r=srcDb.exec('SELECT '+common.map(c=>'"'+c+'"').join(',')+' FROM '+table+' WHERE db_id='+srcDbId);
+  let vals=r[0]&&r[0].values.length?Array.from(r[0].values[0]):common.map(()=>null);
+  vals=vals.map(v=>v===undefined?null:v);
+  if(overrides) common.forEach((c,i)=>{ if(c in overrides) vals[i]=overrides[c]; });
+  LAB.sqlDb.run('INSERT INTO '+table+' (db_id'+(common.length?',':'')+common.map(c=>'"'+c+'"').join(',')+') VALUES (?'+',?'.repeat(common.length)+')',[newDbId].concat(vals));
+}
+async function labMergeScan(){
+  const f=$('#mrgFile')&&$('#mrgFile').files[0];
+  const out=$('#mrgOut');
+  if(!f){ toast('اختر الملف التاني الأول'); return; }
+  if(!LAB.sqlDb||LAB.sqlTables.indexOf('srv_table')<0){ toast('افتح ملف قنوات SQLite الأول'); return; }
+  out.innerHTML='<p style="color:var(--mut)">جاري فحص الدمج (قراءة فقط)…</p>';
+  let db2;
+  try{
+    const SQL=LAB.sql||await initSqlJs({locateFile:x=>'vendor/'+x});
+    db2=new SQL.Database(new Uint8Array(await f.arrayBuffer()));
+    db2.exec('SELECT 1 FROM srv_table LIMIT 1'); db2.exec('SELECT 1 FROM ts_table LIMIT 1'); db2.exec('SELECT 1 FROM sat_para_table LIMIT 1');
+  }catch(e){ out.innerHTML='<p style="color:var(--danger)">الملف التاني مش قاعدة قنوات SQLite معروفة — الدمج بيشتغل بين ملفين SQLite بس، حفاظًا على السلامة.</p>'; return; }
+  LAB.mrgDb2=db2;
+  const normSat=s=>String(s||'').trim().toLowerCase();
+  const sat1=new Map();
+  LAB.sqlDb.exec('SELECT db_id, sat_name FROM sat_para_table')[0].values.forEach(v=>sat1.set(normSat(v[1]), v[0]));
+  const tp1=new Map();
+  LAB.sqlDb.exec('SELECT db_id, db_sat_para_id, freq, polar, symb FROM ts_table')[0].values.forEach(v=>tp1.set(v[1]+'|'+v[2]+'|'+v[3], {db_id:v[0], symb:v[4]}));
+  const plan={newSats:[], newTps:[], newCh:[], dups:[], conflicts:[], srcName:f.name};
+  const satMap={};
+  const r2s=db2.exec('SELECT db_id, sat_name FROM sat_para_table');
+  (r2s[0]?r2s[0].values:[]).forEach(v=>{
+    const key=normSat(v[1]);
+    if(sat1.has(key)) satMap[v[0]]=sat1.get(key);
+    else{ satMap[v[0]]='sat:'+v[0]; plan.newSats.push({srcId:v[0], name:String(v[1]||('قمر '+v[0]))}); }
+  });
+  const tpMap={};
+  const r2t=db2.exec('SELECT db_id, db_sat_para_id, freq, polar, symb FROM ts_table');
+  (r2t[0]?r2t[0].values:[]).forEach(v=>{
+    const satTarget=satMap[v[1]];
+    if(satTarget===undefined){ plan.conflicts.push('تردد '+(v[2]/1000)+' على قمر مش متعرف في الملف التاني — اتخطّى'); return; }
+    if(typeof satTarget==='string'){ tpMap[v[0]]='tp:'+plan.newTps.length; plan.newTps.push({srcId:v[0], sat:satTarget, freq:v[2], polar:v[3], symb:v[4]}); return; }
+    const ex=tp1.get(satTarget+'|'+v[2]+'|'+v[3]);
+    if(ex){
+      if(ex.symb!==v[4]) plan.conflicts.push('تردد '+(v[2]/1000)+' '+(v[3]?'V':'H')+': معدل الترميز مختلف ('+(ex.symb/1000)+' عندنا ← '+(v[4]/1000)+' في التاني) — هنستخدم الموجود');
+      tpMap[v[0]]=ex.db_id;
+    }else{ tpMap[v[0]]='tp:'+plan.newTps.length; plan.newTps.push({srcId:v[0], sat:satTarget, freq:v[2], polar:v[3], symb:v[4]}); }
+  });
+  const dup1=new Set();
+  LAB.sqlDb.exec('SELECT db_ts_id, service_id FROM srv_table')[0].values.forEach(v=>dup1.add(v[0]+'|'+v[1]));
+  const r2c=db2.exec('SELECT service_id, name, db_ts_id FROM srv_table');
+  (r2c[0]?r2c[0].values:[]).forEach(v=>{
+    const sid=+v[0]; if(!sid) return;
+    const t=tpMap[v[2]];
+    if(t===undefined){ plan.conflicts.push('قناة "'+String(v[1]||'')+'" على تردد اتخطّى — القناة اتخطّت'); return; }
+    if(typeof t==='number'&&dup1.has(t+'|'+sid)){ plan.dups.push(String(v[1]||'')+' (SID '+sid+')'); return; }
+    plan.newCh.push({srcTs:v[2], ts:t, sid, name:String(v[1]||'')});
+  });
+  LAB.mrgPlan=plan;
+  let h='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:8px;margin-bottom:8px">'
+    +'<div class="toolbody" style="text-align:center"><b style="color:var(--teal)">'+plan.newCh.length+'</b><br>قناة هتتضاف</div>'
+    +'<div class="toolbody" style="text-align:center"><b>'+plan.newTps.length+'</b><br>تردد جديد</div>'
+    +'<div class="toolbody" style="text-align:center"><b>'+plan.newSats.length+'</b><br>قمر جديد</div>'
+    +'<div class="toolbody" style="text-align:center"><b style="color:var(--gold)">'+plan.dups.length+'</b><br>مكرر (هيتخطّى)</div>'
+    +'<div class="toolbody" style="text-align:center"><b style="color:var(--danger)">'+plan.conflicts.length+'</b><br>تعارض/تنبيه</div></div>';
+  if(plan.conflicts.length) h+='<div style="max-height:140px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:8px;font-size:12px;margin-bottom:8px">'+plan.conflicts.slice(0,30).map(c=>'<div>'+esc(c)+'</div>').join('')+(plan.conflicts.length>30?'<div>… و'+(plan.conflicts.length-30)+' تانيين</div>':'')+'</div>';
+  h+='<p style="font-size:12px;color:var(--mut)">القنوات الجديدة هتتضاف في آخر القائمة بأرقام جديدة، وبياناتها التقنية بتتنقل كاملة (تردد/استقطاب/PIDs/إعدادات دايسك). الباقات (الجروبات) مش بتتنقل في الدمج — القنوات والترددات بس. التنفيذ معاه تراجع كامل وفحص سلامة.</p>';
+  h+='<div class="btnrow"><button type="button" class="btn btn-gold" id="mrgRun">تنفيذ الدمج</button></div>';
+  out.innerHTML=h;
+  $('#mrgRun').addEventListener('click',labMergeRun);
+}
+function labMergeRun(){
+  const plan=LAB.mrgPlan, db2=LAB.mrgDb2, out=$('#mrgOut');
+  if(!plan||!db2){ toast('اعمل فحص الدمج الأول'); return; }
+  const addedSat=[], addedTs=[], addedSrv=[];
+  try{
+    const satIdMap={};
+    plan.newSats.forEach(s=>{
+      const nid=LAB.sqlDb.exec('SELECT COALESCE(MAX(db_id),0)+1 FROM sat_para_table')[0].values[0][0];
+      labCopyRow(db2, 'sat_para_table', s.srcId, nid, null);
+      satIdMap['sat:'+s.srcId]=nid; addedSat.push(nid);
+    });
+    const tsIdMap={};
+    plan.newTps.forEach((t,i)=>{
+      const sat=(typeof t.sat==='number')?t.sat:satIdMap[t.sat];
+      const nid=LAB.sqlDb.exec('SELECT COALESCE(MAX(db_id),0)+1 FROM ts_table')[0].values[0][0];
+      labCopyRow(db2, 'ts_table', t.srcId, nid, {db_sat_para_id: sat});
+      tsIdMap['tp:'+i]=nid; addedTs.push(nid);
+    });
+    let maxCh=LAB.sqlDb.exec('SELECT COALESCE(MAX(chan_num),0) FROM srv_table')[0].values[0][0];
+    let maxId=LAB.sqlDb.exec('SELECT COALESCE(MAX(db_id),0) FROM srv_table')[0].values[0][0];
+    plan.newCh.forEach(ch=>{
+      const ts=(typeof ch.ts==='number')?ch.ts:tsIdMap[ch.ts];
+      const sat=LAB.sqlDb.exec('SELECT db_sat_para_id FROM ts_table WHERE db_id='+ts)[0].values[0][0];
+      // جدّد التحقق من التكرار لحظة التنفيذ
+      const dup=LAB.sqlDb.exec('SELECT COUNT(*) FROM srv_table WHERE db_ts_id='+ts+' AND service_id='+ch.sid)[0].values[0][0];
+      if(dup) return;
+      maxId++; maxCh++;
+      labCopyRow(db2, 'srv_table', (()=>{ const r=db2.exec('SELECT db_id FROM srv_table WHERE db_ts_id='+ch.srcTs+' AND service_id='+ch.sid+' LIMIT 1'); return r[0].values[0][0]; })(), maxId, {db_ts_id: ts, db_sat_para_id: sat, chan_num: maxCh});
+      addedSrv.push(maxId);
+    });
+    const v=LAB.sqlDb.exec('PRAGMA integrity_check')[0].values[0][0];
+    if(v!=='ok'){
+      if(addedSrv.length) LAB.sqlDb.run('DELETE FROM srv_table WHERE db_id IN ('+addedSrv.join(',')+')');
+      if(addedTs.length) LAB.sqlDb.run('DELETE FROM ts_table WHERE db_id IN ('+addedTs.join(',')+')');
+      if(addedSat.length) LAB.sqlDb.run('DELETE FROM sat_para_table WHERE db_id IN ('+addedSat.join(',')+')');
+      out.innerHTML='<p style="color:var(--danger)">فحص السلامة فشل بعد الدمج — اتراجع كل حاجة تلقائيًا. مفيش أي تعديل اتعمل.</p>';
+      return;
+    }
+    const stmts=[];
+    if(addedSrv.length) stmts.push(['DELETE FROM srv_table WHERE db_id IN ('+addedSrv.join(',')+')',[]]);
+    if(addedTs.length) stmts.push(['DELETE FROM ts_table WHERE db_id IN ('+addedTs.join(',')+')',[]]);
+    if(addedSat.length) stmts.push(['DELETE FROM sat_para_table WHERE db_id IN ('+addedSat.join(',')+')',[]]);
+    if(stmts.length) labPushOp('دمج '+addedSrv.length+' قناة من '+plan.srcName+' ('+addedTs.length+' تردد، '+addedSat.length+' قمر)',{kind:'sqlexec', stmts});
+    let h='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:8px;margin-bottom:8px">'
+      +'<div class="toolbody" style="text-align:center"><b style="color:var(--teal)">'+addedSrv.length+'</b><br>قناة اتدمجت</div>'
+      +'<div class="toolbody" style="text-align:center"><b>'+addedTs.length+'</b><br>تردد اتضاف</div>'
+      +'<div class="toolbody" style="text-align:center"><b>'+addedSat.length+'</b><br>قمر اتضاف</div>'
+      +'<div class="toolbody" style="text-align:center"><b style="color:var(--gold)">'+plan.dups.length+'</b><br>مكرر اتخطّى</div></div>'
+      +'<p style="font-size:12px;color:var(--mut)">فحص السلامة: سليم ✓ — الناتج متحقق هيكليًا، غير مُختبر على جهاز. التراجع الكامل متاح من زرار التراجع.</p>';
+    out.innerHTML=h;
+    LAB.mrgPlan=null; LAB.mrgDb2=null;
+    toast('اتدمج '+addedSrv.length+' قناة');
+  }catch(e){ out.innerHTML='<p style="color:var(--danger)">فشل الدمج: '+esc(e.message)+'</p>'; return; }
+  labSqlLoadRows(); labChecks(); render();
+  const out2=$('#mrgOut'); if(out2) out2.innerHTML='<p style="color:var(--teal)">الدمج خلص بنجاح — شوف آخر القائمة أو حمّل الملف المعدّل.</p>';
 }
 // ===== Compare two channel files (read-only) =====
 async function labCompareFiles(){
