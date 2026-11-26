@@ -355,7 +355,29 @@ function viewLab(){
       +'<button type="button" class="btn btn-danger" id="labQDoFilter">حذف بالفلتر</button>'
       +'<button type="button" class="btn btn-sec" id="labQDoDups">حذف المكرر (نفس الاسم)</button>'
       +'<button type="button" class="btn btn-sec" id="labQCleanTat">تنظيف التطويل (ـ)</button>'
-      +'</div></div></div>';
+      +'<button type="button" class="btn btn-primary" id="labArzScan">🌐 تعريب الأسماء الإنجليزية</button>'
+      +'</div>'
+      +(LAB.arabize?arzPreviewHtml():'')
+      +'</div></div>';
+  }
+  if(LAB.type==='sqlite'&&LAB.sqlDb&&LAB.sqlTables.indexOf('ts_table')>=0&&LAB.sqlTables.indexOf('sat_para_table')>=0){
+    main+='<div class="toolcard t-orange">'+labToolHead('t-orange','📡','إضافة تردد وقناة جديدة','ضيف تردد على قمر موجود، وبعدين ضيف عليه قنوات — بتحقق من القيم وتراجع')
+      +'<div class="toolbody">'
+      +'<h2 style="font-size:14px;margin-bottom:8px">١) تردد جديد</h2>'
+      +'<div class="field"><label>القمر</label><select id="tpSat">'+labSatOptions()+'</select></div>'
+      +'<div class="btnrow" style="margin-bottom:8px">'
+      +'<input type="text" id="tpFreq" dir="ltr" placeholder="التردد MHz زي 10719" style="flex:1;min-width:110px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:8px 10px">'
+      +'<select id="tpPol" style="background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:8px 10px"><option value="0">أفقي H (0)</option><option value="1">رأسي V (1)</option></select>'
+      +'<input type="text" id="tpSr" dir="ltr" placeholder="الترميز زي 27500" style="flex:1;min-width:100px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:8px 10px">'
+      +'<button type="button" class="btn btn-primary" id="tpAdd">إضافة التردد</button></div>'
+      +'<h2 style="font-size:14px;margin:10px 0 8px">٢) قناة على تردد</h2>'
+      +'<div class="field"><label>التردد</label><select id="chTs">'+labTsOptions()+'</select></div>'
+      +'<div class="btnrow">'
+      +'<input type="text" id="chName" placeholder="اسم القناة" style="flex:2;min-width:130px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:8px 10px">'
+      +'<input type="text" id="chSid" dir="ltr" placeholder="SID" style="width:80px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:8px 10px">'
+      +'<select id="chType" style="background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:8px 10px"><option value="1">تلفزيون</option><option value="2">إذاعة</option></select>'
+      +'<button type="button" class="btn btn-gold" id="chAdd">إضافة القناة</button></div>'
+      +'</div></div>';
   }
   main+='<div class="toolcard t-blue">'+labToolHead('t-blue','🆔','مغيّر ID السوفت (من ملف لملف)','بيكتب ID الملف المانح في ملفك — زي ما بيتعمل عشان جهاز يقبل سوفت محوّل')
     +'<div class="toolbody">'
@@ -482,6 +504,14 @@ function bindLab(){
     if(nm) labQReplace(nm.name, $('#labQOld').value, $('#labQNew').value);
   });
   on('#labQDoDups',labQDeleteDups);
+  on('#labArzScan',arzScan);
+  on('#arzAll',()=>arzSetAll(true));
+  on('#arzNone',()=>arzSetAll(false));
+  on('#arzApply',arzApply);
+  on('#arzCancel',()=>{ LAB.arabize=null; render(); });
+  document.querySelectorAll('[data-arz]').forEach(b=>b.addEventListener('click',()=>arzToggle(+b.dataset.arz)));
+  on('#tpAdd',()=>{ labTpAdd(+$('#tpSat').value, $('#tpFreq').value, +$('#tpPol').value, $('#tpSr').value); });
+  on('#chAdd',()=>{ labChAdd(+$('#chTs').value, $('#chName').value, $('#chSid').value, +$('#chType').value); });
   on('#labQCleanTat',()=>{
     const nm=(LAB.sqlCols.find(c=>/name/i.test(c.name))||LAB.sqlCols.find(c=>c.type.indexOf('CHAR')>=0||c.type.indexOf('TEXT')>=0));
     if(nm) labQReplace(nm.name,'ـ','');
@@ -551,6 +581,20 @@ labUndo=function(){
   if(op&&op.inverse&&op.inverse.kind==='sqlbulk'){
     LAB.ops.pop();
     try{ LAB.sqlDb.run('UPDATE "'+LAB.sqlTable+'" SET "'+op.inverse.col+'"=REPLACE("'+op.inverse.col+'", ?, ?)',[op.inverse.from,op.inverse.to]); }catch(e){}
+    labSqlLoadRows(); labChecks(); render();
+    toast('تم التراجع عن: '+op.desc);
+    return;
+  }
+  if(op&&op.inverse&&op.inverse.kind==='sqlarabize'){
+    LAB.ops.pop();
+    try{ for(const c of op.inverse.changes) LAB.sqlDb.run('UPDATE "'+LAB.sqlTable+'" SET "'+op.inverse.col+'"=? WHERE rowid=?',[c.old,c.rowid]); }catch(e){}
+    labSqlLoadRows(); labChecks(); render();
+    toast('تم التراجع عن: '+op.desc);
+    return;
+  }
+  if(op&&op.inverse&&op.inverse.kind==='sqldelrows'){
+    LAB.ops.pop();
+    try{ for(const id of op.inverse.ids) LAB.sqlDb.run('DELETE FROM "'+op.inverse.table+'" WHERE db_id=?',[id]); }catch(e){}
     labSqlLoadRows(); labChecks(); render();
     toast('تم التراجع عن: '+op.desc);
     return;
@@ -773,4 +817,193 @@ async function m2vConvert(){
     m2vLog('فشل التحويل: '+e.message,'operr');
   }
   M2V.busy=false;
+}
+/* ---------- arabize channel names (offline dictionary + transliteration) ---------- */
+const ARZ={
+  names:{
+    'AL JAZEERA':'الجزيرة','ALJAZEERA':'الجزيرة','AL ARABIYA':'العربية','ALARABIYA':'العربية',
+    'AL HADATH':'الحدث','ALHADATH':'الحدث','SKY NEWS ARABIA':'سكاي نيوز عربية','BBC ARABIC':'بي بي سي عربية',
+    'FRANCE 24':'فرانس 24','FRANCE24':'فرانس 24','AL HURRA':'الحرة','ALHURRA':'الحرة',
+    'RT ARABIC':'روسيا اليوم','RUSSIA TODAY':'روسيا اليوم','TRT ARABIC':'تي آر تي عربية','CGTN ARABIC':'سي جي تي إن عربية',
+    'MBC':'إم بي سي','MBC 1':'إم بي سي 1','MBC 2':'إم بي سي 2','MBC 3':'إم بي سي 3','MBC 4':'إم بي سي 4',
+    'MBC DRAMA':'إم بي سي دراما','MBC ACTION':'إم بي سي أكشن','MBC BOLLYWOOD':'إم بي سي بوليوود',
+    'ROTANA':'روتانا','ROTANA CINEMA':'روتانا سينما','ROTANA KHALIJIAH':'روتانا خليجية','ROTANA MUSIC':'روتانا موسيقى','ROTANA DRAMA':'روتانا دراما','ROTANA CLASSIC':'روتانا كلاسيك',
+    'BEIN SPORTS':'بي إن سبورتس','BEIN':'بي إن','BEIN MOVIES':'بي إن أفلام','OSN':'أو إس إن',
+    'DUBAI TV':'دبي','DUBAI':'دبي','ABU DHABI':'أبوظبي','AL EMARAT':'الإمارات','SHARJAH TV':'الشارقة','SAUDI TV':'السعودية','AL SAUDIYA':'السعودية','KSA':'السعودية',
+    'KUWAIT TV':'الكويت','OMAN TV':'عُمان','BAHRAIN TV':'البحرين','QATAR TV':'قطر','JORDAN TV':'الأردن','PALESTINE TV':'فلسطين','IRAQ TV':'العراق','SYRIA TV':'سوريا','AL AOULA':'الأولى','2M':'دوزيم',
+    'NILE SPORT':'النيل للرياضة','NILE NEWS':'النيل للأخبار','NILE DRAMA':'النيل دراما','NILE CINEMA':'النيل سينما','NILE COMEDY':'النيل كوميدي','NILE LIFE':'النيل لايف','NILE TV':'النيل',
+    'ONTV':'أون تي في','ON TV':'أون تي في','ON DRAMA':'أون دراما','ON SPORT':'أون سبورت','DMC':'دي إم سي','DMC DRAMA':'دي إم سي دراما','CBC':'سي بي سي','CBC DRAMA':'سي بي سي دراما','CBC SOFRA':'سي بي سي سفرة',
+    'SADA EL BALAD':'صدى البلد','SADAH EL BALAD':'صدى البلد','AL HAYAT':'الحياة','ALHAYAT':'الحياة','AL KAHERA WAL NAS':'القاهرة والناس','AL QAHERA':'القاهرة','TEBA':'طيبة','AL TANIA':'الثانية','AL OULA':'الأولى',
+    'AL RAHMA':'الرحمة','AL MAJD':'المجد','AL MAJD QURAN':'المجد قرآن','IQRA':'اقرأ','IQRAA':'اقرأ','AL RESALAH':'الرسالة','AL NAS':'الناس','AL HAFIZ':'الحافظ','AL FATH':'الفتح','AL SIRA':'السيرة','MAJD':'المجد',
+    'AL WATAN':'الوطن','MEHWAR':'المحور','AL MEHWAR':'المحور','TEN TV':'تن','AL AHRAM':'الأهرام','MASR':'مصر','AL MASRY':'المصري','ZEE AFLAM':'زي أفلام','ZEE ALWAN':'زي ألوان',
+    'PANORAMA DRAMA':'بانوراما دراما','PANORAMA':'بانوراما','MAZZIKA':'مزيكا','MELODY':'ميلودي','4SHABAB':'فور شباب','FREE TV':'فري تي في','CAIRO DRAMA':'القاهرة دراما','CAIRO CINEMA':'القاهرة سينما','TIME DRAMA':'تايم دراما','CINEMA PRO':'سينما برو',
+    'TOYOR AL JANNAH':'طيور الجنة','TOYOR BABY':'طيور بيبي','MAJID KIDS':'ماجد للأطفال','BARAEM':'براعم','SPACETOON':'سبيستون','CARTOON NETWORK':'كرتون نتورك','CN ARABIA':'كرتون نتورك بالعربية','MBC 3':'إم بي سي 3','GULLI':'جولي','DISNEY':'ديزني','NICKELODEON':'نيكلوديون','JIMJAM':'جيم جام','DUCK TV':'داك تي في','BABY TV':'بيبي تي في',
+    'ARABS GOT TALENT':'العرب جوت تالنت','AL ARAB':'العرب','AL MAYADEEN':'الميادين','AL MANAR':'المنار','AL ETEJAH':'الاتجاه','AL GHAD':'الغد','AL GHAD MUSHARAK':'الغد مشارك','AL ARABI':'العربي','ASHARQ NEWS':'الشرق للأخبار','ASHARQ':'الشرق',
+    'ALGERIA TV':'الجزائر','TUNISIA TV':'تونس','NESSMA':'نسيبة','HANNIBAL':'حنبعل','ATTESSIA':'التاسعة','LIBYA TV':'ليبيا','AL AAN':'الآن','LBC':'إل بي سي','MTV LEBANON':'إم تي في لبنان','FUTURE TV':'المستقبل','NBN':'إن بي إن','TELE LUMIERE':'تيلي لوميير','NOUR SAT':'نور سات'
+  },
+  words:{
+    'NEWS':'نيوز','SPORT':'سبورت','SPORTS':'سبورت','MOVIE':'موفي','MOVIES':'موفيز','CINEMA':'سينما','MUSIC':'ميوزيك',
+    'KIDS':'كيدز','BABY':'بيبي','DRAMA':'دراما','SERIES':'مسلسلات','COMEDY':'كوميدي','ACTION':'أكشن','CLASSIC':'كلاسيك',
+    'WORLD':'وورلد','INTERNATIONAL':'إنترناشيونال','NATIONAL':'ناشيونال','GENERAL':'عامة','PUBLIC':'العامة','EDUCATIONAL':'تعليمية','CULTURE':'ثقافة','CULTURAL':'ثقافية','DOCUMENTARY':'وثائقية','DOCU':'دوكيو',
+    'QURAN':'قرآن','KORAN':'قرآن','SUNNAH':'سنة','SUNNA':'سنة','ISLAMIC':'إسلامية','RELIGIOUS':'دينية','FATWA':'فتوى',
+    'TV':'تلفزيون','SAT':'سات','CHANNEL':'قناة','RADIO':'إذاعة','FM':'إف إم','LIVE':'لايف','PLUS':'بلس','MAX':'ماكس','PRIME':'برايم','TOP':'توب','STAR':'ستار','STARS':'ستارز','MEDIA':'ميديا','NETWORK':'نتورك','BROADCAST':'بث',
+    'ARABIA':'أرابيا','ARAB':'عرب','GULF':'الخليج','AFRICA':'أفريقيا','EUROPE':'أوروبا','AMERICA':'أمريكا','ASIA':'آسيا','ORIENT':'الشرق','EAST':'إيست','WEST':'ويست','NORTH':'نورث','SOUTH':'ساوث',
+    'ONE':'1','TWO':'2','THREE':'3','FOUR':'4','FIVE':'5','SIX':'6','SEVEN':'7','EIGHT':'8','NINE':'9','TEN':'10',
+    'AL':'ال','EL':'ال','BIN':'بن','BEN':'بن','ABU':'أبو','IBN':'ابن','NOOR':'نور','NOUR':'نور','NILE':'النيل','MISR':'مصر','EGYPT':'مصر','CAIRO':'القاهرة','ALEX':'الإسكندرية'
+  }
+};
+function arzTransliterate(w){
+  const map=[['sch','ش'],['tch','تش'],['sh','ش'],['ch','تش'],['th','ث'],['kh','خ'],['gh','غ'],['dh','ذ'],['ph','ف'],['aa','ا'],['ee','ي'],['oo','و'],['ou','و'],['ai','اي'],['ay','اي'],['ie','ي'],['qu','كو'],['ck','ك'],
+  ['a','ا'],['b','ب'],['c','ك'],['d','د'],['e','ي'],['f','ف'],['g','ج'],['h','ه'],['i','ي'],['j','ج'],['k','ك'],['l','ل'],['m','م'],['n','ن'],['o','و'],['p','ب'],['q','ك'],['r','ر'],['s','س'],['t','ت'],['u','و'],['v','ف'],['w','و'],['x','كس'],['y','ي'],['z','ز']];
+  let s=w.toLowerCase(), out='';
+  while(s.length){
+    let m=null;
+    for(const pair of map){ if(s.startsWith(pair[0])){ m=pair; break; } }
+    if(m){ out+=m[1]; s=s.slice(m[0].length); } else { s=s.slice(1); }
+  }
+  return out||w;
+}
+function arzTranslate(name){
+  const clean=name.trim().replace(/[._]+/g,' ').replace(/\s+/g,' ');
+  const upper=clean.toUpperCase();
+  if(ARZ.names[upper]) return {text:ARZ.names[upper], conf:100, method:'name'};
+  const compact=upper.replace(/\s/g,'');
+  if(ARZ.names[compact]) return {text:ARZ.names[compact], conf:100, method:'name'};
+  const toks=upper.split(/[\s\-\/\+]+/).filter(t=>t&&t!=='HD'&&t!=='SD'&&t!=='FHD'&&t!=='UHD');
+  const suffix=(/\bU?F?HD\b/.test(upper)||/\bHD\b/.test(upper))?' HD':'';
+  if(!toks.length) return {text:'', conf:0, method:'none'};
+  let hit=0, parts=[];
+  for(const t of toks){
+    if(ARZ.words[t]){ parts.push(ARZ.words[t]); hit++; }
+    else if(ARZ.names[t]){ parts.push(ARZ.names[t]); hit++; }
+    else if(/^\d+$/.test(t)){ parts.push(t); hit++; }
+    else parts.push(arzTransliterate(t));
+  }
+  const conf=Math.round(100*hit/toks.length);
+  return {text:parts.join(' ')+suffix, conf, method:conf===100?'words':'mixed'};
+}
+function arzIsLatin(name){ const t=(name||'').trim(); return /[A-Za-z]/.test(t) && !/[\u0600-\u06FF]/.test(t); }
+/* ---------- arabize apply + transponder/channel add ---------- */
+LAB.arabize=null;
+function arzScan(){
+  if(!LAB.sqlDb) return;
+  const nm=LAB.sqlCols.find(c=>/name/i.test(c.name));
+  if(!nm){ toast('مفيش عمود اسم في الجدول ده'); return; }
+  const r=LAB.sqlDb.exec('SELECT rowid, "'+nm.name+'" FROM "'+LAB.sqlTable+'"');
+  const list=[];
+  if(r[0]) for(const row of r[0].values){
+    const old=String(row[1]||'');
+    if(!arzIsLatin(old)) continue;
+    const tr=arzTranslate(old);
+    if(!tr.text||tr.text===old) continue;
+    list.push({rowid:row[0], old, nw:tr.text, conf:tr.conf, sel:tr.conf>=60});
+  }
+  LAB.arabize={col:nm.name, list};
+  if(!list.length){ toast('مفيش أسماء إنجليزية محتاجة تعريب في الجدول ده'); LAB.arabize=null; }
+  render();
+}
+function arzToggle(i){ if(LAB.arabize&&LAB.arabize.list[i]) LAB.arabize.list[i].sel=!LAB.arabize.list[i].sel; render(); }
+function arzSetAll(v){ if(LAB.arabize) LAB.arabize.list.forEach(r=>r.sel=v); render(); }
+function arzApply(){
+  if(!LAB.arabize||!LAB.sqlDb) return;
+  const sel=LAB.arabize.list.filter(r=>r.sel);
+  if(!sel.length){ toast('اختار قناة واحدة على الأقل'); return; }
+  const col=LAB.arabize.col;
+  const changes=[];
+  try{
+    for(const r of sel){
+      LAB.sqlDb.run('UPDATE "'+LAB.sqlTable+'" SET "'+col+'"=? WHERE rowid=?',[r.nw,r.rowid]);
+      changes.push({rowid:r.rowid, old:r.old});
+    }
+    const v=LAB.sqlDb.exec('PRAGMA integrity_check')[0].values[0][0];
+    if(v!=='ok'){
+      for(const c of changes) try{ LAB.sqlDb.run('UPDATE "'+LAB.sqlTable+'" SET "'+col+'"=? WHERE rowid=?',[c.old,c.rowid]); }catch(e){}
+      toast('فشل فحص السلامة — التعريب اتراجع تلقائياً');
+      LAB.arabize=null; labSqlLoadRows(); labChecks(); render(); return;
+    }
+    labPushOp('تعريب '+sel.length+' اسم قناة في "'+LAB.sqlTable+'.'+col+'"', {kind:'sqlarabize', col, changes});
+    toast('اتعرّب '+sel.length+' اسم');
+  }catch(e){ toast('فشل: '+e.message); }
+  LAB.arabize=null; labSqlLoadRows(); labChecks(); render();
+}
+function labTpAdd(satId, freqMhz, pol, srKsym){
+  if(!LAB.sqlDb) return;
+  const f=parseFloat(freqMhz), sr=parseInt(srKsym,10);
+  if(!(f>=3000&&f<=15000)){ toast('التردد لازم يكون بين 3000 و 15000 ميجاهرتز'); return; }
+  if(!(sr>=1000&&sr<=45000)){ toast('معدل الترميز لازم يكون بين 1000 و 45000'); return; }
+  try{
+    const has=LAB.sqlDb.exec('SELECT COUNT(*) FROM ts_table WHERE freq='+Math.round(f*1000)+' AND db_sat_para_id='+satId)[0].values[0][0];
+    if(has>0){ toast('التردد ده موجود بالفعل على القمر ده'); return; }
+    const mx=LAB.sqlDb.exec('SELECT MAX(db_id), MAX(ts_id) FROM ts_table')[0].values[0];
+    const nid=(mx[0]||0)+1, nts=(mx[1]||0)+1;
+    LAB.sqlDb.run('INSERT INTO ts_table (db_id, src, db_net_id, ts_id, freq, symb, db_sat_para_id, polar) VALUES (?,3,1,?,?,?,?,?)',
+      [nid, nts, Math.round(f*1000), sr*1000, satId, pol]);
+    labPushOp('إضافة تردد جديد: '+f+' MHz / SR '+sr+' على قمر #'+satId+' (ts id '+nid+')',
+      {kind:'sqldelrows', table:'ts_table', ids:[nid]});
+    const v=LAB.sqlDb.exec('PRAGMA integrity_check')[0].values[0][0];
+    if(v!=='ok'){ LAB.sqlDb.run('DELETE FROM ts_table WHERE db_id=?',[nid]); LAB.ops.pop(); toast('فشل فحص السلامة — اتراجع'); }
+    else toast('اتضاف التردد');
+  }catch(e){ toast('فشل: '+e.message); }
+  labChecks(); render();
+}
+function labChAdd(tsDbId, name, sid, stype){
+  if(!LAB.sqlDb) return;
+  name=(name||'').trim();
+  if(!name){ toast('اكتب اسم القناة'); return; }
+  const s=parseInt(sid,10);
+  if(!(s>0&&s<65536)){ toast('رقم الخدمة (SID) لازم يكون بين 1 و 65535'); return; }
+  try{
+    const ts=LAB.sqlDb.exec('SELECT db_sat_para_id FROM ts_table WHERE db_id='+tsDbId);
+    if(!ts[0]||!ts[0].values.length){ toast('التردد مش موجود'); return; }
+    const satId=ts[0].values[0][0];
+    const dup=LAB.sqlDb.exec('SELECT COUNT(*) FROM srv_table WHERE service_id='+s+' AND db_ts_id='+tsDbId)[0].values[0][0];
+    if(dup>0){ toast('فيه قناة بنفس الـ SID على التردد ده'); return; }
+    const mx=LAB.sqlDb.exec('SELECT MAX(db_id), MAX(chan_num) FROM srv_table')[0].values[0];
+    const nid=(mx[0]||0)+1, nch=(mx[1]||0)+1;
+    LAB.sqlDb.run('INSERT INTO srv_table (db_id, src, db_net_id, db_ts_id, name, service_id, service_type, running_status, volume, chan_num, db_sat_para_id, provider_name) VALUES (?,3,1,?,?,?,?,4,50,?,?,?)',
+      [nid, tsDbId, name, s, stype, nch, satId, '']);
+    labPushOp('إضافة قناة "'+name+'" (SID '+s+') على تردد #'+tsDbId,
+      {kind:'sqldelrows', table:'srv_table', ids:[nid]});
+    const v=LAB.sqlDb.exec('PRAGMA integrity_check')[0].values[0][0];
+    if(v!=='ok'){ LAB.sqlDb.run('DELETE FROM srv_table WHERE db_id=?',[nid]); LAB.ops.pop(); toast('فشل فحص السلامة — اتراجع'); }
+    else toast('اتضافت القناة');
+  }catch(e){ toast('فشل: '+e.message); }
+  labSqlLoadRows(); labChecks(); render();
+}
+/* ---------- arabize preview + tp/channel option builders ---------- */
+function arzPreviewHtml(){
+  const list=LAB.arabize.list;
+  const hi=list.filter(r=>r.conf>=60).length, lo=list.length-hi;
+  let h='<div style="margin-top:10px;border-top:1px dashed var(--line);padding-top:10px">'
+    +'<p class="labnote">اتلاقى '+list.length+' اسم إنجليزي: '+hi+' بثقة كويسة (متعلم عليهم ✓)'+(lo?' و '+lo+' بثقة منخفضة (مش متعلم عليهم — راجعهم بنفسك قبل ما تختارهم)':'')+'.</p>'
+    +'<div class="btnrow" style="margin-bottom:8px">'
+    +'<button type="button" class="btn sm btn-sec" id="arzAll">تحديد الكل</button>'
+    +'<button type="button" class="btn sm btn-ghost" id="arzNone">إلغاء الكل</button>'
+    +'<button type="button" class="btn sm btn-primary" id="arzApply">تطبيق المحدد</button>'
+    +'<button type="button" class="btn sm btn-ghost" id="arzCancel">إلغاء</button></div>'
+    +'<div class="labops" style="max-height:300px">';
+  list.forEach((r,i)=>{
+    const badge=r.conf>=100?'🟢':r.conf>=60?'🟡':'🔴';
+    h+='<div class="chrow" style="grid-template-columns:auto 1fr 1fr auto">'
+      +'<span>'+badge+'</span>'
+      +'<span dir="ltr" style="font-size:12.5px;text-align:left;overflow:hidden;text-overflow:ellipsis">'+esc(r.old)+'</span>'
+      +'<span style="font-size:12.5px">'+esc(r.nw)+'</span>'
+      +'<button type="button" class="btn sm '+(r.sel?'btn-primary':'btn-ghost')+'" data-arz="'+i+'">'+(r.sel?'عربي':'إنجليزي')+'</button></div>';
+  });
+  h+='</div></div>';
+  return h;
+}
+function labSatOptions(){
+  try{
+    const r=LAB.sqlDb.exec('SELECT db_id, sat_name FROM sat_para_table ORDER BY sat_name');
+    if(!r[0]) return '';
+    return r[0].values.map(v=>'<option value="'+v[0]+'">'+esc(String(v[1]||('قمر '+v[0])))+'</option>').join('');
+  }catch(e){ return ''; }
+}
+function labTsOptions(){
+  try{
+    const r=LAB.sqlDb.exec('SELECT t.db_id, t.freq, t.polar, t.symb, s.sat_name FROM ts_table t LEFT JOIN sat_para_table s ON s.db_id=t.db_sat_para_id ORDER BY t.freq LIMIT 400');
+    if(!r[0]) return '';
+    return r[0].values.map(v=>'<option value="'+v[0]+'">'+(v[1]/1000)+' '+(v[2]?'V':'H')+' '+(v[3]/1000)+' — '+esc(String(v[4]||''))+'</option>').join('');
+  }catch(e){ return ''; }
 }
