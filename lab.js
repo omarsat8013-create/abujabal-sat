@@ -1233,7 +1233,7 @@ async function labPiconLoadIndex(){
   return LAB.piconIdx;
 }
 function labPiconNorm(name){
-  return String(name||'').toLowerCase().trim().replace(/[<>:"\/\\|?*]/g,'').replace(/\s+/g,' ').replace(/\.+$/,'').trim();
+  return String(name||'').toLowerCase().replace(/\u0640/g,'').replace(/[\u064B-\u0652]/g,'').trim().replace(/[<>:"\/\\|?*]/g,'').replace(/\s+/g,' ').replace(/\.+$/,'').trim();
 }
 function labPiconCandidates(name){
   const idx=LAB.piconIdx||{};
