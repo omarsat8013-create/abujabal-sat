@@ -1241,7 +1241,7 @@ async function labCompareFiles(){
   out.innerHTML='<p style="color:var(--mut)">جاري المقارنة…</p>';
   let db2;
   try{
-    const SQL=await labEnsureSql();
+    const SQL=LAB.sql||await initSqlJs({locateFile:f=>'vendor/'+f});
     const buf=new Uint8Array(await f.arrayBuffer());
     db2=new SQL.Database(buf);
     db2.exec('SELECT 1 FROM srv_table LIMIT 1');
