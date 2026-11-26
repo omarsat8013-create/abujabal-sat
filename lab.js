@@ -527,7 +527,9 @@ function labSqlRowsHtml(){
     const dragBtn=(labHasChanNum()&&!LAB.grpView)?'<span class="btn sm btn-ghost" draggable="true" data-dragrow="'+r.rowid+'" style="cursor:grab;user-select:none">⋮⋮</span>':'';
     const grpBtn=LAB.grpView?'<button type="button" class="btn sm btn-danger" data-grprm="'+(r.db_id??r.rowid)+'">✕</button>':'';
     const selBox='<input type="checkbox" data-sel="'+r.rowid+'"'+(LAB.selection&&LAB.selection.has(r.rowid)?' checked':'')+' style="width:16px;height:16px;accent-color:var(--teal);cursor:pointer">';
-    return '<div class="chrow" data-row="'+r.rowid+'" style="grid-template-columns:auto auto 52px 1fr auto auto auto">'+selBox+dragBtn+'<span style="color:var(--mut);font-size:12px">'+label+'</span>'+cells+favBtn+grpBtn+'</div>';
+    const infoBtn='<button type="button" class="btn sm btn-ghost" data-info="'+r.rowid+'" title="تفاصيل تقنية">ⓘ</button>';
+    const mvBtns=(labHasChanNum()&&!LAB.grpView)?'<span style="display:flex;flex-direction:column;gap:2px"><button type="button" class="btn sm btn-ghost" data-mv="'+r.rowid+'" data-dir="-1" title="طلّع خطوة" style="padding:0 7px;line-height:1.1">▲</button><button type="button" class="btn sm btn-ghost" data-mv="'+r.rowid+'" data-dir="1" title="نزّل خطوة" style="padding:0 7px;line-height:1.1">▼</button></span>':'';
+    return '<div class="chrow" data-row="'+r.rowid+'" style="grid-template-columns:auto auto 52px 1fr auto auto auto auto auto">'+selBox+dragBtn+'<span style="color:var(--mut);font-size:12px">'+label+'</span>'+cells+favBtn+infoBtn+mvBtns+grpBtn+'</div>';
   }).join('');
 }
 /* ---------- bindings ---------- */
@@ -559,6 +561,8 @@ function bindLab(){
   on('#labFavAll',()=>labFavBulk(1));
   on('#labFavClear',()=>labFavBulk(0));
   document.querySelectorAll('[data-fav]').forEach(b=>b.addEventListener('click',()=>labFavToggle(+b.dataset.fav, +b.dataset.favcur)));
+  document.querySelectorAll('[data-info]').forEach(b=>b.addEventListener('click',()=>labShowInfo(+b.dataset.info)));
+  document.querySelectorAll('[data-mv]').forEach(b=>b.addEventListener('click',()=>labMoveStep(+b.dataset.mv, +b.dataset.dir)));
   on('#labRenumber',labRenumberAll);
   on('#grpAdd',()=>labGrpAdd($('#grpNewName').value));
   on('#grpRename',()=>{ const id=+$('#grpSel').value; const n=$('#grpNewName').value.trim()||prompt('الاسم الجديد:'); if(n) labGrpRename(id,n); });
@@ -1184,6 +1188,146 @@ function labMoveRow(dragRowid, targetRowid){
     toast('تم النقل');
   }catch(e){ toast('فشل: '+e.message); }
   labSqlLoadRows(); labChecks(); render();
+}
+/* ---------- mobile step move (▲▼) ---------- */
+function labMoveStep(rowid, dir){
+  if(!LAB.sqlDb||!labHasChanNum()) return;
+  if(LAB.sqlSearch||LAB.favOnly||LAB.grpView){ toast('الأسهم شغالة في العرض الكامل بس — امسح البحث والفلاتر الأول'); return; }
+  try{
+    const r=LAB.sqlDb.exec('SELECT rowid FROM "'+LAB.sqlTable+'" ORDER BY chan_num, rowid');
+    const ids=r[0].values.map(v=>v[0]);
+    const i=ids.indexOf(rowid), j=i+dir;
+    if(i<0) return;
+    if(j<0||j>=ids.length){ toast(dir<0?'دي أول قناة في القائمة':'دي آخر قناة في القائمة'); return; }
+    ids.splice(j,0,ids.splice(i,1)[0]);
+    const lo=Math.min(i,j), hi=Math.max(i,j);
+    const changes=[];
+    for(let k=lo;k<=hi;k++){
+      const old=LAB.sqlDb.exec('SELECT chan_num FROM "'+LAB.sqlTable+'" WHERE rowid='+ids[k])[0].values[0][0];
+      const nw=k+1;
+      if(old!==nw){ LAB.sqlDb.run('UPDATE "'+LAB.sqlTable+'" SET chan_num=? WHERE rowid=?',[nw,ids[k]]); changes.push({rowid:ids[k], old}); }
+    }
+    if(changes.length) labPushOp('نقل قناة خطوة '+(dir<0?'لفوق':'لتحت')+' ('+changes.length+' إعادة ترقيم)',{kind:'sqlarabize', col:'chan_num', changes});
+  }catch(e){ toast('فشل: '+e.message); }
+  labSqlLoadRows(); labChecks(); render();
+}
+/* ---------- channel technical details panel + experimental picons ---------- */
+LAB.piconIdx=null; LAB.piconIdxState='idle';
+const PICONS_RAW='https://raw.githubusercontent.com/picons/picons/master/build-source/';
+async function labPiconLoadIndex(){
+  if(LAB.piconIdx) return LAB.piconIdx;
+  if(LAB.piconIdxState==='loading') return null;
+  LAB.piconIdxState='loading';
+  try{
+    const resp=await fetch(PICONS_RAW+'utf8snp.index');
+    if(!resp.ok) throw new Error('http '+resp.status);
+    const txt=await resp.text();
+    const map={};
+    txt.split('\n').forEach(l=>{
+      const eq=l.indexOf('=');
+      if(eq>0) map[l.slice(0,eq).trim()]=l.slice(eq+1).trim();
+    });
+    LAB.piconIdx=map;
+    LAB.piconIdxState='ok';
+  }catch(e){ LAB.piconIdx={}; LAB.piconIdxState='fail'; }
+  return LAB.piconIdx;
+}
+function labPiconNorm(name){
+  return String(name||'').toLowerCase().trim().replace(/[<>:"\/\\|?*]/g,'').replace(/\s+/g,' ').replace(/\.+$/,'').trim();
+}
+function labPiconCandidates(name){
+  const idx=LAB.piconIdx||{};
+  const n=labPiconNorm(name);
+  if(!n) return {logo:null, urls:[]};
+  const keys=[n];
+  if(/\shd$/.test(n)) keys.push(n.replace(/\shd$/,''));
+  else keys.push(n+' hd');
+  let logo=null;
+  for(const k of keys){ if(idx[k]){ logo=idx[k]; break; } }
+  if(!logo) return {logo:null, urls:[]};
+  const base=PICONS_RAW+'logos/'+logo;
+  return {logo, urls:[base+'.default.png', base+'.default.svg', base+'.light.png', base+'.light.svg']};
+}
+function labPiconProbe(urls){
+  return new Promise(res=>{
+    let i=0;
+    const tryNext=()=>{
+      if(i>=urls.length){ res(null); return; }
+      const u=urls[i++];
+      const img=new Image();
+      img.onload=()=>res(u);
+      img.onerror=tryNext;
+      img.src=u;
+    };
+    tryNext();
+  });
+}
+async function labPiconShow(name, boxId){
+  const box=document.getElementById(boxId);
+  if(!box) return;
+  box.innerHTML='<span style="color:var(--mut);font-size:12px">بيجهّز فهرس الشعارات…</span>';
+  const idx=await labPiconLoadIndex();
+  if(!document.getElementById(boxId)) return;
+  if(LAB.piconIdxState==='fail'){ box.innerHTML='<span style="color:var(--mut);font-size:12px">مش قادر أحمّل فهرس الشعارات (محتاج نت).</span>'; return; }
+  const c=labPiconCandidates(name);
+  if(!c.logo){ box.innerHTML='<span style="color:var(--mut);font-size:12px">مفيش شعار متطابق مع الاسم ده في الفهرس.</span>'; return; }
+  box.innerHTML='<span style="color:var(--mut);font-size:12px">بيدوّر على الشعار…</span>';
+  const url=await labPiconProbe(c.urls);
+  if(!document.getElementById(boxId)) return;
+  if(!url){ box.innerHTML='<span style="color:var(--mut);font-size:12px">الفهرس عارف القناة ('+esc(c.logo)+') بس ملف الشعار مش متاح.</span>'; return; }
+  box.innerHTML='<img src="'+url+'" alt="شعار" style="max-height:64px;max-width:180px;background:#fff;border-radius:8px;padding:6px">'
+    +'<div class="btnrow" style="margin-top:6px"><button type="button" class="btn sm btn-sec" id="piconDl">تحميل الشعار</button></div>';
+  const dl=document.getElementById('piconDl');
+  if(dl) dl.addEventListener('click',async()=>{
+    try{
+      const b=await (await fetch(url)).blob();
+      const ext=url.slice(url.lastIndexOf('.')+1);
+      downloadBlob(b, c.logo+'.'+ext);
+    }catch(e){ toast('فشل تحميل الشعار'); }
+  });
+}
+function labShowInfo(rowid){
+  if(!LAB.sqlDb){ toast('افتح ملف SQLite الأول'); return; }
+  let srv;
+  try{
+    const r=LAB.sqlDb.exec('SELECT * FROM "'+LAB.sqlTable+'" WHERE rowid='+rowid);
+    if(!r[0]||!r[0].values.length){ toast('السطر مش موجود'); return; }
+    srv={}; r[0].columns.forEach((c,i)=>srv[c]=r[0].values[0][i]);
+  }catch(e){ toast('فشل: '+e.message); return; }
+  const SR_LABELS={db_id:'المعرف الداخلي',service_id:'رقم الخدمة (SID)',name:'اسم القناة',chan_num:'رقم القناة في القائمة',service_type:'النوع',favor:'مفضلة',db_ts_id:'معرف التردد',db_sat_para_id:'معرف القمر',lcn:'LCN',casys_flag:'علامة التشفير',v_pid:'PID الفيديو',a_pid:'PID الصوت',pmt_pid:'PID الـ PMT',pcr_pid:'PCR PID',provider:'المزود',lock:'قفل',skip:'تخطي'};
+  let h='<div id="piconBox" style="margin-bottom:10px;min-height:30px"></div>';
+  h+='<div class="labnote" style="margin-bottom:6px">الشعار أعلاه تجريبي: بيدوّر بالاسم في مستودع picons العام، وممكن يكون غلط أو مش موجود — معاينة بس، مش بيتخزن في الملف.</div>';
+  h+='<table style="width:100%;border-collapse:collapse;font-size:13px">';
+  Object.keys(srv).forEach(c=>{
+    let v=srv[c];
+    let lbl=SR_LABELS[c.toLowerCase()]||c;
+    if(c==='service_type') v=(v===1?'1 — قناة TV':v===2?'2 — إذاعة':String(v));
+    if(c==='favor') v=(v?'نعم ★':'لا');
+    h+='<tr><td style="padding:4px 6px;color:var(--mut);border-bottom:1px solid var(--line);white-space:nowrap">'+esc(lbl)+'</td>'
+      +'<td style="padding:4px 6px;border-bottom:1px solid var(--line);word-break:break-all" dir="auto">'+esc(String(v==null?'':v))+'</td></tr>';
+  });
+  h+='</table>';
+  // التردد والقمر
+  try{
+    const ts=LAB.sqlDb.exec('SELECT t.freq, t.polar, t.symb, t.ts_id, s.sat_name FROM ts_table t LEFT JOIN sat_para_table s ON s.db_id=t.db_sat_para_id WHERE t.db_id=?',[srv.db_ts_id]);
+    if(ts[0]&&ts[0].values.length){
+      const t=ts[0].values[0];
+      h+='<h3 style="margin:12px 0 4px;font-size:14px">التردد</h3><table style="width:100%;border-collapse:collapse;font-size:13px">'
+        +'<tr><td style="padding:4px 6px;color:var(--mut);border-bottom:1px solid var(--line)">التردد</td><td style="padding:4px 6px;border-bottom:1px solid var(--line)" dir="ltr">'+(t[0]/1000)+' MHz '+(t[1]?'V':'H')+'</td></tr>'
+        +'<tr><td style="padding:4px 6px;color:var(--mut);border-bottom:1px solid var(--line)">معدل الترميز</td><td style="padding:4px 6px;border-bottom:1px solid var(--line)" dir="ltr">'+(t[2]/1000)+'</td></tr>'
+        +'<tr><td style="padding:4px 6px;color:var(--mut);border-bottom:1px solid var(--line)">TS ID</td><td style="padding:4px 6px;border-bottom:1px solid var(--line)" dir="ltr">'+t[3]+'</td></tr>'
+        +'<tr><td style="padding:4px 6px;color:var(--mut)">القمر</td><td style="padding:4px 6px">'+esc(String(t[4]||''))+'</td></tr></table>';
+    }
+  }catch(e){}
+  // الجروبات اللي القناة فيها
+  try{
+    const gr=LAB.sqlDb.exec('SELECT g.name FROM grp_table g JOIN grp_map_table m ON m.db_grp_id=g.db_id WHERE m.db_srv_id=?',[srv.db_id]);
+    if(gr[0]&&gr[0].values.length){
+      h+='<h3 style="margin:12px 0 4px;font-size:14px">الباقات</h3><div style="font-size:13px">'+gr[0].values.map(v=>esc(String(v[0]))).join(' · ')+'</div>';
+    }
+  }catch(e){}
+  openModal('تفاصيل القناة: '+esc(String(srv.name||'')), h, null, null);
+  labPiconShow(String(srv.name||''), 'piconBox');
 }
 function labMoveSelected(targetPos){
   if(!LAB.sqlDb||!labHasChanNum()) return;
