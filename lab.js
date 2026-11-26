@@ -371,6 +371,11 @@ function viewLab(){
     main+='<div class="toolcard t-orange">'+labToolHead('t-orange','📡','إضافة تردد وقناة جديدة','ضيف تردد على قمر موجود، وبعدين ضيف عليه قنوات — بتحقق من القيم وتراجع')
       +'<div class="toolbody">'
       +'<h2 style="font-size:14px;margin-bottom:8px">١) تردد جديد</h2>'
+      +'<div class="btnrow" style="margin-bottom:8px">'
+      +'<select id="dbSat" style="flex:1;min-width:120px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:8px 10px"><option value="">📚 قاعدة الترددات المدمجة: اختر قمر…</option></select>'
+      +'<select id="dbTp" style="flex:1;min-width:150px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:8px 10px"><option value="">اختر التردد…</option></select>'
+      +'<button type="button" class="btn sm btn-sec" id="dbFill">تعبئة الحقول</button></div>'
+      +'<div style="font-size:11px;color:var(--mut);margin-bottom:8px">قاعدة مدمجة لأهم الأقمار (نايل سات، بدر، هوت بيرد…) من ملف قنوات حقيقي — راجع التردد قبل الإضافة.</div>'
       +'<div class="field"><label>القمر</label><select id="tpSat">'+labSatOptions()+'</select></div>'
       +'<div class="btnrow" style="margin-bottom:8px">'
       +'<input type="text" id="tpFreq" dir="ltr" placeholder="التردد MHz زي 10719" style="flex:1;min-width:110px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:8px 10px">'
@@ -401,6 +406,14 @@ function viewLab(){
       +'<button type="button" class="btn sm btn-danger" id="grpDel">حذف الجروب</button></div>'
       +'<div class="btnrow"><input type="text" id="grpNewName" placeholder="اسم جروب جديد زي SPORTS" style="flex:1;min-width:140px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:8px 10px">'
       +'<button type="button" class="btn btn-gold" id="grpAdd">إنشاء جروب</button></div>'
+      +'</div></div>';
+  }
+  if(LAB.type==='sqlite'&&LAB.sqlDb&&LAB.sqlTables.indexOf('srv_table')>=0){
+    main+='<div class="toolcard t-purple">'+labToolHead('t-purple','⚖️','مقارنة ملفين','قارن ملف القنوات المفتوح بملف تاني — القنوات المضافة والمحذوفة والمتغيرة — قراءة فقط، مابيعدّلش حاجة')
+      +'<div class="toolbody">'
+      +'<div class="field"><label>الملف التاني (قاعدة قنوات SQLite)</label><input type="file" id="cmpFile"></div>'
+      +'<button type="button" class="btn btn-primary" id="cmpRun">قارن الملفين</button>'
+      +'<div id="cmpOut" style="margin-top:10px"></div>'
       +'</div></div>';
   }
   main+='<div class="toolcard t-blue">'+labToolHead('t-blue','🆔','مغيّر ID السوفت (من ملف لملف)','بيكتب ID الملف المانح في ملفك — زي ما بيتعمل عشان جهاز يقبل سوفت محوّل')
@@ -552,6 +565,22 @@ function bindLab(){
     row.addEventListener('dragleave',()=>{ row.style.borderTop=''; });
     row.addEventListener('drop',e=>{ e.preventDefault(); row.style.borderTop=''; if(dragId) labMoveRow(dragId, +row.dataset.row); dragId=null; });
   });
+  on('#dbFill',()=>{
+    const si=+($('#dbSat')&&$('#dbSat').value), ti=+($('#dbTp')&&$('#dbTp').value);
+    if(!(LAB.satdb&&LAB.satdb.sats[si]&&LAB.satdb.sats[si].tps[ti])) return;
+    const tp=LAB.satdb.sats[si].tps[ti];
+    $('#tpFreq').value=String(tp[0]); $('#tpSr').value=String(tp[1]); $('#tpPol').value=(tp[2]==='H'?'0':'1');
+    toast('اتملت الحقول: '+tp[0]+' '+tp[2]+' '+tp[1]+' — راجع واضغط إضافة التردد');
+  });
+  on('#dbSat',async e=>{
+    const tpSel=$('#dbTp'); tpSel.innerHTML='<option value="">اختر التردد…</option>';
+    if(e.target.value==='') return;
+    if(!LAB.satdb){ try{ LAB.satdb=await (await fetch('satdb.json')).json(); }catch(err){ toast('مش قادر أحمّل قاعدة الترددات'); return; } }
+    const sat=LAB.satdb.sats[+e.target.value];
+    tpSel.innerHTML='<option value="">اختر التردد…</option>'+sat.tps.map((t,i)=>'<option value="'+i+'">'+t[0]+' '+t[2]+' '+t[1]+'</option>').join('');
+  });
+  (async()=>{ const dbSat=$('#dbSat'); if(!dbSat) return; try{ if(!LAB.satdb) LAB.satdb=await (await fetch('satdb.json')).json(); dbSat.innerHTML='<option value="">📚 قاعدة الترددات المدمجة: اختر قمر…</option>'+LAB.satdb.sats.map((st,i)=>'<option value="'+i+'">'+esc(st.name)+' ('+st.tps.length+')</option>').join(''); }catch(e){} })();
+  on('#cmpRun',labCompareFiles);
   on('#labArzScan',arzScan);
   on('#arzAll',()=>arzSetAll(true));
   on('#arzNone',()=>arzSetAll(false));
@@ -1202,4 +1231,63 @@ function labGrpRemoveMember(grpId, srvDbId){
     toast('اتشالت من الجروب');
   }catch(e){ toast('فشل: '+e.message); }
   labSqlLoadRows(); labChecks(); render();
+}
+
+// ===== Compare two channel files (read-only) =====
+async function labCompareFiles(){
+  const f=$('#cmpFile')&&$('#cmpFile').files[0];
+  const out=$('#cmpOut');
+  if(!f){ toast('اختر الملف التاني الأول'); return; }
+  out.innerHTML='<p style="color:var(--mut)">جاري المقارنة…</p>';
+  let db2;
+  try{
+    const SQL=await labEnsureSql();
+    const buf=new Uint8Array(await f.arrayBuffer());
+    db2=new SQL.Database(buf);
+    db2.exec('SELECT 1 FROM srv_table LIMIT 1');
+  }catch(e){ out.innerHTML='<p style="color:var(--danger)">الملف التاني مش قاعدة قنوات SQLite معروفة: '+esc(e.message)+'</p>'; return; }
+  const dump=db=>{
+    const m=new Map();
+    const r=db.exec('SELECT service_id, name, chan_num, db_ts_id FROM srv_table');
+    if(r.length) r[0].values.forEach(v=>{
+      const sid=+v[0]; if(!sid) return;
+      if(!m.has(sid)) m.set(sid,{name:String(v[1]||''), num:+v[2]||0, ts:+v[3]||0});
+    });
+    return m;
+  };
+  const A=dump(LAB.sqlDb), B=dump(db2);
+  const added=[], removed=[], renamed=[], moved=[];
+  for(const [sid,b] of B){
+    if(!A.has(sid)) added.push({sid, name:b.name, num:b.num});
+    else{
+      const a=A.get(sid);
+      if(a.name!==b.name) renamed.push({sid, from:a.name, to:b.name, num:b.num});
+      if(a.num!==b.num) moved.push({sid, name:b.name, from:a.num, to:b.num});
+    }
+  }
+  for(const [sid,a] of A) if(!B.has(sid)) removed.push({sid, name:a.name, num:a.num});
+  const row=(t,c)=>'<div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid var(--line);font-size:13px"><span style="color:'+c+'">'+t+'</span></div>';
+  let h='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:10px">'
+    +'<div class="toolbody" style="text-align:center"><b style="color:var(--teal)">'+added.length+'</b><br>قناة مضافة</div>'
+    +'<div class="toolbody" style="text-align:center"><b style="color:var(--danger)">'+removed.length+'</b><br>قناة محذوفة</div>'
+    +'<div class="toolbody" style="text-align:center"><b style="color:var(--gold)">'+renamed.length+'</b><br>اتغير اسمها</div>'
+    +'<div class="toolbody" style="text-align:center"><b>'+moved.length+'</b><br>اتغير رقمها</div></div>';
+  const list=(arr,fmt,c,max)=>arr.slice(0,max||30).map(x=>row(fmt(x),c)).join('')+(arr.length>(max||30)?'<p style="color:var(--mut);font-size:12px">… و '+(arr.length-(max||30))+' تانية في التقرير الكامل</p>':'');
+  if(added.length) h+='<h3 style="font-size:13px;color:var(--teal);margin:8px 0 4px">مضافة في الملف التاني</h3>'+list(added,x=>esc(x.name)+' (SID '+x.sid+' · #'+x.num+')','var(--teal)');
+  if(removed.length) h+='<h3 style="font-size:13px;color:var(--danger);margin:8px 0 4px">موجودة هنا ومش في التاني</h3>'+list(removed,x=>esc(x.name)+' (SID '+x.sid+' · #'+x.num+')','var(--danger)');
+  if(renamed.length) h+='<h3 style="font-size:13px;color:var(--gold);margin:8px 0 4px">اتغير اسمها</h3>'+list(renamed,x=>esc(x.from)+' ← '+esc(x.to)+' (SID '+x.sid+')','var(--gold)');
+  if(moved.length) h+='<h3 style="font-size:13px;margin:8px 0 4px">اتغير رقمها</h3>'+list(moved,x=>esc(x.name)+': '+x.from+' ← '+x.to,'var(--txt)');
+  if(!added.length&&!removed.length&&!renamed.length&&!moved.length) h+='<p style="color:var(--teal)">الملفين متطابقين في القنوات (نفس الـ SIDs والأسماء والأرقام).</p>';
+  h+='<button type="button" class="btn btn-gold" id="cmpDl" style="margin-top:10px">تحميل التقرير الكامل (.txt)</button>';
+  out.innerHTML=h;
+  $('#cmpDl').addEventListener('click',()=>{
+    let t='تقرير مقارنة ملفي قنوات — رسيفر برو\n';
+    t+='الملف الحالي: '+(LAB.name||'')+'\nالملف التاني: '+f.name+'\n\n';
+    t+='== مضافة في الملف التاني ('+added.length+') ==\n'+added.map(x=>'+ '+x.name+' (SID '+x.sid+' · #'+x.num+')').join('\n')+'\n\n';
+    t+='== محذوفة من الملف التاني ('+removed.length+') ==\n'+removed.map(x=>'- '+x.name+' (SID '+x.sid+' · #'+x.num+')').join('\n')+'\n\n';
+    t+='== اتغير اسمها ('+renamed.length+') ==\n'+renamed.map(x=>'~ '+x.from+' -> '+x.to+' (SID '+x.sid+')').join('\n')+'\n\n';
+    t+='== اتغير رقمها ('+moved.length+') ==\n'+moved.map(x=>'# '+x.name+': '+x.from+' -> '+x.to).join('\n')+'\n';
+    const blob=new Blob([t],{type:'text/plain;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='compare-report.txt'; a.click();
+  });
 }
