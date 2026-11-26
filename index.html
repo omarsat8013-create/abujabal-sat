@@ -350,7 +350,7 @@ body.boldtable table.grid td{font-weight:700}
 <main id="view" class="wrap"></main>
 <div id="modalRoot"></div>
 <script src="vendor/sql-wasm.js?v=1"></script>
-<script src="lab.js?v=23"></script>
+<script src="lab.js?v=24"></script>
 <script>
 'use strict';
 const FAMILIES = [
@@ -1453,8 +1453,8 @@ function viewSim(){
     '<div class="caption" style="margin-top:8px">أو اختار عطل جاهز للتدريب:</div>'+
     '<div class="simfaults">'+SIM_FAULTS.map(f=>'<button type="button" data-f="'+f.id+'" class="'+(f.ok?'ok':'')+(simState.fault===f.id?' on':'')+'">'+esc(f.name)+'</button>').join('')+'</div>'+
     (simFault().suspects.length?'<div class="simsuspect"><b>أكثر المشتبه بهم شيوعًا للعطل ده:</b><ol class="steps" style="margin-top:4px">'+simFault().suspects.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ol></div>':'')+
-  '</div>'
-  '<div class="simgrid">'+
+  '</div>'+
+    '<div class="simgrid">'+
     '<div class="mdiagram" style="margin:0">'+simBoardSvg()+'<div class="mdisc">لوحة نموذجية عامة من رسمنا — الدواير الخضرا نقاط قياس تفاعلية. المنطقة الحمرا المنقّطة خارج المحاكاة.</div></div>'+
     '<div class="meter">'+
       '<div class="mbtns">'+SIM_MODES.map(m=>'<button type="button" data-m="'+m.id+'" class="'+(simState.mode===m.id?' on':'')+'">'+m.label+'</button>').join('')+'</div>'+
@@ -1589,7 +1589,7 @@ function svgUart(){
   '</svg>';
 }
 const MAINT_GUIDES=[
-  { id:'dead', title:'الجهاز ميت تمامًا (مفيش ولا لمبة استعداد)', fam:'كل الأجهزة الصينية ميني HD', diagram:'smps', disc:'مخطط تعليمي عام للمعمارية الشائعة لفهم أجزاء مرحلة الباور فقط — مش schematic لموديل بعينه ومش دليل قياس', keys:'ميت لا يعمل مفيش نور لمبة باور dead power فصل',
+  { id:'dead', title:'الجهاز ميت تمامًا (مفيش ولا لمبة استعداد)', fam:'كل الأجهزة الصينية ميني HD', diagram:'smps', disc:'مخطط تعليمي عام للمعمارية الشائعة لفهم أجزاء مرحلة الباور فقط — مش schematic لموديل بعينه ومش دليل قياس', keys:'ميت لا يعمل نور لمبة باور dead power فصل',
     steps:[
       '<b>أمان أولًا:</b> قبل أي تدخل: افصل الكهربة، واعلم إن مكثف التخزين الكبير (400V) بيفضل مشحون بجهد قاتل (<span class="v">310V DC</span>) حتى بعد الفصل. ماتلمسش الجانب الساخن إلا والجهاز مفصول ومفرّغ.',
       '<b>فحص بصري (والجهاز مفصول):</b> مكثفات منتفخة، مقاومة محروقة، أثر سخونة حوالين أيسي التقطيع أو الدايودات.',
