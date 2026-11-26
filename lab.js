@@ -1122,7 +1122,7 @@ function arzPreviewHtml(){
 }
 function labSatOptions(){
   try{
-    const r=LAB.sqlDb.exec('SELECT db_id, sat_name FROM sat_para_table ORDER BY sat_name');
+    const r=LAB.sqlDb.exec('SELECT p.db_id, p.sat_name FROM sat_para_table p ORDER BY (SELECT COUNT(*) FROM srv_table s WHERE s.db_sat_para_id=p.db_id) DESC, p.sat_name');
     if(!r[0]) return '';
     return r[0].values.map(v=>'<option value="'+v[0]+'">'+esc(String(v[1]||('قمر '+v[0])))+'</option>').join('');
   }catch(e){ return ''; }
