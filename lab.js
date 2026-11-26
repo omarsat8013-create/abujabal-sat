@@ -518,7 +518,7 @@ function labSqlRowsHtml(){
   const tcols=LAB.sqlCols.filter(c=>c.type.indexOf('CHAR')>=0||c.type.indexOf('TEXT')>=0).map(c=>c.name);
   const idcols=LAB.sqlCols.filter(c=>/id|no$/i.test(c.name)&&c.type.indexOf('CHAR')<0&&c.type.indexOf('TEXT')<0).map(c=>c.name);
   return LAB.sqlRows.map(r=>{
-    const label=idcols.map(c=>esc(String(r[c]??''))).join(' · ');
+    const label=(r.chan_num!=null)?String(r.chan_num):idcols.map(c=>esc(String(r[c]??''))).join(' · ');
     let cells='';
     for(const c of tcols.slice(0,2)){
       cells+='<input type="text" value="'+esc(String(r[c]??''))+'" data-rowid="'+r.rowid+'" data-col="'+esc(c)+'" data-old="'+esc(String(r[c]??''))+'">';
