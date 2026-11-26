@@ -572,13 +572,13 @@ function bindLab(){
     $('#tpFreq').value=String(tp[0]); $('#tpSr').value=String(tp[1]); $('#tpPol').value=(tp[2]==='H'?'0':'1');
     toast('اتملت الحقول: '+tp[0]+' '+tp[2]+' '+tp[1]+' — راجع واضغط إضافة التردد');
   });
-  on('#dbSat',async e=>{
+  (()=>{ const el=$('#dbSat'); if(el) el.addEventListener('change',async e=>{
     const tpSel=$('#dbTp'); tpSel.innerHTML='<option value="">اختر التردد…</option>';
     if(e.target.value==='') return;
     if(!LAB.satdb){ try{ LAB.satdb=await (await fetch('satdb.json')).json(); }catch(err){ toast('مش قادر أحمّل قاعدة الترددات'); return; } }
     const sat=LAB.satdb.sats[+e.target.value];
     tpSel.innerHTML='<option value="">اختر التردد…</option>'+sat.tps.map((t,i)=>'<option value="'+i+'">'+t[0]+' '+t[2]+' '+t[1]+'</option>').join('');
-  });
+  }); })();
   (async()=>{ const dbSat=$('#dbSat'); if(!dbSat) return; try{ if(!LAB.satdb) LAB.satdb=await (await fetch('satdb.json')).json(); dbSat.innerHTML='<option value="">📚 قاعدة الترددات المدمجة: اختر قمر…</option>'+LAB.satdb.sats.map((st,i)=>'<option value="'+i+'">'+esc(st.name)+' ('+st.tps.length+')</option>').join(''); }catch(e){} })();
   on('#cmpRun',labCompareFiles);
   on('#labArzScan',arzScan);
