@@ -1506,9 +1506,21 @@ function labConvBody(){
     +'التحويل المتاح حاليًا: قواعد SQLite المفهومة (زي ملفات بي أوت كيو) ← JSON / CSV والعكس بالاستيراد مع تحقق كامل. '
     +'لو عندك ملف من النوع ده وعايز دعمه: ابعتهولنا مع أي توثيق لموديله، وهنحلله الأول ونشوف هل نقدر نقراه كامل بثقة قبل ما ندعمه.</div>';
 }
-function labDl(filename, content, mime){
-  const blob=new Blob([content],{type:mime||'application/octet-stream'});
+function labDlBlob(blob, filename){
+  if(window.AbuJabalBridge && AbuJabalBridge.saveFile){
+    const r=new FileReader();
+    r.onload=()=>{ try{ AbuJabalBridge.saveFile(String(r.result).split(',')[1], filename); }catch(e){ labDlAnchor(blob, filename); } };
+    r.onerror=()=>labDlAnchor(blob, filename);
+    r.readAsDataURL(blob);
+    return;
+  }
+  labDlAnchor(blob, filename);
+}
+function labDlAnchor(blob, filename){
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click();
+}
+function labDl(filename, content, mime){
+  labDlBlob(new Blob([content],{type:mime||'application/octet-stream'}), filename);
 }
 function labExpJson(){
   if(!LAB.sqlDb) return;
@@ -1848,7 +1860,6 @@ async function labCompareFiles(){
     t+='== محذوفة من الملف التاني ('+removed.length+') ==\n'+removed.map(x=>'- '+x.name+' (SID '+x.sid+' · #'+x.num+')').join('\n')+'\n\n';
     t+='== اتغير اسمها ('+renamed.length+') ==\n'+renamed.map(x=>'~ '+x.from+' -> '+x.to+' (SID '+x.sid+')').join('\n')+'\n\n';
     t+='== اتغير رقمها ('+moved.length+') ==\n'+moved.map(x=>'# '+x.name+': '+x.from+' -> '+x.to).join('\n')+'\n';
-    const blob=new Blob([t],{type:'text/plain;charset=utf-8'});
-    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='compare-report.txt'; a.click();
+    labDlBlob(new Blob([t],{type:'text/plain;charset=utf-8'}), 'compare-report.txt');
   });
 }
