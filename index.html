@@ -344,13 +344,13 @@ body.boldtable table.grid td{font-weight:700}
     <rect x="9" y="35" width="17" height="4" rx="2" fill="#e7edfa"/>
   </svg></span>
   <span class="tt"><span class="brand">ابوجبل <b>سات</b></span><div class="tag">محرر القنوات الاحترافي للفنيين</div></span>
-  <span class="verchip">نسخة 3.1.1</span>
+  <span class="verchip" id="verchip">نسخة</span>
 </div>
 <nav class="tabs" id="tabs" aria-label="أقسام البرنامج"></nav>
 <main id="view" class="wrap"></main>
 <div id="modalRoot"></div>
 <script src="vendor/sql-wasm.js?v=1"></script>
-<script src="lab.js?v=24"></script>
+<script src="lab.js?v=25"></script>
 <script>
 'use strict';
 const FAMILIES = [
@@ -576,6 +576,8 @@ function downloadBlob(blob, name){
   setTimeout(()=>URL.revokeObjectURL(url),4000);
 }
 /* ================= router ================= */
+const APP_VER='3.1.5';
+const APP_BUILD='v34 · 26/11/2026';
 const TABS=[
   { path:'/',        label:'الرئيسية' },
   { path:'/editor',  label:'المحرر' },
@@ -583,6 +585,7 @@ const TABS=[
   { path:'/library', label:'المكتبة' },
   { path:'/loaders', label:'اللودرات' },
   { path:'/maint',   label:'الصيانة' },
+  { path:'/sim',     label:'القياسات والاختبارات' },
   { path:'/updates', label:'التحديثات' },
   { path:'/convert', label:'التحويل' },
   { path:'/about',   label:'حول البرنامج' },
@@ -1691,7 +1694,7 @@ function viewAbout(){
   '<div class="callout note"><b>مرجع جاهز، مش محتاج تضيف حاجة</b>المكتبة والتحديثات جواهم سوفتات وفلاشات أصلية وملفات قنوات جاهزة بتحميل مباشر من البرنامج، مرتبة على العائلات: صن بلص 1506/1507، جي اكس GX6605، علي ALi 3510/3606، مونتاج، ترومان، داكي، فانيلا، بي أوت كيو. أي ملف بتحمّله بيتخزن عندك وبيبقى متاح حتى من غير نت. والمحتوى بيتجدد باستمرار من قسم التحديثات. لو ناقصك سوفت أو ملف لموديل معين، ابعتهولنا وهيتضاف.</div>'+
   '<div class="callout note"><b>خصوصيتك</b>تعديلاتك وملفاتك الخاصة بتتحفظ جوه البرنامج على جهازك بس ومش بتتبعت لأي سيرفر. لو مسحت بيانات البرنامج أو شلته، المحفوظ بيتمسح معاه، فخد نسخة احتياطية من قايمة ملف في المحرر.</div>'+
   '<div class="callout warn"><b>توصيل الرسيفر بالموبايل (OTG)</b>شحن الرسيفر والتعامل معاه من جوه التطبيق مباشرة (من غير ما تخرج لبرنامج تاني) قيد البناء في نسخة الأندرويد: محتاج جسر USB خاص جوه التطبيق وتجربة على جهاز حقيقي قبل ما نعتبره شغال. على نسخة الويندوز أسهل وهيجي فيها الأول.</div>'+
-  '<div class="footer">ابوجبل سات، نسخة 3.1.1. ملاحظات العائلات ومرجع اللودرات من منتديات السات المصرية والعربية، 26 نوفمبر 2026. قسم التحديثات بيتجدد باستمرار بسوفتات وتحويلات وملفات قنوات بتحميل مباشر من البرنامج.</div>'+
+  '<div class="footer">ابوجبل سات، نسخة '+APP_VER+' · بنية '+APP_BUILD+'. ملاحظات العائلات ومرجع اللودرات من منتديات السات المصرية والعربية، 26 نوفمبر 2026. قسم التحديثات بيتجدد باستمرار بسوفتات وتحويلات وملفات قنوات بتحميل مباشر من البرنامج.</div>'+
   '</div>';
 }
 /* ---- home ---- */
@@ -1762,8 +1765,16 @@ $('#tabs').addEventListener('click',e=>{
 });
 (async function(){
   db=await openDB();
+  const vc=document.getElementById('verchip');
+  if(vc) vc.textContent='نسخة '+APP_VER+' · بنية '+APP_BUILD;
   if('serviceWorker' in navigator){
-    try{ await navigator.serviceWorker.register('sw.js'); }catch(e){}
+    try{
+      const reg=await navigator.serviceWorker.register('sw.js');
+      try{ reg.update(); }catch(e){}
+      setInterval(()=>{ try{ reg.update(); }catch(e){} }, 5*60*1000);
+      let reloaded=false;
+      navigator.serviceWorker.addEventListener('controllerchange',()=>{ if(!reloaded){ reloaded=true; location.reload(); } });
+    }catch(e){}
   }
   render();
 })();

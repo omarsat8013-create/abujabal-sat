@@ -1,5 +1,5 @@
-const CACHE='abujabal-sat-v33';
-const ASSETS=['./','index.html','manifest.webmanifest','sw.js','icon-192.png','icon-512.png','apple-touch-icon.png','hero.jpg','lab.js?v=24','satdb.json','vendor/sql-wasm.js?v=1','vendor/sql-wasm.wasm?v=1'];
+const CACHE='abujabal-sat-v34';
+const ASSETS=['./','index.html','manifest.webmanifest','sw.js','icon-192.png','icon-512.png','apple-touch-icon.png','hero.jpg','lab.js?v=25','satdb.json','vendor/sql-wasm.js?v=1','vendor/sql-wasm.wasm?v=1'];
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
@@ -8,6 +8,15 @@ self.addEventListener('activate',e=>{
 });
 self.addEventListener('fetch',e=>{
   if(e.request.method!=='GET') return;
+  if(e.request.mode==='navigate'){
+    e.respondWith(
+      fetch(e.request).then(res=>{
+        if(res.ok){ const copy=res.clone(); caches.open(CACHE).then(c=>c.put(e.request,copy)); }
+        return res;
+      }).catch(()=>caches.match(e.request).then(r=>r||caches.match('index.html')))
+    );
+    return;
+  }
   e.respondWith(
     caches.match(e.request).then(hit=>hit||fetch(e.request).then(res=>{
       if(res.ok&&(e.request.url.startsWith(self.location.origin)||e.request.url.includes('fonts.g'))){
