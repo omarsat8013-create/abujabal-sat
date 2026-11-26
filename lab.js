@@ -297,135 +297,153 @@ function labHexPage(){
 }
 function labPages(){ return LAB.buf?Math.ceil(LAB.buf.length/LAB.pageSize):0; }
 /* ---------- view ---------- */
+function labToolHead(cls, ico, title, sub){
+  return '<div class="toolhead '+cls+'"><div class="tico">'+ico+'</div><h2>'+title+'<span class="sub">'+sub+'</span></h2></div>';
+}
 function viewLab(){
   if(!LAB.buf){
     return '<div class="narrow">'
-    +'<div class="card"><h2>مختبر السوفت <span class="sub">تعديل آمن على ملفات السوفت والقنوات — مع نسخة أصلية محفوظة وفحص بعد كل خطوة</span></h2>'
-    +'<div class="field"><label>اختار ملف السوفت أو ملف القنوات (.bin / .abs / .db / .rom)</label>'
-    +'<input type="file" id="labFile"></div>'
+    +'<div class="labbanner"><div class="bico">🧪</div><div><h2>مختبر السوفت</h2><p>تعديل آمن على ملفات السوفت والقنوات — نسخة أصلية محفوظة، وفحص بعد كل خطوة</p></div></div>'
+    +'<div class="toolcard t-teal">'+labToolHead('t-teal','📂','فتح ملف','اختار ملف السوفت أو ملف القنوات (.bin / .abs / .db / .rom)')
+    +'<div class="toolbody"><div class="field"><input type="file" id="labFile"></div>'
     +'<div class="labnote"><b>إزاي بيحمي الملف؟</b><br>'
     +'١. النسخة الأصلية بتفضل محفوظة، وزر "استعادة الأصل" بيرجعك في أي لحظة.<br>'
     +'٢. بعد كل تعديل بيحصل فحص تلقائي: ثبات الحجم، سلامة الهيدر (أول ٦٤ بايت مقفولين)، بصمة نوع الملف، وإعادة حساب CRC32.<br>'
-    +'٣. أي خطأ بيظهر في لوحة الأخطاء مع زر تراجع فوري، وفي قواعد البيانات التعديل الفاشل بيتراجع عن نفسه تلقائياً.<br>'
-    +'٤. التعديل المباشر على الجداول (تغيير أسماء القنوات وخلافه) متاح فقط لملفات SQLite الحقيقية. باقي الأنواع ليها أدوات عامة آمنة: عرض hex، استبدال نصوص بنفس الطول، واستبدال صور مدمجة بنفس الحجم أو أصغر. الأنواع غير المعروفة تفضل قراءة-فقط مع الأدوات العامة دي بس.</div>'
-    +'</div></div>';
+    +'٣. أي خطأ بيظهر في لوحة الفحص مع تراجع فوري، والتعديل الفاشل على قواعد البيانات بيتراجع عن نفسه تلقائياً.<br>'
+    +'٤. التعديل الجدولي المباشر متاح لملفات SQLite الحقيقية. باقي الأنواع ليها أدوات عامة آمنة، والأنواع غير المعروفة قراءة-فقط بالأدوات العامة.</div>'
+    +'</div></div></div>';
   }
-  let h='<div class="narrow">';
-  h+='<div class="card"><h2>'+esc(LAB.name)+' <span class="sub">'+esc(LAB.typeLabel)+'</span></h2>'
+  const errs=LAB.errors.filter(e=>e.level==='err').length, warns=LAB.errors.filter(e=>e.level==='warn').length;
+  let side='<div class="labside">'
+    +'<div class="card"><h2>'+esc(LAB.name)+' <span class="sub">'+esc(LAB.typeLabel)+'</span></h2>'
     +'<div class="kv"><span>الحجم</span><b>'+labFmt(LAB.buf.length)+'</b></div>'
     +'<div class="kv"><span>CRC32 الأصل</span><b dir="ltr">'+labCRC32(LAB.orig)+'</b></div>'
     +'<div class="kv"><span>CRC32 الحالي</span><b dir="ltr">'+labCRC32(labCur())+'</b></div>'
     +'<div class="kv"><span>عدد التعديلات</span><b>'+LAB.ops.length+'</b></div>'
-    +'<div class="kv"><span>صور مدمجة مكتشفة</span><b>'+LAB.media.length+'</b></div>'
-    +'<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">'
-    +'<button type="button" class="btn sm" id="labNew">فتح ملف تاني</button>'
-    +'<button type="button" class="btn sm btn-sec" id="labUndo"'+(LAB.ops.length?'':' disabled')+'>تراجع عن آخر تعديل</button>'
-    +'<button type="button" class="btn sm btn-danger" id="labRestore">استعادة الأصل</button>'
-    +'</div></div>';
-  h+='<div class="card"><h2>لوحة الفحص والأخطاء</h2><div class="labops" id="labErrs">'
-    +(LAB.errors.length?LAB.errors.map(e=>'<div class="'+(e.level==='err'?'operr':e.level==='warn'?'opwarn':'opok')+'">'+esc(e.msg)+'</div>').join(''):'<div class="opok">كل الفحوصات سليمة</div>')
-    +'</div></div>';
-  h+='<div class="card"><h2>سجل العمليات</h2><div class="labops">'
-    +(LAB.ops.length?LAB.ops.map((o,i)=>'<div>'+(i+1)+'. '+esc(o.desc)+' <span style="color:var(--mut)">'+esc(o.at)+'</span></div>').join(''):'<div style="color:var(--mut)">لسه مفيش تعديلات</div>')
-    +'</div></div>';
+    +'<div class="kv"><span>صور مدمجة</span><b>'+LAB.media.length+'</b></div></div>'
+    +'<div class="card"><h2>إجراءات الملف</h2><div class="btnrow" style="flex-direction:column;align-items:stretch">'
+    +'<button type="button" class="btn btn-primary big" id="labSave">⬇ تحميل الملف المعدّل</button>'
+    +'<button type="button" class="btn btn-sec" id="labSaveOrig">تحميل النسخة الأصلية</button>'
+    +'<button type="button" class="btn btn-ghost" id="labSaveReport">تقرير التعديل</button>'
+    +'<button type="button" class="btn btn-sec" id="labUndo"'+(LAB.ops.length?'':' disabled')+'>↩ تراجع عن آخر تعديل</button>'
+    +'<button type="button" class="btn btn-danger" id="labRestore">♻ استعادة الأصل</button>'
+    +'<button type="button" class="btn btn-ghost" id="labNew">فتح ملف تاني</button>'
+    +'</div></div></div>';
+  let main='<div class="labmain">';
   if(LAB.type==='sqlite'&&LAB.sqlDb){
-    h+='<div class="card"><h2>محرر قاعدة البيانات (القوائم والقنوات)</h2>'
+    main+='<div class="toolcard t-purple">'+labToolHead('t-purple','📋','محرر قاعدة البيانات','القوائم والقنوات — تعديل مباشر مع فحص سلامة بعد كل خطوة')
+      +'<div class="toolbody">'
       +'<div class="field"><label>الجدول</label><select id="labTable">'
       +LAB.sqlTables.map(t=>'<option value="'+esc(t)+'"'+(t===LAB.sqlTable?' selected':'')+'>'+esc(t)+' ('+labSqlTableCount(t)+' سطر)</option>').join('')
       +'</select></div>'
       +'<div class="field"><label>بحث في النصوص</label><input type="text" id="labSearch" value="'+esc(LAB.sqlSearch)+'" placeholder="اكتب جزء من اسم القناة..."></div>'
-      +'<div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">'
-      +'<button type="button" class="btn sm" id="labSearchGo">بحث</button>'
+      +'<div class="btnrow" style="margin-bottom:8px">'
+      +'<button type="button" class="btn sm btn-primary" id="labSearchGo">بحث</button>'
       +'<button type="button" class="btn sm btn-sec" id="labPrevPage"'+(LAB.sqlOffset>0?'':' disabled')+'>السابق</button>'
       +'<button type="button" class="btn sm btn-sec" id="labNextPage"'+(LAB.sqlRows.length>=LAB.sqlLimit?'':' disabled')+'>التالي</button>'
       +'<span style="align-self:center;font-size:12px;color:var(--mut)">سطور '+(LAB.sqlOffset+1)+' - '+(LAB.sqlOffset+LAB.sqlRows.length)+'</span></div>'
-      +'<div class="labops" style="max-height:340px">'
-      +labSqlRowsHtml()
-      +'</div>'
-      +'<h2 style="margin-top:14px">عمليات سريعة على القنوات</h2>'
-      +'<div class="field"><label>بحث واستبدال في كل الأسماء</label><div style="display:flex;gap:8px;flex-wrap:wrap">'
-      +'<input type="text" id="labQOld" placeholder="النص القديم" style="flex:1;min-width:120px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:6px 10px">'
-      +'<input type="text" id="labQNew" placeholder="النص الجديد" style="flex:1;min-width:120px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:6px 10px">'
-      +'<button type="button" class="btn sm" id="labQDoReplace">استبدال الكل</button></div></div>'
-      +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'
-      +'<input type="text" id="labQFilter" placeholder="احذف قنوات فيها نص..." style="flex:1;min-width:140px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:6px 10px">'
-      +'<button type="button" class="btn sm btn-danger" id="labQDoFilter">حذف بالفلتر</button>'
-      +'<button type="button" class="btn sm btn-sec" id="labQDoDups">حذف المكرر (نفس الاسم)</button>'
-      +'</div>'
-      +'<p class="labnote">كل عملية بتتسجل في السجل وبييجي بعدها فحص سلامة تلقائي، والتراجع بيرجعها.</p></div>';
+      +'<div class="labops" style="max-height:340px">'+labSqlRowsHtml()+'</div>'
+      +'</div></div>'
+      +'<div class="toolcard t-gold">'+labToolHead('t-gold','⚡','عمليات سريعة على القنوات','تنظيف الأسماء، استبدال جماعي، حذف مكرر — كلها بتتسجل وليها تراجع')
+      +'<div class="toolbody">'
+      +'<div class="field"><label>بحث واستبدال في كل الأسماء</label><div class="btnrow">'
+      +'<input type="text" id="labQOld" placeholder="النص القديم" style="flex:1;min-width:120px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:8px 10px">'
+      +'<input type="text" id="labQNew" placeholder="النص الجديد" style="flex:1;min-width:120px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:8px 10px">'
+      +'<button type="button" class="btn btn-gold" id="labQDoReplace">استبدال الكل</button></div></div>'
+      +'<div class="btnrow">'
+      +'<input type="text" id="labQFilter" placeholder="احذف قنوات فيها نص..." style="flex:1;min-width:140px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:8px 10px">'
+      +'<button type="button" class="btn btn-danger" id="labQDoFilter">حذف بالفلتر</button>'
+      +'<button type="button" class="btn btn-sec" id="labQDoDups">حذف المكرر (نفس الاسم)</button>'
+      +'<button type="button" class="btn btn-sec" id="labQCleanTat">تنظيف التطويل (ـ)</button>'
+      +'</div></div></div>';
   }
-  h+='<div class="card"><h2>تعديل ID / نصوص داخل الملف <span class="sub">استبدال بنفس الطول بالظبط — مناسب لتغيير ID السوفت أو اسم موديل ظاهر</span></h2>'
-    +'<div class="field"><label>النص القديم (زي ما هو في الملف)</label><input type="text" id="labOldStr" dir="ltr" placeholder="GX6605S-..."></div>'
-    +'<div class="field"><label>النص الجديد (نفس عدد الحروف)</label><input type="text" id="labNewStr" dir="ltr"></div>'
-    +'<div class="field"><label>الترميز</label><select id="labEnc"><option value="ascii">ASCII (حرف = بايت)</option><option value="utf16">UTF-16LE (حرف = بايتين)</option></select></div>'
-    +'<button type="button" class="btn btn-gold" id="labDoReplace">استبدال في كل الأماكن</button></div>'
-    +'<div class="card"><h2>مغيّر ID السوفت (من ملف لملف) <span class="sub">بيقارن بايتات الـ ID بين ملفين ويكتب ID الملف المانح في ملفك — زي ما بيتعمل عشان جهاز يقبل سوفت محوّل</span></h2>'
+  main+='<div class="toolcard t-blue">'+labToolHead('t-blue','🆔','مغيّر ID السوفت (من ملف لملف)','بيكتب ID الملف المانح في ملفك — زي ما بيتعمل عشان جهاز يقبل سوفت محوّل')
+    +'<div class="toolbody">'
     +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'
     +'<div class="field" style="flex:1;min-width:120px"><label>إزاحة الـ ID (hex)</label><input type="text" id="labIdOff" dir="ltr" value="0000000C"></div>'
     +'<div class="field"><label>الطول</label><select id="labIdLen"><option value="4" selected>4 بايت</option><option value="2">2 بايت</option><option value="8">8 بايت</option><option value="16">16 بايت</option></select></div>'
     +'</div>'
     +'<div class="field"><label>الملف المانح (اللي هناخد منه الـ ID)</label><input type="file" id="labIdDonor"></div>'
     +'<div id="labIdPreview"></div>'
-    +'<button type="button" class="btn btn-primary" id="labIdApply" disabled>تطبيق الـ ID على ملفي</button></div>';
+    +'<button type="button" class="btn btn-primary big" id="labIdApply" disabled>تطبيق الـ ID على ملفي</button></div></div>'
+    +'<div class="toolcard t-teal">'+labToolHead('t-teal','✏️','تعديل نصوص داخل الملف','استبدال بنفس الطول بالظبط — مناسب لاسم موديل أو نص ظاهر')
+    +'<div class="toolbody">'
+    +'<div class="field"><label>النص القديم (زي ما هو في الملف)</label><input type="text" id="labOldStr" dir="ltr" placeholder="GX6605S-..."></div>'
+    +'<div class="field"><label>النص الجديد (نفس عدد الحروف)</label><input type="text" id="labNewStr" dir="ltr"></div>'
+    +'<div class="field"><label>الترميز</label><select id="labEnc"><option value="ascii">ASCII (حرف = بايت)</option><option value="utf16">UTF-16LE (حرف = بايتين)</option></select></div>'
+    +'<button type="button" class="btn btn-gold big" id="labDoReplace">استبدال في كل الأماكن</button></div></div>';
   if(LAB.media.length){
-    h+='<div class="card"><h2>الصور المدمجة ('+LAB.media.length+') <span class="sub">استخراج أو استبدال — الجديدة لازم نفس الحجم أو أصغر</span></h2>'
+    main+='<div class="toolcard t-orange">'+labToolHead('t-orange','🖼','الصور المدمجة ('+LAB.media.length+')','استخراج أو استبدال — الجديدة لازم نفس الحجم أو أصغر')
+      +'<div class="toolbody">'
       +LAB.media.map((m,i)=>'<div class="mediaitem"><span>'+m.kind+' @ '+labHex(m.off)+' ('+labFmt(m.len)+')</span><span>'
-      +'<button type="button" class="btn sm" data-labext="'+i+'">استخراج</button> '
-      +'<button type="button" class="btn sm btn-sec" data-labrep="'+i+'">استبدال</button></span></div>').join('')
-      +'<input type="file" id="labImgFile" accept="image/*" style="display:none"></div>';
+      +'<button type="button" class="btn sm btn-sec" data-labext="'+i+'">استخراج</button> '
+      +'<button type="button" class="btn sm btn-primary" data-labrep="'+i+'">استبدال</button></span></div>').join('')
+      +'<input type="file" id="labImgFile" accept="image/*" style="display:none"></div></div>';
   }
-  h+='<div class="card"><h2>عارض Hex <span class="sub">قراءة فقط — '+(LAB.page+1)+' / '+labPages()+' صفحة</span></h2>'
-    +'<div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">'
+  main+='<div class="toolcard t-purple">'+labToolHead('t-purple','🎬','محوّل الصور إلى فيديو M2V','يحوّل مجموعة صور لفيديو MPEG-2 (.m2v) جوه المتصفح — بدون سيرفر')
+    +'<div class="toolbody">'
+    +'<div class="field"><label>الصور (بالترتيب)</label><input type="file" id="m2vFiles" accept="image/*" multiple></div>'
+    +'<div class="btnrow" style="margin-bottom:8px">'
+    +'<select id="m2vRes" style="background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:8px 10px"><option value="720x576" selected>720×576 (SD)</option><option value="720x480">720×480 (NTSC)</option><option value="1280x720">1280×720 (HD)</option><option value="1920x1080">1920×1080 (Full HD)</option></select>'
+    +'<select id="m2vFps" style="background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:8px 10px"><option value="25" selected>25 fps</option><option value="30">30 fps</option></select>'
+    +'<input type="text" id="m2vSecs" value="3" style="width:90px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:8px 10px" title="ثواني لكل صورة">'
+    +'</div>'
+    +'<div class="btnrow" style="margin-bottom:8px">'
+    +'<button type="button" class="btn btn-sec" id="m2vPrev">▶ معاينة</button>'
+    +'<button type="button" class="btn btn-gold big" id="m2vGo">تحويل وتحميل .m2v</button></div>'
+    +'<img id="m2vPrevImg" style="display:none;max-width:100%;border-radius:10px;border:1px solid var(--line2);margin-bottom:8px">'
+    +'<div class="labops" id="m2vLog" style="max-height:140px"><div style="color:var(--mut)">اختار الصور واضغط تحويل. أول مرة بيحمل محرك التحويل من النت (~25MB).</div></div></div></div>'
+    +'<div class="toolcard t-blue">'+labToolHead('t-blue','🔌','لودر السيريال (تجريبي)','فلاشة/دامب عن طريق منفذ COM من المتصفح — Web Serial')
+    +'<div class="toolbody">'
+    +'<p class="labnote" style="color:#fbbf24">تنبيه صريح: ده اتصال سيريال خام (إرسال/استقبال) شغال من المتصفح، لكن بروتوكول اللودر الكامل بتاع GX/Sunplus <b>لم يُختبر على جهاز حقيقي بعد</b>. استخدمه للتجربة بس، وماتعتمدش عليه في فلاشة جهاز عميل.</p>'
+    +'<div class="btnrow" style="margin-bottom:8px">'
+    +'<select id="serBaud" style="background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:8px 10px">'
+    +['9600','38400','57600','115200','230400','460800','921600'].map(b=>'<option value="'+b+'"'+(b==='115200'?' selected':'')+'>'+b+'</option>').join('')
+    +'</select>'
+    +(SER.port
+      ?'<button type="button" class="btn btn-danger" id="serDisc">فصل</button><span id="serStatus" style="align-self:center;font-size:12px;color:var(--mut)">استقبال: '+SER.rx.toLocaleString('en-US')+' بايت</span>'
+      :'<button type="button" class="btn btn-primary" id="serConn">اتصال بالمنفذ</button>')
+    +'<button type="button" class="btn btn-sec" id="serSave"'+(SER.rx?'':' disabled')+'>حفظ المستقبَل + SHA-256</button>'
+    +'</div>'
+    +'<div class="btnrow" style="margin-bottom:8px">'
+    +'<input type="text" id="serHex" dir="ltr" placeholder="بايتات hex للإرسال زي A5 5A 00 01" style="flex:1;min-width:200px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:8px 10px">'
+    +'<button type="button" class="btn btn-sec" id="serSend"'+(SER.port?'':' disabled')+'>إرسال</button></div>'
+    +'<div class="labops hexview" id="serLog" style="max-height:180px;white-space:pre-wrap">'
+    +(SER.log.length?SER.log.map(l=>'<div class="'+l.cls+'">['+l.t+'] '+esc(l.msg)+'</div>').join(''):'<div style="color:var(--mut)">اللوج فاضي — اتصل بالمنفذ عشان تبدأ</div>')
+    +'</div></div></div>'
+    +'<div class="toolcard t-teal">'+labToolHead('t-teal','🔬','عارض Hex','قراءة فقط — '+(LAB.page+1)+' / '+labPages()+' صفحة')
+    +'<div class="toolbody">'
+    +'<div class="btnrow" style="margin-bottom:8px">'
     +'<button type="button" class="btn sm btn-sec" id="labHxPrev"'+(LAB.page>0?'':' disabled')+'>السابق</button>'
     +'<button type="button" class="btn sm btn-sec" id="labHxNext"'+(LAB.page<labPages()-1?'':' disabled')+'>التالي</button>'
     +'<input type="text" id="labHxGoto" dir="ltr" placeholder="عنوان hex زي 0001A000" style="width:160px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:6px 10px">'
-    +'<button type="button" class="btn sm" id="labHxGo">روح</button>'
+    +'<button type="button" class="btn sm btn-primary" id="labHxGo">روح</button>'
     +(LAB.unlocked
       ?'<button type="button" class="btn sm btn-danger" id="labLock">قفل الهيدر تاني</button>'
       :'<button type="button" class="btn sm btn-ghost" id="labUnlock">فك قفل الهيدر (خطر)</button>')
     +'</div>'
-    +'<div class="hexview">'+labHexPage()+'</div></div>';
-  h+='<div class="card"><h2>تعديل بايتات متقدم <span class="sub">للخبراء — اكتب العنوان والبايتات hex</span></h2>'
+    +'<div class="hexview">'+labHexPage()+'</div></div></div>'
+    +'<div class="toolcard t-red">'+labToolHead('t-red','🧬','تعديل بايتات متقدم','للخبراء — اكتب العنوان والبايتات hex')
+    +'<div class="toolbody">'
     +'<div class="field"><label>العنوان (hex)</label><input type="text" id="labPatchOff" dir="ltr" placeholder="0001A000"></div>'
     +'<div class="field"><label>البايتات الجديدة (hex)</label><input type="text" id="labPatchBytes" dir="ltr" placeholder="48 65 6C 6C 6F"></div>'
-    +'<button type="button" class="btn btn-sec" id="labDoPatch">تطبيق التعديل</button></div>';
-  h+='<div class="card"><h2>محوّل الصور إلى فيديو M2V <span class="sub">يحوّل مجموعة صور لفيديو MPEG-2 (.m2v) جوه المتصفح — بدون سيرفر</span></h2>'
-    +'<div class="field"><label>الصور (بالترتيب)</label><input type="file" id="m2vFiles" accept="image/*" multiple></div>'
-    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'
-    +'<select id="m2vRes" style="background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:6px 10px"><option value="720x576" selected>720×576 (SD)</option><option value="720x480">720×480 (NTSC)</option><option value="1280x720">1280×720 (HD)</option><option value="1920x1080">1920×1080 (Full HD)</option></select>'
-    +'<select id="m2vFps" style="background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:6px 10px"><option value="25" selected>25 fps</option><option value="30">30 fps</option></select>'
-    +'<input type="text" id="m2vSecs" value="3" style="width:90px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:6px 10px" title="ثواني لكل صورة">'
-    +'</div>'
-    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'
-    +'<button type="button" class="btn sm btn-sec" id="m2vPrev">معاينة</button>'
-    +'<button type="button" class="btn sm btn-gold" id="m2vGo">تحويل وتحميل .m2v</button></div>'
-    +'<img id="m2vPrevImg" style="display:none;max-width:100%;border-radius:10px;border:1px solid var(--line2);margin-bottom:8px">'
-    +'<div class="labops" id="m2vLog" style="max-height:140px"><div style="color:var(--mut)">اختار الصور واضغط تحويل. أول مرة بيحمل محرك التحويل من النت.</div></div></div>';
-  h+='<div class="card"><h2>لودر السيريال (تجريبي) <span class="sub">فلاشة/دامب عن طريق منفذ COM من المتصفح — Web Serial</span></h2>'
-    +'<p class="labnote" style="color:var(--gold,#fbbf24)">تنبيه صريح: ده اتصال سيريال خام (إرسال/استقبال) شغال من المتصفح، لكن بروتوكول اللودر الكامل بتاع GX/Sunplus <b>لم يُختبر على جهاز حقيقي بعد</b>. استخدمه للتجربة بس، وماتعتمدش عليه في فلاشة جهاز عميل.</p>'
-    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'
-    +'<select id="serBaud" style="background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:6px 10px">'
-    +['9600','38400','57600','115200','230400','460800','921600'].map(b=>'<option value="'+b+'"'+(b==='115200'?' selected':'')+'>'+b+'</option>').join('')
-    +'</select>'
-    +(SER.port
-      ?'<button type="button" class="btn sm btn-danger" id="serDisc">فصل</button><span id="serStatus" style="align-self:center;font-size:12px;color:var(--mut)">استقبال: '+SER.rx.toLocaleString('en-US')+' بايت</span>'
-      :'<button type="button" class="btn sm btn-primary" id="serConn">اتصال بالمنفذ</button>')
-    +'<button type="button" class="btn sm btn-sec" id="serSave"'+(SER.rx?'':' disabled')+'>حفظ المستقبَل + SHA-256</button>'
-    +'</div>'
-    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'
-    +'<input type="text" id="serHex" dir="ltr" placeholder="بايتات hex للإرسال زي A5 5A 00 01" style="flex:1;min-width:200px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:6px 10px">'
-    +'<button type="button" class="btn sm" id="serSend"'+(SER.port?'':' disabled')+'>إرسال</button></div>'
-    +'<div class="labops hexview" id="serLog" style="max-height:180px;white-space:pre-wrap">'
-    +(SER.log.length?SER.log.map(l=>'<div class="'+l.cls+'">['+l.t+'] '+esc(l.msg)+'</div>').join(''):'<div style="color:var(--mut)">اللوج فاضي — اتصل بالمنفذ عشان تبدأ</div>')
-    +'</div></div>';
-  h+='<div class="card"><h2>الحفظ</h2><div style="display:flex;gap:8px;flex-wrap:wrap">'
-    +'<button type="button" class="btn btn-primary" id="labSave">تحميل الملف المعدّل</button>'
-    +'<button type="button" class="btn btn-sec" id="labSaveOrig">تحميل النسخة الأصلية</button>'
-    +'<button type="button" class="btn btn-ghost" id="labSaveReport">تحميل تقرير التعديل</button>'
-    +'</div><p class="labnote" style="margin-top:10px">الملف المعدّل بينزل باسم فيه _modified. جرّبه الأول على نسخة، وخلي الأصل عندك دايماً.</p></div>';
-  h+='</div>';
-  return h;
+    +'<button type="button" class="btn btn-sec" id="labDoPatch">تطبيق التعديل</button></div></div>';
+  main+='</div>';
+  const lastOp=LAB.ops.length?LAB.ops[LAB.ops.length-1].desc:'مفيش تعديلات لسه';
+  const status='<div class="labstatus">'
+    +'<span><span class="dot" style="background:'+(errs?'#f87171':warns?'#fbbf24':'#34d399')+'"></span>'+(errs?errs+' خطأ':warns?warns+' تنبيه':'الفحص سليم')+'</span>'
+    +'<span style="color:var(--mut)">آخر عملية: '+esc(lastOp)+'</span>'
+    +'<span dir="ltr" style="color:var(--mut)">CRC '+labCRC32(labCur())+'</span>'
+    +'</div>';
+  return '<div class="narrow">'
+    +'<div class="labbanner"><div class="bico">🧪</div><div><h2>مختبر السوفت</h2><p>تعديل آمن — أصل محفوظ، تراجع، وفحص بعد كل خطوة</p></div></div>'
+    +'<div class="card" style="margin-bottom:14px"><h2 style="font-size:15px">لوحة الفحص والأخطاء</h2><div class="labops" id="labErrs">'
+    +(LAB.errors.length?LAB.errors.map(e=>'<div class="'+(e.level==='err'?'operr':e.level==='warn'?'opwarn':'opok')+'">'+esc(e.msg)+'</div>').join(''):'<div class="opok">كل الفحوصات سليمة</div>')
+    +'</div></div>'
+    +'<div class="labgrid2">'+side+main+'</div>'
+    +status+'</div>';
 }
+
 function labSqlRowsHtml(){
   if(!LAB.sqlRows.length) return '<div style="color:var(--mut)">لا توجد سطور</div>';
   const tcols=LAB.sqlCols.filter(c=>c.type.indexOf('CHAR')>=0||c.type.indexOf('TEXT')>=0).map(c=>c.name);
@@ -464,6 +482,10 @@ function bindLab(){
     if(nm) labQReplace(nm.name, $('#labQOld').value, $('#labQNew').value);
   });
   on('#labQDoDups',labQDeleteDups);
+  on('#labQCleanTat',()=>{
+    const nm=(LAB.sqlCols.find(c=>/name/i.test(c.name))||LAB.sqlCols.find(c=>c.type.indexOf('CHAR')>=0||c.type.indexOf('TEXT')>=0));
+    if(nm) labQReplace(nm.name,'ـ','');
+  });
   on('#labQDoFilter',()=>{
     const nm=(LAB.sqlCols.find(c=>/name/i.test(c.name))||LAB.sqlCols.find(c=>c.type.indexOf('CHAR')>=0||c.type.indexOf('TEXT')>=0));
     if(nm) labQDeleteFilter(nm.name, $('#labQFilter').value.trim());
