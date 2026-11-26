@@ -537,12 +537,13 @@ labUndo=function(){
     LAB.ops.pop();
     try{
       LAB.sqlDb.run('DELETE FROM "'+op.inverse.table+'"');
-      const cols=(op.inverse.cols||[]).filter(c=>c!=='rowid');
+      const cols=(op.inverse.cols&&op.inverse.cols.length?op.inverse.cols.slice():[]);
+      if(!cols.length&&op.inverse.rows.length){ toast('لا يمكن التراجع: نسخة الأعمدة ناقصة'); labSqlLoadRows(); labChecks(); render(); return; }
       if(cols.length){
-        const colIdx=(op.inverse.cols||[]).map(c=>c);
+        const colIdx=cols.map(c=>c);
         for(const row of op.inverse.rows){
           const vals=cols.map(c=>row[colIdx.indexOf(c)]);
-          LAB.sqlDb.run('INSERT INTO "'+op.inverse.table+'" ('+cols.map(c=>'"'+c+'"').join(',')+') VALUES ('+cols.map(()=>'?').join(',')+')', vals);
+          LAB.sqlDb.run('INSERT INTO "'+op.inverse.table+'" ('+cols.map(c=>c==='rowid'?'rowid':'"'+c+'"').join(',')+') VALUES ('+cols.map(()=>'?').join(',')+')', vals);
         }
       }
     }catch(e){ toast('فشل التراجع: '+e.message); }
@@ -595,7 +596,7 @@ function labQDeleteDups(){
     const after=LAB.sqlDb.exec('SELECT COUNT(*) FROM "'+LAB.sqlTable+'"')[0].values[0][0];
     const removed=before-after;
     if(removed<=0){ toast('مفيش تكرارات'); labChecks(); render(); return; }
-    labPushOp('حذف '+removed+' قناة مكررة (نفس الاسم) من "'+LAB.sqlTable+'"', {kind:'sqlrestore', rows:backup[0]?backup[0].values:[], table:LAB.sqlTable});
+    labPushOp('حذف '+removed+' قناة مكررة (نفس الاسم) من "'+LAB.sqlTable+'"', {kind:'sqlrestore', rows:backup[0]?backup[0].values:[], table:LAB.sqlTable, cols:backup[0]?backup[0].columns:null});
     const v=LAB.sqlDb.exec('PRAGMA integrity_check')[0].values[0][0];
     if(v!=='ok') labAddErr('err','فحص السلامة فشل بعد حذف المكرر',null);
     toast('اتحذف '+removed+' مكرر');
