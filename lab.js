@@ -1200,9 +1200,8 @@ function labMoveSelected(targetPos){
     const moving=ids.filter(id=>sel.has(id));
     if(!moving.length){ toast('التحديد مش في الجدول ده'); return; }
     const rest=ids.filter(id=>!sel.has(id));
-    // position after removal = target-1 adjusted by how many moved were before it
-    const movedBefore=moving.filter(id=>ids.indexOf(id)<targetPos-1).length;
-    const at=Math.max(0,Math.min(rest.length,(targetPos-1)-movedBefore));
+    // في الترقيم الجديد، أول قناة في المجموعة تاخد رقم الموضع المطلوب بالظبط
+    const at=Math.max(0,Math.min(rest.length, targetPos-1));
     const merged=rest.slice(0,at).concat(moving, rest.slice(at));
     const changes=[];
     merged.forEach((id,i)=>{
