@@ -341,13 +341,32 @@ function viewLab(){
       +'<span style="align-self:center;font-size:12px;color:var(--mut)">سطور '+(LAB.sqlOffset+1)+' - '+(LAB.sqlOffset+LAB.sqlRows.length)+'</span></div>'
       +'<div class="labops" style="max-height:340px">'
       +labSqlRowsHtml()
-      +'</div></div>';
+      +'</div>'
+      +'<h2 style="margin-top:14px">عمليات سريعة على القنوات</h2>'
+      +'<div class="field"><label>بحث واستبدال في كل الأسماء</label><div style="display:flex;gap:8px;flex-wrap:wrap">'
+      +'<input type="text" id="labQOld" placeholder="النص القديم" style="flex:1;min-width:120px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:6px 10px">'
+      +'<input type="text" id="labQNew" placeholder="النص الجديد" style="flex:1;min-width:120px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:6px 10px">'
+      +'<button type="button" class="btn sm" id="labQDoReplace">استبدال الكل</button></div></div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'
+      +'<input type="text" id="labQFilter" placeholder="احذف قنوات فيها نص..." style="flex:1;min-width:140px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:6px 10px">'
+      +'<button type="button" class="btn sm btn-danger" id="labQDoFilter">حذف بالفلتر</button>'
+      +'<button type="button" class="btn sm btn-sec" id="labQDoDups">حذف المكرر (نفس الاسم)</button>'
+      +'</div>'
+      +'<p class="labnote">كل عملية بتتسجل في السجل وبييجي بعدها فحص سلامة تلقائي، والتراجع بيرجعها.</p></div>';
   }
   h+='<div class="card"><h2>تعديل ID / نصوص داخل الملف <span class="sub">استبدال بنفس الطول بالظبط — مناسب لتغيير ID السوفت أو اسم موديل ظاهر</span></h2>'
     +'<div class="field"><label>النص القديم (زي ما هو في الملف)</label><input type="text" id="labOldStr" dir="ltr" placeholder="GX6605S-..."></div>'
     +'<div class="field"><label>النص الجديد (نفس عدد الحروف)</label><input type="text" id="labNewStr" dir="ltr"></div>'
     +'<div class="field"><label>الترميز</label><select id="labEnc"><option value="ascii">ASCII (حرف = بايت)</option><option value="utf16">UTF-16LE (حرف = بايتين)</option></select></div>'
-    +'<button type="button" class="btn btn-gold" id="labDoReplace">استبدال في كل الأماكن</button></div>';
+    +'<button type="button" class="btn btn-gold" id="labDoReplace">استبدال في كل الأماكن</button></div>'
+    +'<div class="card"><h2>مغيّر ID السوفت (من ملف لملف) <span class="sub">بيقارن بايتات الـ ID بين ملفين ويكتب ID الملف المانح في ملفك — زي ما بيتعمل عشان جهاز يقبل سوفت محوّل</span></h2>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'
+    +'<div class="field" style="flex:1;min-width:120px"><label>إزاحة الـ ID (hex)</label><input type="text" id="labIdOff" dir="ltr" value="0000000C"></div>'
+    +'<div class="field"><label>الطول</label><select id="labIdLen"><option value="4" selected>4 بايت</option><option value="2">2 بايت</option><option value="8">8 بايت</option><option value="16">16 بايت</option></select></div>'
+    +'</div>'
+    +'<div class="field"><label>الملف المانح (اللي هناخد منه الـ ID)</label><input type="file" id="labIdDonor"></div>'
+    +'<div id="labIdPreview"></div>'
+    +'<button type="button" class="btn btn-primary" id="labIdApply" disabled>تطبيق الـ ID على ملفي</button></div>';
   if(LAB.media.length){
     h+='<div class="card"><h2>الصور المدمجة ('+LAB.media.length+') <span class="sub">استخراج أو استبدال — الجديدة لازم نفس الحجم أو أصغر</span></h2>'
       +LAB.media.map((m,i)=>'<div class="mediaitem"><span>'+m.kind+' @ '+labHex(m.off)+' ('+labFmt(m.len)+')</span><span>'
@@ -370,6 +389,35 @@ function viewLab(){
     +'<div class="field"><label>العنوان (hex)</label><input type="text" id="labPatchOff" dir="ltr" placeholder="0001A000"></div>'
     +'<div class="field"><label>البايتات الجديدة (hex)</label><input type="text" id="labPatchBytes" dir="ltr" placeholder="48 65 6C 6C 6F"></div>'
     +'<button type="button" class="btn btn-sec" id="labDoPatch">تطبيق التعديل</button></div>';
+  h+='<div class="card"><h2>محوّل الصور إلى فيديو M2V <span class="sub">يحوّل مجموعة صور لفيديو MPEG-2 (.m2v) جوه المتصفح — بدون سيرفر</span></h2>'
+    +'<div class="field"><label>الصور (بالترتيب)</label><input type="file" id="m2vFiles" accept="image/*" multiple></div>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'
+    +'<select id="m2vRes" style="background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:6px 10px"><option value="720x576" selected>720×576 (SD)</option><option value="720x480">720×480 (NTSC)</option><option value="1280x720">1280×720 (HD)</option><option value="1920x1080">1920×1080 (Full HD)</option></select>'
+    +'<select id="m2vFps" style="background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:6px 10px"><option value="25" selected>25 fps</option><option value="30">30 fps</option></select>'
+    +'<input type="text" id="m2vSecs" value="3" style="width:90px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:6px 10px" title="ثواني لكل صورة">'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'
+    +'<button type="button" class="btn sm btn-sec" id="m2vPrev">معاينة</button>'
+    +'<button type="button" class="btn sm btn-gold" id="m2vGo">تحويل وتحميل .m2v</button></div>'
+    +'<img id="m2vPrevImg" style="display:none;max-width:100%;border-radius:10px;border:1px solid var(--line2);margin-bottom:8px">'
+    +'<div class="labops" id="m2vLog" style="max-height:140px"><div style="color:var(--mut)">اختار الصور واضغط تحويل. أول مرة بيحمل محرك التحويل من النت.</div></div></div>';
+  h+='<div class="card"><h2>لودر السيريال (تجريبي) <span class="sub">فلاشة/دامب عن طريق منفذ COM من المتصفح — Web Serial</span></h2>'
+    +'<p class="labnote" style="color:var(--gold,#fbbf24)">تنبيه صريح: ده اتصال سيريال خام (إرسال/استقبال) شغال من المتصفح، لكن بروتوكول اللودر الكامل بتاع GX/Sunplus <b>لم يُختبر على جهاز حقيقي بعد</b>. استخدمه للتجربة بس، وماتعتمدش عليه في فلاشة جهاز عميل.</p>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'
+    +'<select id="serBaud" style="background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:6px 10px">'
+    +['9600','38400','57600','115200','230400','460800','921600'].map(b=>'<option value="'+b+'"'+(b==='115200'?' selected':'')+'>'+b+'</option>').join('')
+    +'</select>'
+    +(SER.port
+      ?'<button type="button" class="btn sm btn-danger" id="serDisc">فصل</button><span id="serStatus" style="align-self:center;font-size:12px;color:var(--mut)">استقبال: '+SER.rx.toLocaleString('en-US')+' بايت</span>'
+      :'<button type="button" class="btn sm btn-primary" id="serConn">اتصال بالمنفذ</button>')
+    +'<button type="button" class="btn sm btn-sec" id="serSave"'+(SER.rx?'':' disabled')+'>حفظ المستقبَل + SHA-256</button>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'
+    +'<input type="text" id="serHex" dir="ltr" placeholder="بايتات hex للإرسال زي A5 5A 00 01" style="flex:1;min-width:200px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:6px 10px">'
+    +'<button type="button" class="btn sm" id="serSend"'+(SER.port?'':' disabled')+'>إرسال</button></div>'
+    +'<div class="labops hexview" id="serLog" style="max-height:180px;white-space:pre-wrap">'
+    +(SER.log.length?SER.log.map(l=>'<div class="'+l.cls+'">['+l.t+'] '+esc(l.msg)+'</div>').join(''):'<div style="color:var(--mut)">اللوج فاضي — اتصل بالمنفذ عشان تبدأ</div>')
+    +'</div></div>';
   h+='<div class="card"><h2>الحفظ</h2><div style="display:flex;gap:8px;flex-wrap:wrap">'
     +'<button type="button" class="btn btn-primary" id="labSave">تحميل الملف المعدّل</button>'
     +'<button type="button" class="btn btn-sec" id="labSaveOrig">تحميل النسخة الأصلية</button>'
@@ -402,6 +450,32 @@ function bindLab(){
   on('#labDoReplace',()=>{
     labReplaceString($('#labOldStr').value, $('#labNewStr').value, $('#labEnc').value);
   });
+  const idOff=$('#labIdOff'), idLen=$('#labIdLen');
+  if(idOff) idOff.addEventListener('change',labIdSyncOpts);
+  if(idLen) idLen.addEventListener('change',labIdSyncOpts);
+  const donor=$('#labIdDonor');
+  if(donor) donor.addEventListener('change',async()=>{
+    if(donor.files[0]){ LABID.donor=new Uint8Array(await donor.files[0].arrayBuffer()); LABID.donorName=donor.files[0].name; labIdSyncOpts(); }
+  });
+  on('#labIdApply',labIdApply);
+  labIdRenderPreview();
+  on('#labQDoReplace',()=>{
+    const nm=(LAB.sqlCols.find(c=>/name/i.test(c.name))||LAB.sqlCols.find(c=>c.type.indexOf('CHAR')>=0||c.type.indexOf('TEXT')>=0));
+    if(nm) labQReplace(nm.name, $('#labQOld').value, $('#labQNew').value);
+  });
+  on('#labQDoDups',labQDeleteDups);
+  on('#labQDoFilter',()=>{
+    const nm=(LAB.sqlCols.find(c=>/name/i.test(c.name))||LAB.sqlCols.find(c=>c.type.indexOf('CHAR')>=0||c.type.indexOf('TEXT')>=0));
+    if(nm) labQDeleteFilter(nm.name, $('#labQFilter').value.trim());
+  });
+  const m2vF=$('#m2vFiles');
+  if(m2vF) m2vF.addEventListener('change',()=>{ M2V.imgs=Array.from(m2vF.files||[]); m2vLog('اتختار '+M2V.imgs.length+' صورة','opok'); });
+  on('#m2vPrev',m2vPreview);
+  on('#m2vGo',m2vConvert);
+  on('#serConn',serConnect);
+  on('#serDisc',serDisconnect);
+  on('#serSend',()=>{ serSendHex($('#serHex').value); });
+  on('#serSave',serSaveDump);
   on('#labDoPatch',()=>{ labPatchBytes($('#labPatchOff').value, $('#labPatchBytes').value); });
   on('#labHxPrev',()=>{ if(LAB.page>0){ LAB.page--; render(); } });
   on('#labHxNext',()=>{ if(LAB.page<labPages()-1){ LAB.page++; render(); } });
@@ -452,5 +526,228 @@ labUndo=function(){
     toast('تم التراجع عن: '+op.desc);
     return;
   }
+  if(op&&op.inverse&&op.inverse.kind==='sqlbulk'){
+    LAB.ops.pop();
+    try{ LAB.sqlDb.run('UPDATE "'+LAB.sqlTable+'" SET "'+op.inverse.col+'"=REPLACE("'+op.inverse.col+'", ?, ?)',[op.inverse.from,op.inverse.to]); }catch(e){}
+    labSqlLoadRows(); labChecks(); render();
+    toast('تم التراجع عن: '+op.desc);
+    return;
+  }
+  if(op&&op.inverse&&op.inverse.kind==='sqlrestore'){
+    LAB.ops.pop();
+    try{
+      LAB.sqlDb.run('DELETE FROM "'+op.inverse.table+'"');
+      const cols=(op.inverse.cols||[]).filter(c=>c!=='rowid');
+      if(cols.length){
+        const colIdx=(op.inverse.cols||[]).map(c=>c);
+        for(const row of op.inverse.rows){
+          const vals=cols.map(c=>row[colIdx.indexOf(c)]);
+          LAB.sqlDb.run('INSERT INTO "'+op.inverse.table+'" ('+cols.map(c=>'"'+c+'"').join(',')+') VALUES ('+cols.map(()=>'?').join(',')+')', vals);
+        }
+      }
+    }catch(e){ toast('فشل التراجع: '+e.message); }
+    labSqlLoadRows(); labChecks(); render();
+    toast('تم التراجع عن: '+op.desc);
+    return;
+  }
   _labUndoOrig();
 };
+/* ---------- ID changer (compare two bins) ---------- */
+const LABID={donor:null, donorName:'', off:0x0C, len:4};
+function labIdRead(u8,off,len){ if(!u8||off+len>u8.length) return null; return Array.from(u8.slice(off,off+len)); }
+function labIdHex(b){ return b?b.map(x=>x.toString(16).toUpperCase().padStart(2,'0')).join(' '):'—'; }
+function labIdApply(){
+  if(!LAB.buf||!LABID.donor) return;
+  const off=LABID.off, len=LABID.len;
+  const nb=labIdRead(LABID.donor,off,len);
+  if(!nb){ toast('الإزاحة خارج حجم الملف المانح'); return; }
+  if(off+len>LAB.buf.length){ toast('الإزاحة خارج حجم الملف الحالي'); return; }
+  const old=Array.from(LAB.buf.slice(off,off+len));
+  for(let j=0;j<len;j++) LAB.buf[off+j]=nb[j];
+  labPushOp('تغيير ID عند '+labHex(off)+' ('+len+' بايت): '+labIdHex(old)+' ← '+labIdHex(nb)+' من "'+LABID.donorName+'"',
+    {kind:'patches',patches:[{off,old}]});
+  labChecks(); render();
+  toast('تم تغيير الـ ID');
+}
+/* ---------- channel studio quick ops (SQLite) ---------- */
+function labQReplace(col, oldS, newS){
+  if(!LAB.sqlDb||!oldS) return;
+  try{
+    const before=LAB.sqlDb.exec('SELECT COUNT(*) FROM "'+LAB.sqlTable+'"')[0].values[0][0];
+    LAB.sqlDb.run('UPDATE "'+LAB.sqlTable+'" SET "'+col+'"=REPLACE("'+col+'", ?, ?)',[oldS,newS]);
+    const ch=LAB.sqlDb.exec('SELECT changes()')[0].values[0][0];
+    labPushOp('استبدال جماعي في "'+LAB.sqlTable+'.'+col+'": "'+oldS+'" ← "'+newS+'" ('+ch+' سطر)', {kind:'sqlbulk', col, from:newS, to:oldS});
+    const v=LAB.sqlDb.exec('PRAGMA integrity_check')[0].values[0][0];
+    if(v!=='ok'){ labAddErr('err','فحص السلامة فشل بعد الاستبدال الجماعي',null); }
+    toast('اتعدل '+ch+' سطر من '+before);
+  }catch(e){ toast('فشل: '+e.message); }
+  labSqlLoadRows(); labChecks(); render();
+}
+function labQDeleteDups(){
+  if(!LAB.sqlDb) return;
+  try{
+    const cols=LAB.sqlCols.map(c=>'"'+c.name+'"').join(',');
+    const before=LAB.sqlDb.exec('SELECT COUNT(*) FROM "'+LAB.sqlTable+'"')[0].values[0][0];
+    const nm=LAB.sqlCols.find(c=>/name/i.test(c.name));
+    if(!nm){ toast('مفيش عمود اسم في الجدول ده'); return; }
+    const backup=LAB.sqlDb.exec('SELECT rowid,'+cols+' FROM "'+LAB.sqlTable+'"');
+    LAB.sqlDb.run('DELETE FROM "'+LAB.sqlTable+'" WHERE rowid NOT IN (SELECT MIN(rowid) FROM "'+LAB.sqlTable+'" GROUP BY "'+nm.name+'")');
+    const after=LAB.sqlDb.exec('SELECT COUNT(*) FROM "'+LAB.sqlTable+'"')[0].values[0][0];
+    const removed=before-after;
+    if(removed<=0){ toast('مفيش تكرارات'); labChecks(); render(); return; }
+    labPushOp('حذف '+removed+' قناة مكررة (نفس الاسم) من "'+LAB.sqlTable+'"', {kind:'sqlrestore', rows:backup[0]?backup[0].values:[], table:LAB.sqlTable});
+    const v=LAB.sqlDb.exec('PRAGMA integrity_check')[0].values[0][0];
+    if(v!=='ok') labAddErr('err','فحص السلامة فشل بعد حذف المكرر',null);
+    toast('اتحذف '+removed+' مكرر');
+  }catch(e){ toast('فشل: '+e.message); }
+  labSqlLoadRows(); labChecks(); render();
+}
+function labQDeleteFilter(col, txt){
+  if(!LAB.sqlDb||!txt) return;
+  openModal('حذف قنوات','<p>هيتم حذف كل قناة الـ "'+esc(col)+'" فيها "'+esc(txt)+'" من جدول "'+esc(LAB.sqlTable)+'". متأكد؟</p>','نعم، احذف',()=>{
+    try{
+      const backup=LAB.sqlDb.exec('SELECT rowid,* FROM "'+LAB.sqlTable+'"');
+      LAB.sqlDb.run('DELETE FROM "'+LAB.sqlTable+'" WHERE "'+col+'" LIKE ?',['%'+txt+'%']);
+      const ch=LAB.sqlDb.exec('SELECT changes()')[0].values[0][0];
+      labPushOp('حذف '+ch+' سطر من "'+LAB.sqlTable+'" حيث "'+col+'" فيه "'+txt+'"', {kind:'sqlrestore', rows:backup[0]?backup[0].values:[], table:LAB.sqlTable, cols:backup[0]?backup[0].columns:null});
+      toast('اتحذف '+ch+' سطر');
+    }catch(e){ toast('فشل: '+e.message); }
+    labSqlLoadRows(); labChecks(); render();
+  });
+}
+/* ---------- ID changer helpers ---------- */
+function labIdSyncOpts(){
+  const o=$('#labIdOff'); if(o){ const v=parseInt(o.value,16); if(!isNaN(v)&&v>=0) LABID.off=v; }
+  const l=$('#labIdLen'); if(l) LABID.len=+l.value;
+  labIdRenderPreview();
+}
+function labIdRenderPreview(){
+  const el=$('#labIdPreview'); if(!el) return;
+  const mine=labIdRead(LAB.buf,LABID.off,LABID.len);
+  const donor=LABID.donor?labIdRead(LABID.donor,LABID.off,LABID.len):null;
+  el.innerHTML='<div class="kv"><span>ID ملفي الحالي</span><b dir="ltr">'+labIdHex(mine)+'</b></div>'
+    +(LABID.donor?'<div class="kv"><span>ID الملف المانح ('+esc(LABID.donorName)+')</span><b dir="ltr">'+labIdHex(donor)+'</b></div>':'<div class="labnote">اختار الملف المانح عشان تشوف المعاينة.</div>');
+  const b=$('#labIdApply'); if(b) b.disabled=!(LABID.donor&&donor&&mine);
+}
+/* ---------- serial loader (experimental, Web Serial) ---------- */
+const SER={port:null, reader:null, reading:false, log:[], rx:0, rxBuf:[]};
+function serLog(msg, cls){
+  SER.log.push({t:new Date().toLocaleTimeString('ar-EG'), msg, cls:cls||''});
+  if(SER.log.length>400) SER.log.shift();
+  const el=$('#serLog');
+  if(el){ el.innerHTML=SER.log.map(l=>'<div class="'+l.cls+'">['+l.t+'] '+esc(l.msg)+'</div>').join(''); el.scrollTop=el.scrollHeight; }
+}
+async function serConnect(){
+  if(!('serial' in navigator)){ toast('المتصفح ده مش بيدعم Web Serial — جرّب Chrome/Edge على الكمبيوتر'); return; }
+  try{
+    SER.port=await navigator.serial.requestPort();
+    const baud=+($('#serBaud')?$('#serBaud').value:115200);
+    await SER.port.open({baudRate:baud});
+    serLog('اتفتح المنفذ على '+baud+' baud','opok');
+    render();
+    serReadLoop();
+  }catch(e){ serLog('فشل الاتصال: '+e.message,'operr'); }
+}
+async function serReadLoop(){
+  SER.reading=true; SER.rx=0; SER.rxBuf=[];
+  while(SER.port&&SER.port.readable&&SER.reading){
+    SER.reader=SER.port.readable.getReader();
+    try{
+      while(true){
+        const {value,done}=await SER.reader.read();
+        if(done) break;
+        if(value){ SER.rx+=value.length; SER.rxBuf.push(value); const st=$('#serStatus'); if(st) st.textContent='استقبال: '+SER.rx.toLocaleString('en-US')+' بايت'; }
+      }
+    }catch(e){ serLog('خطأ قراءة: '+e.message,'operr'); }
+    finally{ SER.reader.releaseLock(); }
+  }
+}
+async function serDisconnect(){
+  SER.reading=false;
+  if(SER.reader){ try{ await SER.reader.cancel(); }catch(e){} }
+  if(SER.port){ try{ await SER.port.close(); }catch(e){} }
+  SER.port=null; serLog('اتقفل المنفذ','opwarn'); render();
+}
+async function serSendHex(hexStr){
+  if(!SER.port){ toast('اتصل بالمنفذ الأول'); return; }
+  const clean=hexStr.replace(/[^0-9a-fA-F]/g,'');
+  if(!clean.length||clean.length%2){ toast('اكتب بايتات hex صحيحة'); return; }
+  const bytes=new Uint8Array(clean.length/2);
+  for(let i=0;i<clean.length;i+=2) bytes[i/2]=parseInt(clean.substr(i,2),16);
+  try{
+    const w=SER.port.writable.getWriter();
+    await w.write(bytes); w.releaseLock();
+    serLog('أرسلنا '+bytes.length+' بايت: '+clean.toUpperCase().match(/.{1,2}/g).join(' '),'opok');
+  }catch(e){ serLog('فشل الإرسال: '+e.message,'operr'); }
+}
+function serCollected(){
+  let n=0; for(const c of SER.rxBuf) n+=c.length;
+  const out=new Uint8Array(n); let p=0;
+  for(const c of SER.rxBuf){ out.set(c,p); p+=c.length; }
+  return out;
+}
+async function serSaveDump(){
+  const data=serCollected();
+  if(!data.length){ toast('مفيش بيانات مستقبلة'); return; }
+  const hash=await crypto.subtle.digest('SHA-256',data);
+  const hex=Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  downloadBlob(new Blob([data]),'serial-dump-'+data.length+'.bin');
+  serLog('اتحفظ dump بحجم '+data.length+' بايت — SHA-256: '+hex,'opok');
+}
+/* ---------- images -> m2v converter (ffmpeg.wasm, lazy CDN load) ---------- */
+const M2V={imgs:[], ff:null, busy:false, previewTimer:null, previewIdx:0};
+function m2vLog(msg, cls){
+  const el=$('#m2vLog');
+  if(el){ el.innerHTML+='<div class="'+(cls||'')+'">'+esc(msg)+'</div>'; el.scrollTop=el.scrollHeight; }
+}
+async function m2vLoadFF(){
+  if(M2V.ff) return M2V.ff;
+  if(!window.FFmpeg){
+    m2vLog('بنحمّل محرك التحويل (ffmpeg.wasm ~25MB أول مرة بس)...');
+    await new Promise((res,rej)=>{
+      const sc=document.createElement('script');
+      sc.src='https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js';
+      sc.onload=res; sc.onerror=()=>rej(new Error('فشل تحميل ffmpeg — محتاج نت'));
+      document.head.appendChild(sc);
+    });
+  }
+  const ff=FFmpeg.createFFmpeg({ log:false, corePath:'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js' });
+  await ff.load();
+  M2V.ff=ff;
+  return ff;
+}
+function m2vPreview(){
+  const img=$('#m2vPrevImg');
+  if(!img||!M2V.imgs.length) return;
+  if(M2V.previewTimer){ clearInterval(M2V.previewTimer); M2V.previewTimer=null; img.style.display='none'; return; }
+  const secs=+($('#m2vSecs')?$('#m2vSecs').value:3)||3;
+  img.style.display='block'; M2V.previewIdx=0;
+  const show=()=>{ img.src=URL.createObjectURL(M2V.imgs[M2V.previewIdx % M2V.imgs.length]); M2V.previewIdx++; };
+  show(); M2V.previewTimer=setInterval(show, Math.min(secs,5)*1000);
+}
+async function m2vConvert(){
+  if(M2V.busy) return;
+  if(!M2V.imgs.length){ toast('اختار صور الأول'); return; }
+  M2V.busy=true;
+  try{
+    const res=$('#m2vRes').value.split('x'), W=+res[0], H=+res[1];
+    const fps=+$('#m2vFps').value||25;
+    const secs=+$('#m2vSecs').value||3;
+    m2vLog('بنجهز '+M2V.imgs.length+' صورة...');
+    const ff=await m2vLoadFF();
+    for(let i=0;i<M2V.imgs.length;i++){
+      const data=new Uint8Array(await M2V.imgs[i].arrayBuffer());
+      ff.FS('writeFile','img'+String(i).padStart(3,'0')+'.jpg', data);
+    }
+    m2vLog('بيتحول... (W×H='+W+'×'+H+', '+fps+'fps, '+secs+' ثانية لكل صورة)');
+    await ff.run('-framerate','1/'+secs,'-i','img%03d.jpg','-vf','scale='+W+':'+H+':force_original_aspect_ratio=decrease,pad='+W+':'+H+':(ow-iw)/2:(oh-ih)/2','-r',String(fps),'-c:v','mpeg2video','-q:v','4','out.m2v');
+    const out=ff.FS('readFile','out.m2v');
+    downloadBlob(new Blob([out.buffer],{type:'video/MP2V'}),'images-'+M2V.imgs.length+'pic.m2v');
+    m2vLog('تم! الحجم '+out.length.toLocaleString('en-US')+' بايت — نزل الملف','opok');
+    for(let i=0;i<M2V.imgs.length;i++){ try{ff.FS('unlink','img'+String(i).padStart(3,'0')+'.jpg');}catch(e){} }
+    try{ff.FS('unlink','out.m2v');}catch(e){}
+  }catch(e){
+    m2vLog('فشل التحويل: '+e.message,'operr');
+  }
+  M2V.busy=false;
+}
