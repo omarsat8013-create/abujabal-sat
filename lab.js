@@ -4,7 +4,7 @@ const LAB = {
   buf:null, orig:null, name:'', type:'', typeLabel:'',
   ops:[], errors:[], media:[], headerLock:64, unlocked:false,
   page:0, pageSize:256,
-  sql:null, sqlDb:null, sqlTables:[], sqlTable:'', sqlCols:[], sqlRows:[], sqlOffset:0, sqlLimit:200, sqlSearch:''
+  sql:null, sqlDb:null, sqlTables:[], sqlTable:'', sqlCols:[], sqlRows:[], sqlOffset:0, sqlLimit:200, sqlSearch:'', favOnly:false
 };
 const LAB_TYPES = {
   sqlite:  'قاعدة بيانات SQLite (ملف قنوات/سوفت .db)',
@@ -66,7 +66,7 @@ function labReset(){
   LAB.buf=null; LAB.orig=null; LAB.name=''; LAB.type=''; LAB.ops=[]; LAB.errors=[]; LAB.media=[];
   LAB.page=0; LAB.unlocked=false;
   if(LAB.sqlDb){ try{LAB.sqlDb.close();}catch(e){} }
-  LAB.sqlDb=null; LAB.sqlTables=[]; LAB.sqlTable=''; LAB.sqlRows=[]; LAB.sqlOffset=0; LAB.sqlSearch='';
+  LAB.sqlDb=null; LAB.sqlTables=[]; LAB.sqlTable=''; LAB.sqlRows=[]; LAB.sqlOffset=0; LAB.sqlSearch=''; LAB.favOnly=false;
 }
 async function labLoadFile(file){
   labReset();
@@ -243,10 +243,13 @@ function labSqlLoadRows(){
     LAB.sqlCols=info[0].values.map(v=>({name:v[1], type:String(v[2]||'').toUpperCase()}));
     const tcols=LAB.sqlCols.filter(c=>c.type.indexOf('CHAR')>=0||c.type.indexOf('TEXT')>=0);
     let where='';
+    const conds=[];
     if(LAB.sqlSearch&&tcols.length){
       const q=LAB.sqlSearch.replace(/'/g,"''");
-      where=' WHERE '+tcols.map(c=>'"'+c.name+'" LIKE \'%'+q+'%\'').join(' OR ');
+      conds.push('('+tcols.map(c=>'"'+c.name+'" LIKE \'%'+q+'%\'').join(' OR ')+')');
     }
+    if(LAB.favOnly&&labHasFavCol()) conds.push('favor=1');
+    if(conds.length) where=' WHERE '+conds.join(' AND ');
     const r=LAB.sqlDb.exec('SELECT rowid,* FROM "'+LAB.sqlTable+'"'+where+' LIMIT '+LAB.sqlLimit+' OFFSET '+LAB.sqlOffset);
     if(r[0]){
       const colnames=r[0].columns;
@@ -341,6 +344,7 @@ function viewLab(){
       +'<button type="button" class="btn sm btn-primary" id="labSearchGo">بحث</button>'
       +'<button type="button" class="btn sm btn-sec" id="labPrevPage"'+(LAB.sqlOffset>0?'':' disabled')+'>السابق</button>'
       +'<button type="button" class="btn sm btn-sec" id="labNextPage"'+(LAB.sqlRows.length>=LAB.sqlLimit?'':' disabled')+'>التالي</button>'
+      +(labHasFavCol()?'<button type="button" class="btn sm '+(LAB.favOnly?'btn-gold':'btn-ghost')+'" id="labFavOnly">★ المفضلة بس</button>':'')
       +'<span style="align-self:center;font-size:12px;color:var(--mut)">سطور '+(LAB.sqlOffset+1)+' - '+(LAB.sqlOffset+LAB.sqlRows.length)+'</span></div>'
       +'<div class="labops" style="max-height:340px">'+labSqlRowsHtml()+'</div>'
       +'</div></div>'
@@ -355,6 +359,7 @@ function viewLab(){
       +'<button type="button" class="btn btn-danger" id="labQDoFilter">حذف بالفلتر</button>'
       +'<button type="button" class="btn btn-sec" id="labQDoDups">حذف المكرر (نفس الاسم)</button>'
       +'<button type="button" class="btn btn-sec" id="labQCleanTat">تنظيف التطويل (ـ)</button>'
+      +(labHasFavCol()?'<button type="button" class="btn btn-sec" id="labFavAll">★ تفضيل الكل</button><button type="button" class="btn btn-ghost" id="labFavClear">تفريغ المفضلة</button>':'')
       +'<button type="button" class="btn btn-primary" id="labArzScan">🌐 تعريب الأسماء الإنجليزية</button>'
       +'</div>'
       +(LAB.arabize?arzPreviewHtml():'')
@@ -476,7 +481,8 @@ function labSqlRowsHtml(){
     for(const c of tcols.slice(0,2)){
       cells+='<input type="text" value="'+esc(String(r[c]??''))+'" data-rowid="'+r.rowid+'" data-col="'+esc(c)+'" data-old="'+esc(String(r[c]??''))+'">';
     }
-    return '<div class="chrow"><span style="color:var(--mut);font-size:12px">'+label+'</span>'+cells+'</div>';
+    const favBtn=labHasFavCol()?'<button type="button" class="btn sm '+(r.favor?'btn-gold':'btn-ghost')+'" data-fav="'+r.rowid+'" data-favcur="'+(r.favor?1:0)+'">'+(r.favor?'★':'☆')+'</button>':'';
+    return '<div class="chrow" style="grid-template-columns:52px 1fr auto auto"><span style="color:var(--mut);font-size:12px">'+label+'</span>'+cells+favBtn+'</div>';
   }).join('');
 }
 /* ---------- bindings ---------- */
@@ -504,6 +510,10 @@ function bindLab(){
     if(nm) labQReplace(nm.name, $('#labQOld').value, $('#labQNew').value);
   });
   on('#labQDoDups',labQDeleteDups);
+  on('#labFavOnly',()=>{ LAB.favOnly=!LAB.favOnly; LAB.sqlOffset=0; labSqlLoadRows(); render(); });
+  on('#labFavAll',()=>labFavBulk(1));
+  on('#labFavClear',()=>labFavBulk(0));
+  document.querySelectorAll('[data-fav]').forEach(b=>b.addEventListener('click',()=>labFavToggle(+b.dataset.fav, +b.dataset.favcur)));
   on('#labArzScan',arzScan);
   on('#arzAll',()=>arzSetAll(true));
   on('#arzNone',()=>arzSetAll(false));
@@ -1006,4 +1016,29 @@ function labTsOptions(){
     if(!r[0]) return '';
     return r[0].values.map(v=>'<option value="'+v[0]+'">'+(v[1]/1000)+' '+(v[2]?'V':'H')+' '+(v[3]/1000)+' — '+esc(String(v[4]||''))+'</option>').join('');
   }catch(e){ return ''; }
+}
+/* ---------- favorites ---------- */
+function labHasFavCol(){ return LAB.sqlCols.some(c=>/^favor$/i.test(c.name)); }
+function labFavToggle(rowid, cur){
+  if(!LAB.sqlDb) return;
+  const nv=cur?0:1;
+  try{
+    LAB.sqlDb.run('UPDATE "'+LAB.sqlTable+'" SET favor=? WHERE rowid=?',[nv,rowid]);
+    labPushOp((nv?'إضافة لـ':'إزالة من')+' المفضلة (سطر '+rowid+')',
+      {kind:'sql', sql:'UPDATE "'+LAB.sqlTable+'" SET favor=? WHERE rowid=?', params:[cur,rowid]});
+  }catch(e){ toast('فشل: '+e.message); }
+  labSqlLoadRows(); labChecks(); render();
+}
+function labFavBulk(setVal){
+  if(!LAB.sqlDb) return;
+  try{
+    const before=LAB.sqlDb.exec('SELECT rowid, favor FROM "'+LAB.sqlTable+'" WHERE favor='+(setVal?0:1));
+    const rows=before[0]?before[0].values:[];
+    if(!rows.length){ toast(setVal?'مفيش قناة بره المفضلة':'المفضلة فاضية أصلاً'); return; }
+    LAB.sqlDb.run('UPDATE "'+LAB.sqlTable+'" SET favor=?',[setVal]);
+    labPushOp((setVal?'إضافة كل القنوات للمفضلة':'تفريغ المفضلة')+' ('+rows.length+' سطر)',
+      {kind:'sqlarabize', col:'favor', changes:rows.map(r=>({rowid:r[0], old:r[1]}))});
+    toast('تم');
+  }catch(e){ toast('فشل: '+e.message); }
+  labSqlLoadRows(); labChecks(); render();
 }
