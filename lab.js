@@ -57,6 +57,7 @@ function labScanMedia(u8){
   }
   return out;
 }
+function labCur(){ if(LAB.sqlDb){ try{ return LAB.sqlDb.export(); }catch(e){} } return LAB.buf; }
 function labFmt(n){ return n.toLocaleString('en-US')+' بايت'; }
 function labHex(n){ return '0x'+n.toString(16).toUpperCase().padStart(8,'0'); }
 function labPushOp(desc, inverse){ LAB.ops.push({desc, inverse, at:new Date().toLocaleTimeString('ar-EG')}); }
@@ -101,7 +102,7 @@ function labChecks(){
       if(v!=='ok') errs.push({level:'err',msg:'فحص سلامة قاعدة البيانات فشل: '+v,fix:'undo'});
     }catch(e){ errs.push({level:'err',msg:'قاعدة البيانات لم تعد تقرأ: '+e.message,fix:'undo'}); }
   }
-  errs.push({level:'ok',msg:'CRC32 الحالي: '+labCRC32(LAB.buf)+' (الأصل: '+labCRC32(LAB.orig)+')',fix:'static'});
+  errs.push({level:'ok',msg:'CRC32 الحالي: '+labCRC32(labCur())+' (الأصل: '+labCRC32(LAB.orig)+')',fix:'static'});
   LAB.errors=errs;
 }
 /* ---------- editing operations ---------- */
@@ -182,8 +183,7 @@ function labRestore(){
 }
 function labDownloadModified(){
   if(!LAB.buf) return;
-  let u8=LAB.buf;
-  if(LAB.sqlDb){ try{ u8=LAB.sqlDb.export(); }catch(e){ toast('فشل تصدير قاعدة البيانات'); return; } }
+  const u8=labCur();
   const dot=LAB.name.lastIndexOf('.');
   const base=dot>0?LAB.name.slice(0,dot):LAB.name, ext=dot>0?LAB.name.slice(dot):'';
   downloadBlob(new Blob([u8]), base+'_modified'+ext);
@@ -202,7 +202,7 @@ function labDownloadReport(){
   lines.push('النوع: '+LAB.typeLabel);
   lines.push('الحجم: '+labFmt(LAB.orig.length)+' (لم يتغير: '+(LAB.buf.length===LAB.orig.length?'نعم':'لا')+')');
   lines.push('CRC32 الأصل: '+labCRC32(LAB.orig));
-  lines.push('CRC32 المعدّل: '+labCRC32(LAB.buf));
+  lines.push('CRC32 المعدّل: '+labCRC32(labCur()));
   lines.push('');
   lines.push('العمليات ('+LAB.ops.length+'):');
   LAB.ops.forEach((o,i)=>lines.push((i+1)+'. ['+o.at+'] '+o.desc));
@@ -314,7 +314,7 @@ function viewLab(){
   h+='<div class="card"><h2>'+esc(LAB.name)+' <span class="sub">'+esc(LAB.typeLabel)+'</span></h2>'
     +'<div class="kv"><span>الحجم</span><b>'+labFmt(LAB.buf.length)+'</b></div>'
     +'<div class="kv"><span>CRC32 الأصل</span><b dir="ltr">'+labCRC32(LAB.orig)+'</b></div>'
-    +'<div class="kv"><span>CRC32 الحالي</span><b dir="ltr">'+labCRC32(LAB.sqlDb?LAB.buf:LAB.buf)+'</b></div>'
+    +'<div class="kv"><span>CRC32 الحالي</span><b dir="ltr">'+labCRC32(labCur())+'</b></div>'
     +'<div class="kv"><span>عدد التعديلات</span><b>'+LAB.ops.length+'</b></div>'
     +'<div class="kv"><span>صور مدمجة مكتشفة</span><b>'+LAB.media.length+'</b></div>'
     +'<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">'
