@@ -712,7 +712,7 @@ async function m2vLoadFF(){
       document.head.appendChild(sc);
     });
   }
-  const ff=FFmpeg.createFFmpeg({ log:false, corePath:'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js' });
+  const ff=FFmpeg.createFFmpeg({ log:false, corePath:'https://cdn.jsdelivr.net/npm/@ffmpeg/core-st@0.11.1/dist/ffmpeg-core.js' });
   await ff.load();
   M2V.ff=ff;
   return ff;
