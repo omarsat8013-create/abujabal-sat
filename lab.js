@@ -66,7 +66,7 @@ function labReset(){
   LAB.buf=null; LAB.orig=null; LAB.name=''; LAB.type=''; LAB.ops=[]; LAB.errors=[]; LAB.media=[];
   LAB.page=0; LAB.unlocked=false;
   if(LAB.sqlDb){ try{LAB.sqlDb.close();}catch(e){} }
-  LAB.sqlDb=null; LAB.sqlTables=[]; LAB.sqlTable=''; LAB.sqlRows=[]; LAB.sqlOffset=0; LAB.sqlSearch=''; LAB.favOnly=false; LAB.grpView=null; LAB.arabize=null;
+  LAB.sqlDb=null; LAB.sqlTables=[]; LAB.sqlTable=''; LAB.sqlRows=[]; LAB.sqlOffset=0; LAB.sqlSearch=''; LAB.favOnly=false; LAB.grpView=null; LAB.arabize=null; LAB.selection=new Set(); LAB.selAnchor=null;
 }
 async function labLoadFile(file){
   labReset();
@@ -348,6 +348,14 @@ function viewLab(){
       +(labHasFavCol()?'<button type="button" class="btn sm '+(LAB.favOnly?'btn-gold':'btn-ghost')+'" id="labFavOnly">★ المفضلة بس</button>':'')
       +(labHasChanNum()?'<button type="button" class="btn sm btn-ghost" id="labRenumber" title="إعادة ترقيم الكل من ١ للنهاية">🔢 إعادة ترقيم</button>':'')
       +'<span style="align-self:center;font-size:12px;color:var(--mut)">سطور '+(LAB.sqlOffset+1)+' - '+(LAB.sqlOffset+LAB.sqlRows.length)+'</span></div>'
+      +(labHasChanNum()?'<div class="btnrow" style="margin-bottom:8px;background:#0b1425;border:1px solid var(--line2);border-radius:10px;padding:8px">'
+      +'<span style="align-self:center;font-size:12px;color:var(--gold)">محدد: '+(LAB.selection?LAB.selection.size:0)+'</span>'
+      +'<button type="button" class="btn sm btn-ghost" id="selVisible">تحديد الظاهر</button>'
+      +'<button type="button" class="btn sm btn-ghost" id="selClear">إلغاء التحديد</button>'
+      +'<input type="text" id="selMoveTo" dir="ltr" placeholder="رقم الموضع" style="width:90px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:6px 8px">'
+      +'<button type="button" class="btn sm btn-primary" id="selMove">نقل المحدد</button>'
+      +(LAB.sqlTables.indexOf('grp_table')>=0?'<button type="button" class="btn sm btn-gold" id="selToGrp">إضافة المحدد لجروب</button>':'')
+      +'<span style="align-self:center;font-size:11px;color:var(--mut)">Shift+ضغطة على مربع التحديد = تحديد نطاق</span></div>':'')
       +'<div class="labops" style="max-height:340px">'+labSqlRowsHtml()+'</div>'
       +'</div></div>'
       +'<div class="toolcard t-gold">'+labToolHead('t-gold','⚡','عمليات سريعة على القنوات','تنظيف الأسماء، استبدال جماعي، حذف مكرر — كلها بتتسجل وليها تراجع')
@@ -416,6 +424,8 @@ function viewLab(){
       +'<div id="cmpOut" style="margin-top:10px"></div>'
       +'</div></div>';
   }
+  main+='<div class="toolcard t-teal">'+labToolHead('t-teal','🔄','تحويل واستيراد صيغ القنوات','تحويل موثّق بس — اللي نقدر نقراه ونتحقق منه كامل. الصيغ المغلقة بنرفضها بدل التخمين، حفاظًا على الأجهزة')
+    +'<div class="toolbody">'+labConvBody()+'</div></div>';
   main+='<div class="toolcard t-blue">'+labToolHead('t-blue','🆔','مغيّر ID السوفت (من ملف لملف)','بيكتب ID الملف المانح في ملفك — زي ما بيتعمل عشان جهاز يقبل سوفت محوّل')
     +'<div class="toolbody">'
     +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">'
@@ -516,7 +526,8 @@ function labSqlRowsHtml(){
     const favBtn=labHasFavCol()?'<button type="button" class="btn sm '+(r.favor?'btn-gold':'btn-ghost')+'" data-fav="'+r.rowid+'" data-favcur="'+(r.favor?1:0)+'">'+(r.favor?'★':'☆')+'</button>':'';
     const dragBtn=(labHasChanNum()&&!LAB.grpView)?'<span class="btn sm btn-ghost" draggable="true" data-dragrow="'+r.rowid+'" style="cursor:grab;user-select:none">⋮⋮</span>':'';
     const grpBtn=LAB.grpView?'<button type="button" class="btn sm btn-danger" data-grprm="'+(r.db_id??r.rowid)+'">✕</button>':'';
-    return '<div class="chrow" data-row="'+r.rowid+'" style="grid-template-columns:auto 52px 1fr auto auto auto">'+dragBtn+'<span style="color:var(--mut);font-size:12px">'+label+'</span>'+cells+favBtn+grpBtn+'</div>';
+    const selBox='<input type="checkbox" data-sel="'+r.rowid+'"'+(LAB.selection&&LAB.selection.has(r.rowid)?' checked':'')+' style="width:16px;height:16px;accent-color:var(--teal);cursor:pointer">';
+    return '<div class="chrow" data-row="'+r.rowid+'" style="grid-template-columns:auto auto 52px 1fr auto auto auto">'+selBox+dragBtn+'<span style="color:var(--mut);font-size:12px">'+label+'</span>'+cells+favBtn+grpBtn+'</div>';
   }).join('');
 }
 /* ---------- bindings ---------- */
@@ -556,6 +567,35 @@ function bindLab(){
   on('#grpExit',()=>{ LAB.grpView=null; LAB.sqlOffset=0; labSqlLoadRows(); render(); });
   on('#grpAddVisible',()=>labGrpAddVisible(+$('#grpSel').value));
   document.querySelectorAll('[data-grprm]').forEach(b=>b.addEventListener('click',()=>labGrpRemoveMember(LAB.grpView, +b.dataset.grprm)));
+  document.querySelectorAll('[data-sel]').forEach(cb=>{
+    cb.addEventListener('click',e=>{
+      e.stopPropagation();
+      const rid=+cb.dataset.sel;
+      if(e.shiftKey&&LAB.selAnchor!=null&&LAB.selAnchor!==rid){
+        const order=LAB.sqlRows.map(r=>r.rowid);
+        const a=order.indexOf(LAB.selAnchor), b=order.indexOf(rid);
+        if(a>=0&&b>=0){
+          const lo=Math.min(a,b), hi=Math.max(a,b);
+          for(let i=lo;i<=hi;i++) LAB.selection.add(order[i]);
+          render(); return;
+        }
+      }
+      if(cb.checked) LAB.selection.add(rid); else LAB.selection.delete(rid);
+      LAB.selAnchor=rid;
+      render();
+    });
+  });
+  on('#selVisible',()=>{ LAB.sqlRows.forEach(r=>LAB.selection.add(r.rowid)); render(); });
+  on('#selClear',()=>{ LAB.selection=new Set(); LAB.selAnchor=null; render(); });
+  on('#selMove',()=>labMoveSelected($('#selMoveTo').value));
+  on('#selToGrp',()=>{
+    const grps=labGrpList();
+    if(!grps.length){ toast('مفيش جروبات — اعمل جروب الأول من كرت الباقات'); return; }
+    const names=grps.map((g,i)=>(i+1)+') '+g.name+' ('+g.count+')').join('\n');
+    const pick=prompt('اختار رقم الجروب:\n'+names);
+    const gi=parseInt(pick,10);
+    if(gi>=1&&gi<=grps.length) labGrpAddRows(grps[gi-1].id, Array.from(LAB.selection||[]));
+  });
   let dragId=null;
   document.querySelectorAll('[data-dragrow]').forEach(h=>{
     h.addEventListener('dragstart',e=>{ dragId=+h.dataset.dragrow; e.dataTransfer.effectAllowed='move'; });
@@ -581,6 +621,9 @@ function bindLab(){
   }); })();
   (async()=>{ const dbSat=$('#dbSat'); if(!dbSat) return; try{ if(!LAB.satdb) LAB.satdb=await (await fetch('satdb.json')).json(); dbSat.innerHTML='<option value="">📚 قاعدة الترددات المدمجة: اختر قمر…</option>'+LAB.satdb.sats.map((st,i)=>'<option value="'+i+'">'+esc(st.name)+' ('+st.tps.length+')</option>').join(''); }catch(e){} })();
   on('#cmpRun',labCompareFiles);
+  on('#expJson',labExpJson);
+  on('#expCsv',labExpCsv);
+  on('#impRun',labImportRun);
   on('#labArzScan',arzScan);
   on('#arzAll',()=>arzSetAll(true));
   on('#arzNone',()=>arzSetAll(false));
@@ -1142,6 +1185,61 @@ function labMoveRow(dragRowid, targetRowid){
   }catch(e){ toast('فشل: '+e.message); }
   labSqlLoadRows(); labChecks(); render();
 }
+function labMoveSelected(targetPos){
+  if(!LAB.sqlDb||!labHasChanNum()) return;
+  const sel=LAB.selection;
+  if(!sel||!sel.size){ toast('حدد قنوات الأول بمربعات التحديد'); return; }
+  targetPos=parseInt(targetPos,10);
+  if(!targetPos||targetPos<1){ toast('اكتب رقم الموضع المطلوب'); return; }
+  if(LAB.sqlSearch||LAB.favOnly||LAB.grpView){ toast('النقل بالمجموعة شغال في العرض الكامل بس — امسح البحث والفلاتر الأول'); return; }
+  try{
+    const r=LAB.sqlDb.exec('SELECT rowid FROM "'+LAB.sqlTable+'" ORDER BY chan_num, rowid');
+    const ids=r[0].values.map(v=>v[0]);
+    const total=ids.length;
+    if(targetPos>total) targetPos=total;
+    const moving=ids.filter(id=>sel.has(id));
+    if(!moving.length){ toast('التحديد مش في الجدول ده'); return; }
+    const rest=ids.filter(id=>!sel.has(id));
+    // position after removal = target-1 adjusted by how many moved were before it
+    const movedBefore=moving.filter(id=>ids.indexOf(id)<targetPos-1).length;
+    const at=Math.max(0,Math.min(rest.length,(targetPos-1)-movedBefore));
+    const merged=rest.slice(0,at).concat(moving, rest.slice(at));
+    const changes=[];
+    merged.forEach((id,i)=>{
+      const old=LAB.sqlDb.exec('SELECT chan_num FROM "'+LAB.sqlTable+'" WHERE rowid='+id)[0].values[0][0];
+      const nw=i+1;
+      if(old!==nw){ LAB.sqlDb.run('UPDATE "'+LAB.sqlTable+'" SET chan_num=? WHERE rowid=?',[nw,id]); changes.push({rowid:id, old}); }
+    });
+    if(changes.length) labPushOp('نقل '+moving.length+' قناة للموضع '+targetPos+' ('+changes.length+' إعادة ترقيم)',{kind:'sqlarabize', col:'chan_num', changes});
+    LAB.selection=new Set();
+    toast('اتنقل '+moving.length+' قناة');
+  }catch(e){ toast('فشل: '+e.message); }
+  labSqlLoadRows(); labChecks(); render();
+}
+function labGrpAddRows(grpId, rowids){
+  if(!LAB.sqlDb||!grpId||!rowids||!rowids.length){ toast('مفيش قنوات محددة'); return; }
+  try{
+    const exists=LAB.sqlDb.exec('SELECT COUNT(*) FROM grp_table WHERE db_id=?',[grpId])[0].values[0][0];
+    if(!exists){ toast('الجروب مش موجود'); return; }
+    const idsToDel=[];
+    let added=0, dup=0;
+    const maxId=LAB.sqlDb.exec('SELECT COALESCE(MAX(db_id),0) FROM grp_map_table')[0].values[0][0];
+    let nid=maxId;
+    rowids.forEach(rid=>{
+      const srv=LAB.sqlDb.exec('SELECT db_id FROM srv_table WHERE rowid='+rid);
+      if(!srv.length||!srv[0].values.length) return;
+      const srvId=srv[0].values[0][0];
+      const isDup=LAB.sqlDb.exec('SELECT COUNT(*) FROM grp_map_table WHERE db_grp_id=? AND db_srv_id=?',[grpId,srvId])[0].values[0][0];
+      if(isDup){ dup++; return; }
+      nid++;
+      LAB.sqlDb.run('INSERT INTO grp_map_table (db_id, db_srv_id, db_grp_id, service_type) VALUES (?,?,?,1)',[nid,srvId,grpId]);
+      idsToDel.push(nid); added++;
+    });
+    if(added) labPushOp('إضافة '+added+' قناة للجروب'+(dup?' ('+dup+' موجودين أصلاً)':''),{kind:'sqldelrows', table:'grp_map_table', ids:idsToDel});
+    toast('اتضاف '+added+(dup?'، '+dup+' كانوا موجودين':''));
+  }catch(e){ toast('فشل: '+e.message); }
+  labChecks(); render();
+}
 function labRenumberAll(){
   if(!LAB.sqlDb||!labHasChanNum()) return;
   openModal('إعادة ترقيم شاملة','<p>هيتم إعادة ترقيم كل القنوات من ١ للنهاية حسب الترتيب الحالي. الأرقام القديمة هتتغير كلها (مع تراجع متاح). متأكد؟</p>','نعم، رقّم',()=>{
@@ -1233,6 +1331,189 @@ function labGrpRemoveMember(grpId, srvDbId){
   labSqlLoadRows(); labChecks(); render();
 }
 
+// ===== Channel format conversion (validated only) =====
+function labConvBody(){
+  if(!LAB.type) return '<p style="color:var(--mut)">افتح ملف الأول.</p>';
+  const canSql=LAB.type==='sqlite'&&LAB.sqlDb&&LAB.sqlTables.indexOf('srv_table')>=0&&LAB.sqlTables.indexOf('ts_table')>=0;
+  if(canSql){
+    let h='<div style="font-size:12px;color:var(--mut);margin-bottom:10px">الملف المفتوح قاعدة قنوات SQLite مفهومة بالكامل — التحويلات المتاحة:</div>'
+      +'<div class="btnrow" style="margin-bottom:10px">'
+      +'<button type="button" class="btn btn-primary" id="expJson">تصدير JSON (صيغة ابوجبل سات)</button>'
+      +'<button type="button" class="btn btn-primary" id="expCsv">تصدير CSV</button></div>'
+      +'<h2 style="font-size:14px;margin:10px 0 6px">استيراد قنوات من JSON / CSV</h2>'
+      +'<div style="font-size:12px;color:var(--mut);margin-bottom:8px">كل صف بيتحقق قبل الإدخال: اسم غير فاضي، تردد 3000–15000 MHz، ترميز 1000–45000، استقطاب H أو V. الصف الناقص أو الغلط بيترفض وبيظهر سببه — مفيش تخمين ولا قيم افتراضية. الناتج متحقق منه هيكليًا (فحص سلامة القاعدة)، <b>ومش مُختبر على جهاز حقيقي</b>.</div>'
+      +'<div class="field"><label>القمر اللي تتسجل عليه القنوات</label><select id="impSat">'+labSatOptions()+'</select></div>'
+      +'<div class="field"><label>ملف الاستيراد (.json / .csv)</label><input type="file" id="impFile" accept=".json,.csv"></div>'
+      +'<button type="button" class="btn btn-gold" id="impRun">تحقق واستورد</button>'
+      +'<div id="impOut" style="margin-top:10px"></div>';
+    return h;
+  }
+  const names={trumandb:'صيغة DB(^o^) الثنائية (ترومان / مونتاج / أجهزة مشابهة)',gx6605:'صيغة GX6605 الثنائية',ali:'صيغة ALi الثنائية',bin:'صيغة ثنائية غير معروفة'};
+  return '<div style="border:1px solid var(--danger);border-radius:10px;padding:12px;font-size:13px">'
+    +'⛔ '+(names[LAB.type]||names.bin)+' — بنيتها الداخلية <b>غير موثقة بالكامل</b> عندنا. التحويل منها أو ليها غير متاح، لأن أي تخمين في ملف بيترفع على جهاز ممكن يعطّله. '
+    +'التحويل المتاح حاليًا: قواعد SQLite المفهومة (زي ملفات بي أوت كيو) ← JSON / CSV والعكس بالاستيراد مع تحقق كامل. '
+    +'لو عندك ملف من النوع ده وعايز دعمه: ابعتهولنا مع أي توثيق لموديله، وهنحلله الأول ونشوف هل نقدر نقراه كامل بثقة قبل ما ندعمه.</div>';
+}
+function labDl(filename, content, mime){
+  const blob=new Blob([content],{type:mime||'application/octet-stream'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click();
+}
+function labExpJson(){
+  if(!LAB.sqlDb) return;
+  try{
+    const sats=LAB.sqlDb.exec('SELECT db_id, sat_name FROM sat_para_table ORDER BY db_id')[0];
+    const tps=LAB.sqlDb.exec('SELECT db_id, db_sat_para_id, freq, symb, polar FROM ts_table ORDER BY db_id')[0];
+    const srvs=LAB.sqlDb.exec('SELECT db_id, name, service_id, service_type, chan_num, db_ts_id, db_sat_para_id FROM srv_table ORDER BY chan_num, db_id')[0];
+    const satList=(sats?sats.values:[]).map(v=>({id:'sat'+v[0], name:String(v[1]||''), pos:''}));
+    const tpList=(tps?tps.values:[]).map(v=>({id:'tp'+v[0], satId:'sat'+v[1], freq:String(Math.round(v[2]/1000)), sr:String(Math.round(v[3]/1000)), pol:(+v[4]===0?'H':'V'), prov:''}));
+    const chList=(srvs?srvs.values:[]).map((v,i)=>({id:'c'+v[0], satId:'sat'+v[6], tpId:'tp'+v[5], no:+v[4]||i+1, name:String(v[1]||''), type:(+v[3]===2?'Radio':'TV'), cat:'', sid:+v[2]||0, pid:0, pmt:0, wide:false, fav:false}));
+    const out={sats:satList, tps:tpList, chs:chList, fileName:'تصدير من '+(LAB.name||'ملف قنوات')+' — ابوجبل سات (متحقق هيكليًا، غير مُختبر على جهاز)', dirty:false};
+    labDl((LAB.name||'channels')+'.json', JSON.stringify(out,null,1), 'application/json');
+    toast('اتصدّر '+chList.length+' قناة');
+  }catch(e){ toast('فشل التصدير: '+e.message); }
+}
+function labExpCsv(){
+  if(!LAB.sqlDb) return;
+  try{
+    const rows=LAB.sqlDb.exec('SELECT s.name, s.service_type, t.freq, t.polar, t.symb, s.service_id, p.sat_name FROM srv_table s JOIN ts_table t ON t.db_id=s.db_ts_id JOIN sat_para_table p ON p.db_id=s.db_sat_para_id ORDER BY s.chan_num, s.db_id')[0];
+    let csv='\uFEFF"الرقم","الاسم","النوع","التردد","الاستقطاب","الترميز","SID","القمر"\n';
+    (rows?rows.values:[]).forEach((v,i)=>{
+      const q=x=>'"'+String(x??'').replace(/"/g,'""')+'"';
+      csv+=[i+1,q(v[0]),(+v[1]===2?'Radio':'TV'),Math.round(v[2]/1000),(+v[3]===0?'H':'V'),Math.round(v[4]/1000),v[5],q(v[6])].join(',')+'\n';
+    });
+    labDl((LAB.name||'channels')+'.csv', csv, 'text/csv;charset=utf-8');
+    toast('اتصدّر '+(rows?rows.values.length:0)+' قناة');
+  }catch(e){ toast('فشل التصدير: '+e.message); }
+}
+function labParseCsvText(text){
+  // CSV parser يدعم الاقتباس
+  const rows=[]; let cur=[''], inQ=false, field=0, cell='';
+  const push=()=>{ cur[field++]=cell; cell=''; };
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(inQ){
+      if(c==='"'){ if(text[i+1]==='"'){ cell+='"'; i++; } else inQ=false; }
+      else cell+=c;
+    }else{
+      if(c==='"') inQ=true;
+      else if(c===',') push();
+      else if(c==='\n'||c==='\r'){ if(c==='\r'&&text[i+1]==='\n') i++; push(); rows.push(cur); cur=['']; field=0; }
+      else cell+=c;
+    }
+  }
+  if(cell!==''||field>0){ push(); rows.push(cur); }
+  return rows.filter(r=>r.length>1||String(r[0]).trim()!=='');
+}
+async function labImportRun(){
+  const f=$('#impFile')&&$('#impFile').files[0];
+  const out=$('#impOut');
+  if(!f){ toast('اختر ملف الاستيراد الأول'); return; }
+  const satId=+$('#impSat').value;
+  out.innerHTML='<p style="color:var(--mut)">جاري التحقق…</p>';
+  let items=[]; // {name,type,sid,freq,pol,sr}
+  const skipped=[];
+  try{
+    const text=new TextDecoder('utf-8').decode(await f.arrayBuffer());
+    if(/\.json$/i.test(f.name)){
+      const d=JSON.parse(text);
+      if(!d||!Array.isArray(d.chs)||!Array.isArray(d.tps)){ out.innerHTML='<p style="color:var(--danger)">ملف JSON مش بصيغة ابوجبل سات المعروفة (محتاج chs و tps).</p>'; return; }
+      const tpMap={}; d.tps.forEach(t=>{ tpMap[t.id]=t; });
+      d.chs.forEach((c,idx)=>{
+        const tp=tpMap[c.tpId]||{};
+        items.push({row:idx+1, name:String(c.name||'').trim(), type:(String(c.type||'').toLowerCase().indexOf('rad')>=0?2:1), sid:+c.sid||0, freq:String(tp.freq||''), pol:String(tp.pol||''), sr:String(tp.sr||'')});
+      });
+    }else{
+      const rows=labParseCsvText(text);
+      if(!rows.length){ out.innerHTML='<p style="color:var(--danger)">الملف فاضي أو مش CSV مفهوم.</p>'; return; }
+      const head=rows[0].map(h=>String(h).replace(/[\uFEFF"\s]/g,''));
+      const col=(...ns)=>head.findIndex(h=>ns.some(n=>h.indexOf(n)>=0));
+      const cName=col('الاسم','name'), cFreq=col('التردد','freq'), cPol=col('الاستقطاب','pol'), cSr=col('الترميز','sr'), cType=col('النوع','type'), cSid=col('SID','sid');
+      if(cName<0||cFreq<0){ out.innerHTML='<p style="color:var(--danger)">أعمدة مطلوبة مش موجودة: الاسم والتردد. الأعمدة المقبولة: الاسم، التردد، الاستقطاب، الترميز، النوع، SID.</p>'; return; }
+      rows.slice(1).forEach((r,idx)=>{
+        const g=i=>i>=0?String(r[i]||'').replace(/"/g,'').trim():'';
+        items.push({row:idx+2, name:g(cName), type:(g(cType).toLowerCase().indexOf('rad')>=0?2:1), sid:parseInt(g(cSid),10)||0, freq:g(cFreq), pol:g(cPol), sr:g(cSr)});
+      });
+    }
+  }catch(e){ out.innerHTML='<p style="color:var(--danger)">فشل قراءة الملف: '+esc(e.message)+'</p>'; return; }
+  // تحقق صارم — مفيش قيم افتراضية
+  const valid=[];
+  items.forEach(it=>{
+    const errs=[];
+    if(!it.name) errs.push('اسم فاضي');
+    if(it.name.length>100) errs.push('اسم أطول من 100 حرف');
+    const fr=parseFloat(it.freq);
+    if(!(fr>=3000&&fr<=15000)) errs.push('تردد "'+it.freq+'" مش في النطاق 3000–15000 MHz');
+    const sr=parseInt(it.sr,10);
+    if(!(sr>=1000&&sr<=45000)) errs.push('ترميز "'+it.sr+'" مش في النطاق 1000–45000');
+    const pl=String(it.pol||'').trim().toUpperCase();
+    let pol=-1;
+    if(pl==='H'||pl==='0') pol=0; else if(pl==='V'||pl==='1') pol=1;
+    if(pol<0) errs.push('استقطاب "'+it.pol+'" مش مفهوم (لازم H أو V)');
+    if(it.sid&&!(it.sid>0&&it.sid<65536)) errs.push('SID "'+it.sid+'" خارج النطاق');
+    if(errs.length) skipped.push({row:it.row, name:it.name||'(بدون اسم)', why:errs.join('، ')});
+    else valid.push({name:it.name, type:it.type, sid:it.sid, freq:Math.round(fr*1000), pol, sr:sr*1000});
+  });
+  if(!valid.length){ out.innerHTML='<p style="color:var(--danger)">كل الصفوف اترفضت ('+skipped.length+'). أول سبب: '+esc(skipped[0]?skipped[0].why:'—')+'</p>'; return; }
+  // الإدخال
+  const addedSrv=[], addedTs=[], dups=[];
+  try{
+    let mxSrv=LAB.sqlDb.exec('SELECT COALESCE(MAX(db_id),0), COALESCE(MAX(chan_num),0), COALESCE(MAX(service_id),0) FROM srv_table')[0].values[0];
+    let nid=mxSrv[0], nch=mxSrv[1], autoSid=mxSrv[2];
+    let mxTs=LAB.sqlDb.exec('SELECT COALESCE(MAX(db_id),0), COALESCE(MAX(ts_id),0) FROM ts_table')[0].values[0];
+    let nTsId=mxTs[0], nTs=mxTs[1];
+    const tsCache={};
+    const findTs=freq=>{
+      if(tsCache[freq]!=null) return tsCache[freq];
+      const r=LAB.sqlDb.exec('SELECT db_id FROM ts_table WHERE freq=? AND db_sat_para_id=?',[freq,satId]);
+      if(r.length&&r[0].values.length){ tsCache[freq]=r[0].values[0][0]; return tsCache[freq]; }
+      return null;
+    };
+    for(const v of valid){
+      let tsId=findTs(v.freq);
+      if(tsId==null){
+        nTsId++; nTs++;
+        LAB.sqlDb.run('INSERT INTO ts_table (db_id, src, db_net_id, ts_id, freq, symb, db_sat_para_id, polar) VALUES (?,3,1,?,?,?,?,?)',[nTsId,nTs,v.freq,v.sr,satId,v.pol]);
+        addedTs.push(nTsId); tsCache[v.freq]=nTsId; tsId=nTsId;
+      }
+      let sid=v.sid;
+      if(!sid){ sid=++autoSid; }
+      const dup=LAB.sqlDb.exec('SELECT COUNT(*) FROM srv_table WHERE service_id=? AND db_ts_id=?',[sid,tsId])[0].values[0][0];
+      if(dup>0){ dups.push(v.name+' (SID '+sid+')'); continue; }
+      nid++; nch++;
+      LAB.sqlDb.run('INSERT INTO srv_table (db_id, src, db_net_id, db_ts_id, name, service_id, service_type, running_status, volume, chan_num, db_sat_para_id, provider_name) VALUES (?,3,1,?,?,?,?,4,50,?,?,?)',
+        [nid, tsId, v.name, sid, v.type, nch, satId, '']);
+      addedSrv.push(nid);
+    }
+  }catch(e){ out.innerHTML='<p style="color:var(--danger)">فشل أثناء الإدخال: '+esc(e.message)+' — راجع بالتراجع</p>'; labSqlLoadRows(); labChecks(); render(); return; }
+  // فحص السلامة — لو فشل نرجع كل حاجة
+  const ic=LAB.sqlDb.exec('PRAGMA integrity_check')[0].values[0][0];
+  if(ic!=='ok'){
+    try{
+      if(addedSrv.length) LAB.sqlDb.run('DELETE FROM srv_table WHERE db_id IN ('+addedSrv.join(',')+')');
+      if(addedTs.length) LAB.sqlDb.run('DELETE FROM ts_table WHERE db_id IN ('+addedTs.join(',')+')');
+    }catch(e){}
+    out.innerHTML='<p style="color:var(--danger)">فحص سلامة القاعدة فشل بعد الإدخال — اتراجع كل حاجة تلقائيًا. الملف الأصلي سليم.</p>';
+    labSqlLoadRows(); labChecks(); render(); return;
+  }
+  if(addedSrv.length||addedTs.length){
+    const stmts=[];
+    if(addedSrv.length) stmts.push(['DELETE FROM srv_table WHERE db_id IN ('+addedSrv.join(',')+')',[]]);
+    if(addedTs.length) stmts.push(['DELETE FROM ts_table WHERE db_id IN ('+addedTs.join(',')+')',[]]);
+    labPushOp('استيراد '+addedSrv.length+' قناة من '+f.name+' ('+addedTs.length+' تردد جديد)',{kind:'sqlexec', stmts});
+  }
+  let h='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:8px">'
+    +'<div class="toolbody" style="text-align:center"><b style="color:var(--teal)">'+addedSrv.length+'</b><br>قناة اتضافت</div>'
+    +'<div class="toolbody" style="text-align:center"><b>'+addedTs.length+'</b><br>تردد جديد</div>'
+    +'<div class="toolbody" style="text-align:center"><b style="color:var(--gold)">'+dups.length+'</b><br>مكرر (اتخطّى)</div>'
+    +'<div class="toolbody" style="text-align:center"><b style="color:var(--danger)">'+skipped.length+'</b><br>مرفوض بالتحقق</div></div>'
+    +'<p style="font-size:12px;color:var(--mut)">فحص السلامة: سليم ✓ — الناتج متحقق هيكليًا، غير مُختبر على جهاز. فيه تراجع كامل من زرار التراجع.</p>';
+  if(dups.length) h+='<p style="font-size:12px;color:var(--gold)">مكرر: '+esc(dups.slice(0,10).join('، '))+(dups.length>10?'…':'')+'</p>';
+  if(skipped.length) h+='<div style="max-height:150px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:8px;font-size:12px">'+skipped.slice(0,30).map(x=>'<div>صف '+x.row+': '+esc(x.name)+' — '+esc(x.why)+'</div>').join('')+(skipped.length>30?'<div>… و'+(skipped.length-30)+' تانيين</div>':'')+'</div>';
+  out.innerHTML=h;
+  labSqlLoadRows(); labChecks(); render();
+  // رجّع النتيجة ظاهرة بعد الريندر
+  const out2=$('#impOut'); if(out2) out2.innerHTML=h;
+}
 // ===== Compare two channel files (read-only) =====
 async function labCompareFiles(){
   const f=$('#cmpFile')&&$('#cmpFile').files[0];
