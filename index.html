@@ -99,6 +99,18 @@ a{color:var(--teal)}
 .callout.note b{color:var(--teal)}
 .callout.warn{border-color:#713f12}
 .callout.warn b{color:var(--gold)}
+.callout.danger{border-color:#7f1d1d;background:#1c0f14}
+.callout.danger b{color:#f87171}
+.mguide{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.mguide h3{margin:0 0 8px;font-size:16px}
+.mguide .fam{display:inline-block;font-size:10.5px;border:1px solid var(--line2);color:var(--mut);border-radius:999px;padding:1px 9px;margin-inline-start:8px}
+.mguide ol.steps{margin:8px 0 0;padding-inline-start:18px}
+.mguide ol.steps li{margin-bottom:7px;font-size:13.5px;line-height:1.7}
+.mguide ol.steps li b{color:var(--teal)}
+.mguide ol.steps li .v{color:var(--gold);font-weight:700;direction:ltr;unicode-bidi:embed}
+.mdiagram{background:#0b1425;border:1px solid var(--line2);border-radius:12px;padding:10px;margin:10px 0;overflow-x:auto}
+.mdiagram svg{display:block;min-width:700px;width:100%;height:auto}
+.mdisc{font-size:11px;color:var(--mut);margin-top:6px;text-align:center}
 .field{margin-bottom:12px}
 .field>label{display:block;font-size:12.5px;color:var(--mut);margin-bottom:5px}
 .field input[type=text],.field input:not([type]),.field select{width:100%;background:#0b1425;border:1px solid var(--line2);border-radius:10px;padding:9px 12px;min-height:42px}
@@ -542,6 +554,7 @@ const TABS=[
   { path:'/lab',     label:'مختبر السوفت' },
   { path:'/library', label:'المكتبة' },
   { path:'/loaders', label:'اللودرات' },
+  { path:'/maint',   label:'الصيانة' },
   { path:'/updates', label:'التحديثات' },
   { path:'/convert', label:'التحويل' },
   { path:'/about',   label:'حول البرنامج' },
@@ -1273,6 +1286,88 @@ function viewConvert(){
   '<div class="callout warn"><b>قيد التطوير</b>رفع ملف قنوات وتحويله بين أجهزة نفس العائلة من جوه البرنامج، وبعدها التصدير لصيغة الرسيفر مباشرة. ودمج ملف القنوات جوه السوفت وير أون لاين لكل المعالجات متسجل في خطة التطوير: هيتبنى معالج معالج بداية بالأكثر استخداماً. التعديل العميق على باينات السوفت وير هيفضل بأدواته المتخصصة، والبرنامج هينظمها ويرشدك ليها.</div>'+
   '<div class="card"><h2>أدوات النهارده</h2><p>لحد ما قسم التحويلات يجهز: محرر القنوات بيحفظ ترتيبك بالعربي ويصدّره نص أو ملف، والمكتبة بتخزن ملفاتك نفسها جوه البرنامج مرتبة حسب العائلة، وتنزّلها منه تاني وقت ما تحتاجها.</p></div>';
 }
+/* ---- الصيانة (maintenance reference) ---- */
+/* كل المخططات هنا معمارية نموذجية عامة من رسمنا، مش schematic لموديل بعينه */
+function mBox(x,y,w,h,label,sub){
+  return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="8" fill="#101c3a" stroke="#2c3f6e" stroke-width="1.4"/>'+
+    '<text x="'+(x+w/2)+'" y="'+(y+(sub?h/2-4:h/2))+'" text-anchor="middle" dominant-baseline="middle" fill="#dbe4ff" font-size="12.5" font-weight="600">'+label+'</text>'+
+    (sub?'<text x="'+(x+w/2)+'" y="'+(y+h/2+13)+'" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="700">'+sub+'</text>':'');
+}
+function mArrow(x1,y1,x2,y2){
+  return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#14b8a6" stroke-width="2.2" marker-end="url(#mArrHead)"/>';
+}
+const M_ARR_DEF='<defs><marker id="mArrHead" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L8,4.5 L0,9 z" fill="#14b8a6"/></marker></defs>';
+function svgSmps(){
+  return '<svg viewBox="0 0 770 360" xmlns="http://www.w3.org/2000/svg" font-family="inherit">'+M_ARR_DEF+
+  '<rect x="415" y="40" width="345" height="92" rx="10" fill="rgba(127,29,29,.18)" stroke="#7f1d1d" stroke-width="1.4" stroke-dasharray="6 4"/>'+
+  '<text x="590" y="56" text-anchor="middle" fill="#f87171" font-size="12" font-weight="700">⚠ المنطقة الساخنة (جهد 310V حتى بعد فصل الكهربة)</text>'+
+  '<text x="180" y="56" text-anchor="middle" fill="#14b8a6" font-size="12" font-weight="700">المنطقة الباردة (آمنة نسبيًا)</text>'+
+  mBox(650,70,100,44,'مدخل 220V~')+mBox(535,70,100,44,'فيوز + فلتر EMI')+mBox(420,70,100,44,'مقوم جسري')+mBox(305,70,100,44,'مكثف تخزين 400V','310V DC ⚠')+mBox(190,70,100,44,'أيسي التقطيع PWM','VCC 12-20V')+
+  mArrow(650,92,635,92)+mArrow(535,92,520,92)+mArrow(420,92,405,92)+mArrow(305,92,290,92)+
+  '<rect x="120" y="60" width="56" height="64" rx="6" fill="#132a5c" stroke="#2c3f6e" stroke-width="1.4"/>'+
+  '<text x="148" y="96" text-anchor="middle" fill="#dbe4ff" font-size="12" font-weight="600">محول</text>'+
+  '<text x="148" y="112" text-anchor="middle" fill="#8ea2d6" font-size="10.5">التشوبر</text>'+
+  mArrow(190,92,180,92)+
+  mBox(60,160,120,44,'دايود شوتكي + فلترة')+
+  '<line x1="120" y1="92" x2="120" y2="182" stroke="#14b8a6" stroke-width="2.2"/><line x1="120" y1="182" x2="182" y2="182" stroke="#14b8a6" stroke-width="2.2" marker-end="url(#mArrHead)"/>'+
+  mBox(60,225,120,36,'خرج 12V')+mBox(60,268,120,36,'خرج 5V')+mBox(60,311,120,36,'خرج 3.3V')+mBox(215,225,130,36,'استعداد 5V/3.3V','شغال دايمًا')+
+  mArrow(120,204,120,225)+
+  mBox(430,225,150,44,'TL431 + أوبتوكبلر','تغذية مرتدة للفولت')+
+  '<line x1="215" y1="243" x2="120" y2="243" stroke="#8ea2d6" stroke-width="1.6" stroke-dasharray="5 4"/><line x1="120" y1="243" x2="120" y2="225" stroke="#8ea2d6" stroke-width="1.6" stroke-dasharray="5 4"/>'+
+  '<line x1="430" y1="247" x2="349" y2="247" stroke="#8ea2d6" stroke-width="1.6" stroke-dasharray="5 4"/>'+
+  '<line x1="505" y1="225" x2="505" y2="118" stroke="#8ea2d6" stroke-width="1.6" stroke-dasharray="5 4"/><line x1="505" y1="118" x2="293" y2="118" stroke="#8ea2d6" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#mArrHead)"/>'+
+  '<text x="385" y="352" text-anchor="middle" fill="#8ea2d6" font-size="11">المسار المنقّط = تغذية مرتدة (feedback) بتثبت فولت الخرج عن طريق الأوبتوكبلر (العزل بين الساخن والبارد)</text>'+
+  '</svg>';
+}
+function svgBoot(){
+  return '<svg viewBox="0 0 770 200" xmlns="http://www.w3.org/2000/svg" font-family="inherit">'+M_ARR_DEF+
+  mBox(645,60,110,48,'أمر التشغيل','زرار / ريموت')+mBox(500,60,125,48,'المعالج SoC','Core 1.0-1.2V')+mBox(370,60,110,48,'كريستالة 27MHz')+mBox(240,60,110,48,'فلاشة SPI','السوفت · 3.3V')+mBox(115,60,100,48,'ذاكرة DDR','1.35-1.8V')+mBox(10,60,90,48,'الشاشة / فيديو')+
+  mArrow(645,84,628,84)+mArrow(500,84,483,84)+mArrow(370,84,353,84)+mArrow(240,84,218,84)+mArrow(115,84,102,84)+
+  '<text x="385" y="150" text-anchor="middle" fill="#8ea2d6" font-size="11.5">الإقلاع: المعالج بيقرا السوفت من فلاشة الـ SPI ← ينسخه للـ DDR ← يكمل تشغيل. تلف السوفت في الفلاشة = إعادة تشغيل متكرر أو وقوف على اللوجو</text>'+
+  '</svg>';
+}
+const MAINT_GUIDES=[
+  { id:'dead', title:'الجهاز ميت تمامًا (مفيش ولا لمبة استعداد)', fam:'كل الأجهزة الصينية ميني HD', diagram:'smps', keys:'ميت لا يعمل مفيش نور لمبة باور dead power فصل',
+    steps:[
+      '<b>أمان أولًا:</b> قبل ما تلمس مرحلة الباور: افصل الكهربة وفرّغ مكثف التخزين الكبير (400V) بلمبة سريه أو مقاومة. جهد <span class="v">310V DC</span> بيفضل محفوظ فيه بعد الفصل ويقتل. الأفضل شغل البوردة من محول عزل.',
+      '<b>فحص بصري:</b> مكثفات منتفخة، مقاومة محروقة، أثر سخونة حوالين أيسي التقطيع أو الدايودات.',
+      '<b>الفيوز:</b> قس استمراريته. لو مقطوع متبدلوش وتشغل على طول: في قصر بعده (المقوم الجسري أو ترانزستور/أيسي التقطيع أو مكثف الـ 400V). قس قصر على أطراف المكثف الكبير بالبازر.',
+      '<b>جهد مكثف التخزين:</b> افحص على أطرافه <span class="v">300-320V DC</span>. مش موجود؟ المشكلة قبله: فيوز، مقوم، مقاومة NTC، مسار مقطوع.',
+      '<b>VCC أيسي التقطيع:</b> <span class="v">12-20V</span> حسب نوع الأيسي. مفيش VCC؟ مقاومة البداية (startup) المفتوحة سبب شائع.',
+      '<b>فولت الاستعداد:</b> <span class="v">5V أو 3.3V</span> لازم يكون موجود دايمًا (هو اللي بيشغل لمبة standby والمعالج الصغير). مش موجود رغم وجود الـ 310V؟ أيسي التقطيع أو الأوبتوكبلر/TL431 أو دايود شوتكي مقصور في الثانوي.',
+      '<b>قصر في الثانوي:</b> دايودات الشوتكي ومكثفات الفلترة بتقصر كتير — قس كل خط خرج بالبازر ناحية الأرضي.',
+    ]},
+  { id:'bootloop', title:'بيرستارت لوحده أو واقف على اللوجو (Boot loop)', fam:'كل الأجهزة الصينية ميني HD', diagram:'boot', keys:'ريستارت لوجو واقف شعار يعيد تشغيل boot loop restart',
+    steps:[
+      '<b>الفولتات أولًا:</b> لو أي خط ناقص أو مهتز الجهاز هيعمل لوب. قس: <span class="v">12V</span> و <span class="v">5V</span> و <span class="v">3.3V</span> وجهد الكور <span class="v">1.0-1.2V</span> وجهد الـ DDR <span class="v">1.35-1.8V</span> حسب النوع.',
+      '<b>مكثفات الباور المنتفخة</b> بتعمل لوب حتى لو الفولت باين موجود على الملتيميتر (ريبل عالي) — الأفووميتر أو البدل التجريبي بيكشفها.',
+      '<b>الكريستالة 27MHz:</b> لو بايظة أو لحامها بارد الجهاز ممكن يهنج أو يرسترت.',
+      '<b>لو كل الفولتات سليمة:</b> الغالبية سوفت الفلاشة اتلف (كهربة فصلت أثناء تحديث أو فلاشة ضعيفة). الحل: إعادة شحن السوفت المناسب للمعالج باللودر من قسم اللودرات، أو سحب فلاشة من جهاز شغال مماثل.',
+      '<b>فلاشة SPI بايظة هاردوير:</b> لو الشحن بيفشل أو الجهاز مابيقراش الفلاشة، بدّلها (8 أو 16 ميجا حسب الجهاز) واشحن على الجديدة.',
+      '<b>زرار/ريموت عالق:</b> زرار مضغوط على البانل بيخلي الجهاز يدخل وضع ريكفري أو يرسترت — افحص أزرار البانل.',
+    ]},
+];
+let maintQ='';
+function viewMaint(){
+  return '<div class="card"><h2>قسم الصيانة<span class="sub">مخططات وأدلة أعطال بالعربي، بتتوسع باستمرار</span></h2>'+
+    '<div class="field"><input type="text" id="maintQ" placeholder="ابحث بالعرض أو الموديل أو كلمة: ميت، لوجو، ريستارت..." value="'+esc(maintQ)+'"></div></div>'+
+    '<div class="callout danger"><b>تحذير أمان</b>مرحلة الباور فيها جهد 220 فولت وتيار قاتل حتى بعد فصل الكهربة (مكثف التخزين مشحون بـ 310 فولت DC). فرّغ المكثف قبل اللمس، واستخدم محول عزل لو بتقيس على البوردة شغالة، وإيد واحدة بس أثناء القياس.</div>'+
+    '<div id="maintList">'+maintListHtml()+'</div>';
+}
+function maintListHtml(){
+  const q=maintQ.trim();
+  const list=MAINT_GUIDES.filter(g=>!q || (g.title+' '+g.keys+' '+g.fam).includes(q));
+  if(!list.length) return '<div class="card"><p style="color:var(--mut)">مفيش دليل مطابق لبحثك لسه. ابعتلنا العطل أو الموديل وهنضيفه.</p></div>';
+  return list.map(g=>{
+    const svg=g.diagram==='smps'?svgSmps():(g.diagram==='boot'?svgBoot():'');
+    return '<div class="mguide"><h3>'+esc(g.title)+'<span class="fam">'+esc(g.fam)+'</span></h3>'+
+      (svg?'<div class="mdiagram">'+svg+'<div class="mdisc">مخطط نموذجي عام للمعمارية الشائعة، مش schematic لموديل بعينه</div></div>':'')+
+      '<ol class="steps">'+g.steps.map(s=>'<li>'+s+'</li>').join('')+'</ol></div>';
+  }).join('');
+}
+function bindMaint(){
+  const q=$('#maintQ'); if(q) q.addEventListener('input',()=>{ maintQ=q.value; const l=$('#maintList'); if(l) l.innerHTML=maintListHtml(); });
+}
 /* ---- about ---- */
 function viewAbout(){
   return '<div class="narrow">'+
@@ -1339,6 +1434,7 @@ function render(){
   if(p==='/library'){ view.innerHTML='<div class="narrow">'+viewLibrary()+'</div>'; bindLibrary(); }
   else if(p==='/loaders'){ view.innerHTML='<div class="narrow">'+viewLoaders()+'</div>'; bindLoaders(); }
   else if(p==='/updates'){ view.innerHTML='<div class="narrow">'+viewUpdates()+'</div>'; bindUpdates(); }
+  else if(p==='/maint'){ view.innerHTML='<div class="narrow">'+viewMaint()+'</div>'; bindMaint(); }
   else if(p==='/convert'){ view.innerHTML='<div class="narrow">'+viewConvert()+'</div>'; }
   else if(p==='/about'){ view.innerHTML=viewAbout(); const b=$('#installBtn'); if(b) b.addEventListener('click',doInstall); }
   else if(p==='/lab'){ view.innerHTML=viewLab(); bindLab(); }
