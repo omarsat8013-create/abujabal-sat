@@ -90,6 +90,17 @@ a{color:var(--teal)}
 .field>label{display:block;font-size:12.5px;color:var(--mut);margin-bottom:5px}
 .field input[type=text],.field input:not([type]),.field select{width:100%;background:#0b1425;border:1px solid var(--line2);border-radius:10px;padding:9px 12px;min-height:42px}
 .field input:focus,.field select:focus{outline:none;border-color:var(--teal)}
+.hexview{font-family:monospace;font-size:12px;direction:ltr;text-align:left;background:#0b1425;border:1px solid var(--line2);border-radius:10px;padding:10px;overflow-x:auto;white-space:pre;line-height:1.5}
+.hexview .of{color:#5b6b8c}.hexview .as{color:#8fb3a8}
+.opok{color:#34d399}.operr{color:#f87171}.opwarn{color:#fbbf24}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.kv b{font-weight:600}
+.mediaitem{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 9px;border:1px solid var(--line);border-radius:9px;margin-bottom:6px;direction:ltr;font-size:12.5px;font-family:monospace}
+.chrow{display:grid;grid-template-columns:52px 1fr auto;gap:8px;align-items:center;padding:4px 0;border-bottom:1px solid var(--line)}
+.chrow input{background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:6px 8px;min-height:34px;width:100%}
+.labops{max-height:200px;overflow:auto;font-size:12.5px}
+.labops div{padding:3px 0;border-bottom:1px dashed var(--line)}
+.labnote{font-size:12.5px;color:var(--mut);line-height:1.7}
 .choices{display:flex;flex-wrap:wrap;gap:6px}
 .choices button{appearance:none;border:1px solid var(--line2);background:#0b1425;color:var(--mut);border-radius:999px;padding:7px 14px;cursor:pointer;min-height:38px}
 .choices button.on{background:rgba(45,212,191,.14);border-color:var(--teal);color:var(--teal);font-weight:700}
@@ -253,6 +264,8 @@ body.boldtable table.grid td{font-weight:700}
 <nav class="tabs" id="tabs" aria-label="أقسام البرنامج"></nav>
 <main id="view" class="wrap"></main>
 <div id="modalRoot"></div>
+<script src="vendor/sql-wasm.js"></script>
+<script src="lab.js"></script>
 <script>
 'use strict';
 const FAMILIES = [
@@ -481,6 +494,7 @@ function downloadBlob(blob, name){
 const TABS=[
   { path:'/',        label:'الرئيسية' },
   { path:'/editor',  label:'المحرر' },
+  { path:'/lab',     label:'مختبر السوفت' },
   { path:'/library', label:'المكتبة' },
   { path:'/loaders', label:'اللودرات' },
   { path:'/updates', label:'التحديثات' },
@@ -1279,6 +1293,7 @@ function render(){
   else if(p==='/updates'){ view.innerHTML='<div class="narrow">'+viewUpdates()+'</div>'; bindUpdates(); }
   else if(p==='/convert'){ view.innerHTML='<div class="narrow">'+viewConvert()+'</div>'; }
   else if(p==='/about'){ view.innerHTML=viewAbout(); const b=$('#installBtn'); if(b) b.addEventListener('click',doInstall); }
+  else if(p==='/lab'){ view.innerHTML=viewLab(); bindLab(); }
   else if(p==='/editor'){ view.innerHTML=viewEditor(); bindEditor(); }
   else { view.innerHTML=viewHome(); bindHome(); }
 }
