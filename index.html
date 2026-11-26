@@ -259,7 +259,15 @@ body.boldtable table.grid td{font-weight:700}
   .panel{display:none}
   .panel.active{display:flex}
   .ptable{max-height:56vh}
-  .tabs{top:58px}
+  /* phone: tabs become a fixed bottom nav bar (standard Android pattern, no top clipping) */
+  .tabs{top:auto;position:fixed;bottom:0;left:0;right:0;z-index:60;
+    background:#0a1122;border-top:1px solid var(--line);border-bottom:0;
+    padding:0 6px;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabs button{padding:10px 12px;min-height:54px;font-size:12.5px;
+    border-bottom:0;border-top:2px solid transparent;flex-shrink:0}
+  .tabs button.on{border-top-color:var(--teal);border-bottom-color:transparent}
+  .wrap{padding-bottom:80px}
 }
 
 /* ===== home screen (receiver-style icon grid) ===== */
@@ -296,7 +304,7 @@ body.boldtable table.grid td{font-weight:700}
     <rect x="9" y="35" width="17" height="4" rx="2" fill="#e7edfa"/>
   </svg></span>
   <span class="tt"><span class="brand">ابوجبل <b>سات</b></span><div class="tag">محرر القنوات الاحترافي للفنيين</div></span>
-  <span class="verchip">نسخة 3.0</span>
+  <span class="verchip">نسخة 3.1.1</span>
 </div>
 <nav class="tabs" id="tabs" aria-label="أقسام البرنامج"></nav>
 <main id="view" class="wrap"></main>
@@ -548,6 +556,8 @@ function renderTabs(){
   $('#tabs').innerHTML=TABS.map(t=>
     '<button type="button" data-tab="'+t.path+'" class="'+(t.path===p?'on':'')+'">'+t.label+'</button>'
   ).join('');
+  const onBtn=$('#tabs .on');
+  if(onBtn && onBtn.scrollIntoView){ try{ onBtn.scrollIntoView({inline:'center',block:'nearest'}); }catch(e){ onBtn.scrollIntoView(false); } }
 }
 /* ================= modal & menus ================= */
 function openModal(title, bodyHtml, okLabel, onOk){
@@ -1273,7 +1283,7 @@ function viewAbout(){
   '<p>برنامج واحد بيجمع شغل الفني: محرر قنوات احترافي بثلاث شاشات (أقمار، ترددات، قنوات) ببحث وفرز وتصنيفات ومفضلة، أدوات ملف كاملة (ترتيب، إعادة ترقيم، بحث عن المكرر، إصلاح أسماء، خط عريض، تعريب)، تصدير لكل صيغ الأجهزة (داكي، فانيلا، جي اكس، كومبو، توين، بي أوت كيو وأكثر)، مكتبة بتخزن السوفتات والفلاشات نفسها جوه البرنامج، ومرجع لودرات منظم لكل عائلة معالج.</p></div>'+
   '<div class="callout note"><b>بياناتك على جهازك بس</b>كل اللي بتعمله، بما فيه الملفات نفسها، بيتحفظ جوه البرنامج على الجهاز ده، ومش بيتبعت لأي سيرفر. لو مسحت بيانات البرنامج أو شلته، المحفوظ بيتمسح معاه، فخد نسخة احتياطية كاملة (مشروع القنوات + المكتبة بالملفات المتخزنة) من قايمة ملف في المحرر، وتقدر ترجعها على أي جهاز أو لينك تاني.</div>'+
   '<div class="callout warn"><b>توصيل الرسيفر بالموبايل (OTG)</b>وصّل الرسيفر أو الفلاشة بكابل OTG وتعامل معاها مباشرة من البرنامج: دي محتاجة صلاحية أجهزة مش متاحة للمتصفح، فهي متطلب أساسي في نسخة التطبيق الأصلي للموبايل، ومتسجلة في الأدوات المتقدمة.</div>'+
-  '<div class="footer">ابوجبل سات، نسخة 3.0. ملاحظات العائلات ومرجع اللودرات من منتديات السات المصرية والعربية، 26 نوفمبر 2026. قسم التحديثات بيتجدد باستمرار بسوفتات وتحويلات وملفات قنوات بتحميل مباشر من البرنامج.</div>'+
+  '<div class="footer">ابوجبل سات، نسخة 3.1.1. ملاحظات العائلات ومرجع اللودرات من منتديات السات المصرية والعربية، 26 نوفمبر 2026. قسم التحديثات بيتجدد باستمرار بسوفتات وتحويلات وملفات قنوات بتحميل مباشر من البرنامج.</div>'+
   '</div>';
 }
 /* ---- home ---- */
