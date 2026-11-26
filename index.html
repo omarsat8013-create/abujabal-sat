@@ -1356,6 +1356,47 @@ const SIM_FAULTS=[
    over:{tplnb:{dcv:{f:'0.00',fnote:'مفيش تغذية للطبق — منظم الـ LNB مش بيطلع. قبل التبديل اتأكد إن الكابل مفيهوش قصر وإلا الجديد هيتلف برضه.'}}}},
 ];
 let simState={fault:'healthy',mode:'dcv',tp:null};
+let simDiagType='', simDiagFault='', simDiagResult=null;
+/* عائلات موثقة من مصادر عامة (منتديات السات) — غيرها يشتغل باللوحة النموذجية */
+const SIM_FAMILIES=[['صن بلص','Sunplus صن بلص'],['سنبلص','Sunplus صن بلص'],['1506','Sunplus 1506'],['1507','Sunplus 1507'],['2507','Sunplus 2507'],['gx','GX جي اكس'],['جي اكس','GX جي اكس'],['gx6605','GX6605'],['علي','ALi علي'],['ali','ALi علي'],['3510','ALi 3510'],['3511','ALi 3511'],['3516','ALi 3516'],['3606','ALi 3606'],['مونتاج','Montage مونتاج'],['montage','Montage مونتاج'],['ترومان','Truman ترومان'],['truman','Truman ترومان'],['داكي','Ducky داكي'],['فانيلا','Vanilla فانيلا'],['كومبو','Combo كومبو'],['توين','Twin توين'],['شعبي','Shaabi شعبي']];
+const SIM_GUIDE_KEYS={
+  f5vsb:'استعداد standby ميت لمبة نور 5v باور فصل',
+  f33:'3.3 قصر خط فلاشة io هنج تهنيج',
+  fschot:'شوتكي قصر دايود باور خرج ميت',
+  flnb:'lnb اشارة إشارة طبق تيونر فولت عدسة سيجنال',
+};
+const SIM_GUIDED={f5vsb:{mode:'dcv',tp:'tp5vsb'},f33:{mode:'buzz',tp:'tp33'},fschot:{mode:'diode',tp:'tpschot'},flnb:{mode:'dcv',tp:'tplnb'}};
+function simDiagnose(){
+  const ft=simDiagFault.trim(), tt=simDiagType.trim();
+  if(!ft && !tt){ simDiagResult=null; return; }
+  let fam=null;
+  const low=tt.toLowerCase();
+  for(const [k,v] of SIM_FAMILIES){ if(tt.includes(k)||low.includes(k.toLowerCase())){ fam=v; break; } }
+  const cands=[];
+  for(const f of SIM_FAULTS){ if(f.ok) continue; const keys=(SIM_GUIDE_KEYS[f.id]||'').split(' '); let s=0; for(const k of keys){ if(k && ft.includes(k)) s+=k.length; } if(s>0) cands.push({kind:'sim',id:f.id,name:f.name,score:s}); }
+  for(const g of MAINT_GUIDES){ const keys=(g.keys||'').split(' '); let s=0; for(const k of keys){ if(k && ft.includes(k)) s+=k.length; } if(s>0) cands.push({kind:'guide',id:g.id,name:g.title,score:s,firstKey:(g.keys||'').split(' ')[0]}); }
+  cands.sort((a,b)=>b.score-a.score);
+  simDiagResult={fam, faultText:ft, typeText:tt, results:cands.slice(0,3)};
+}
+function simDiagHtml(){
+  if(!simDiagResult) return '';
+  const r=simDiagResult;
+  let h='<div class="callout note" style="margin-top:10px"><b>نتيجة التشخيص</b>';
+  if(r.typeText) h+= r.fam? 'الجهاز: <b>'+esc(r.typeText)+'</b> — عائلة <b>'+esc(r.fam)+'</b> موثقة من مصادر عامة. القيم تفضل نموذجية عامة للعائلة، مش قراءات موديلك بالظبط.<br>' : 'الجهاز: <b>'+esc(r.typeText)+'</b> — موديل غير موثق عندنا، فهنشتغل باللوحة النموذجية العامة. ابعتلنا معالجه أو صورة بوردته ونضيفه موثق.<br>';
+  if(!r.results.length){ h+='مفيش تطابق واضح للعطل ده في قاعدة الأعطال لسه. جرب صياغة تانية (ميت، إشارة، لوجو، صورة، ريموت) أو ابعتهولنا ونضيفه.</div>'; }
+  else { h+='الأقرب لعطل "'+esc(r.faultText)+'":</div>';
+    h+=r.results.map((c,i)=>{
+      const rank=i===0?'الأقرب':(i===1?'محتمل':'ممكن');
+      let btn='';
+      if(c.kind==='sim'&&SIM_GUIDED[c.id]) btn=' <button type="button" class="btn sm btn-gold" data-simg="'+c.id+'">🧪 جرب القياس في المحاكي</button>';
+      else btn=' <button type="button" class="btn sm btn-sec" data-simq="'+esc(c.firstKey||'')+'">📖 افتح الدليل</button>';
+      return '<div class="callout" style="margin-top:8px"><b>'+rank+': '+esc(c.name)+'</b>'+btn+'</div>';
+    }).join('');
+    const topSim=r.results.find(c=>c.kind==='sim');
+    if(topSim){ const f=SIM_FAULTS.find(x=>x.id===topSim.id); if(f&&f.suspects.length) h+='<div class="simsuspect" style="margin-top:6px"><b>المشتبه بهم بالترتيب:</b><ol class="steps" style="margin-top:4px">'+f.suspects.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ol></div>'; }
+  }
+  return h;
+}
 function simFault(){ return SIM_FAULTS.find(f=>f.id===simState.fault)||SIM_FAULTS[0]; }
 function simBoardSvg(){
   const dots=SIM_TPS.map(t=>'<circle class="tpdot'+(simState.tp===t.id?' sel':'')+'" data-tp="'+t.id+'" cx="'+SIM_TPPOS[t.id][0]+'" cy="'+SIM_TPPOS[t.id][1]+'" r="11"/>'+ '<text x="'+SIM_TPPOS[t.id][0]+'" y="'+(SIM_TPPOS[t.id][1]-16)+'" text-anchor="middle" fill="#7ef29a" font-size="10.5" font-weight="700">'+t.label+'</text>').join('');
@@ -1402,11 +1443,17 @@ function simReading(){
     '<div class="simproc"><b>الإجراء الصح:</b> '+esc(m.proc)+'<br><b>القراءة دي معناها:</b> '+esc(note||'')+'</div>';
 }
 function viewSim(){
-  return '<div class="card"><h2>محاكي الملتيميتر التفاعلي<span class="sub">تدرّب على القياس الصح: اختار عطل، اختار وضع الملتيميتر، ودوس على نقطة القياس في اللوحة</span></h2>'+
+  return '<div class="card"><h2>محاكي الملتيميتر التفاعلي<span class="sub">اكتب نوع الجهاز والعطل، أو اختار عطل جاهز، وتدرّب على القياس الصح على اللوحة</span></h2>'+
     '<div class="caption">قيم نموذجية عامة لبوردة رسيفر ميني تقليدية — مش قيم موديل بعينه. المحاكاة على الجانب البارد منخفض الجهد بس: مفيش أي قياس حي على جانب الكهربة الرئيسي.</div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">'+
+      '<input type="text" id="simType" placeholder="نوع الرسيفر / الموديل — مثال: فانيلا 1506، GX6605، ترومان" value="'+esc(simDiagType)+'" style="flex:1;min-width:180px;background:#0b1425;border:1px solid var(--line2);border-radius:10px;padding:9px 12px;min-height:42px">'+
+      '<input type="text" id="simFaultQ" placeholder="العطل — مثال: ميت خالص، مفيش إشارة، بيرستارت" value="'+esc(simDiagFault)+'" style="flex:1;min-width:180px;background:#0b1425;border:1px solid var(--line2);border-radius:10px;padding:9px 12px;min-height:42px">'+
+      '<button type="button" class="btn btn-gold" id="simDiagBtn">شخّص</button>'+
+    '</div>'+ simDiagHtml() +
+    '<div class="caption" style="margin-top:8px">أو اختار عطل جاهز للتدريب:</div>'+
     '<div class="simfaults">'+SIM_FAULTS.map(f=>'<button type="button" data-f="'+f.id+'" class="'+(f.ok?'ok':'')+(simState.fault===f.id?' on':'')+'">'+esc(f.name)+'</button>').join('')+'</div>'+
     (simFault().suspects.length?'<div class="simsuspect"><b>أكثر المشتبه بهم شيوعًا للعطل ده:</b><ol class="steps" style="margin-top:4px">'+simFault().suspects.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ol></div>':'')+
-  '</div>'+
+  '</div>'
   '<div class="simgrid">'+
     '<div class="mdiagram" style="margin:0">'+simBoardSvg()+'<div class="mdisc">لوحة نموذجية عامة من رسمنا — الدواير الخضرا نقاط قياس تفاعلية. المنطقة الحمرا المنقّطة خارج المحاكاة.</div></div>'+
     '<div class="meter">'+
@@ -1420,6 +1467,10 @@ function bindSim(){
   view.querySelectorAll('.simfaults button').forEach(b=>b.addEventListener('click',()=>{ simState.fault=b.dataset.f; rerenderSim(); }));
   view.querySelectorAll('.mbtns button').forEach(b=>b.addEventListener('click',()=>{ simState.mode=b.dataset.m; rerenderSim(); }));
   view.querySelectorAll('.tpdot').forEach(c=>c.addEventListener('click',()=>{ simState.tp=c.dataset.tp; rerenderSim(); }));
+  const db=view.querySelector('#simDiagBtn');
+  if(db) db.addEventListener('click',()=>{ simDiagType=(view.querySelector('#simType')||{}).value||''; simDiagFault=(view.querySelector('#simFaultQ')||{}).value||''; simDiagnose(); rerenderSim(); });
+  view.querySelectorAll('[data-simg]').forEach(b=>b.addEventListener('click',()=>{ const g=SIM_GUIDED[b.dataset.simg]; simState.fault=b.dataset.simg; simState.mode=g.mode; simState.tp=g.tp; rerenderSim(); const gr=document.querySelector('.simgrid'); if(gr) gr.scrollIntoView({block:'start'}); }));
+  view.querySelectorAll('[data-simq]').forEach(b=>b.addEventListener('click',()=>{ maintQ=b.dataset.simq||''; go('/maint'); }));
 }
 function rerenderSim(){
   const view=$('#view'); if(!view) return;
