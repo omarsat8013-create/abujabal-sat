@@ -2,6 +2,19 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
+<script>
+/* ES5 only: early error banner so a JS failure is visible (and screenshot-able) instead of silent empty sections */
+window.__ajsErrShown=false;
+function __ajsShowErr(msg){
+  if(window.__ajsErrShown)return; window.__ajsErrShown=true;
+  var d=document.createElement('div');
+  d.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#7f1d1d;color:#fff;padding:10px 12px;font-size:13px;direction:rtl;text-align:right;font-family:sans-serif';
+  d.textContent='حصل خطأ في التحميل: '+msg+' — ابعت صورة الشاشة دي لو سمحت';
+  (document.body||document.documentElement).appendChild(d);
+}
+window.addEventListener('error',function(e){ __ajsShowErr(e.message||'script error'); },true);
+window.addEventListener('unhandledrejection',function(e){ __ajsShowErr((e.reason&&e.reason.message)||'async error'); });
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ابوجبل سات - محرر القنوات الاحترافي</title>
 <meta name="description" content="ابوجبل سات: محرر قنوات احترافي للفني - أقمار وترددات وقنوات، أدوات ترتيب وتعريب وبحث عن المكرر، تصدير لكل صيغ الأجهزة، مكتبة سوفتات ومرجع لودرات.">
@@ -289,7 +302,7 @@ body.boldtable table.grid td{font-weight:700}
 <main id="view" class="wrap"></main>
 <div id="modalRoot"></div>
 <script src="vendor/sql-wasm.js?v=1"></script>
-<script src="lab.js?v=22"></script>
+<script src="lab.js?v=23"></script>
 <script>
 'use strict';
 const FAMILIES = [
@@ -445,7 +458,7 @@ let satQ='', tpQ='', chQ='', chType='الكل', chCat='الكل', chSort='file';
 let edPanel='ch';
 /* ================= helpers ================= */
 const $ = (sel, el) => (el||document).querySelector(sel);
-function esc(s){ return String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function esc(s){ return String(s!=null?s:'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function uid(){ try{ return crypto.randomUUID(); }catch(e){ return 'id-'+Date.now()+'-'+Math.floor(Math.random()*1e6); } }
 function fmtSize(n){
   if(!n) return '';

@@ -526,14 +526,14 @@ function labSqlRowsHtml(){
   const tcols=LAB.sqlCols.filter(c=>c.type.indexOf('CHAR')>=0||c.type.indexOf('TEXT')>=0).map(c=>c.name);
   const idcols=LAB.sqlCols.filter(c=>/id|no$/i.test(c.name)&&c.type.indexOf('CHAR')<0&&c.type.indexOf('TEXT')<0).map(c=>c.name);
   return LAB.sqlRows.map(r=>{
-    const label=(r.chan_num!=null)?String(r.chan_num):idcols.map(c=>esc(String(r[c]??''))).join(' · ');
+    const label=(r.chan_num!=null)?String(r.chan_num):idcols.map(c=>esc(String(r[c]!=null?r[c]:''))).join(' · ');
     let cells='';
     for(const c of tcols.slice(0,2)){
-      cells+='<input type="text" value="'+esc(String(r[c]??''))+'" data-rowid="'+r.rowid+'" data-col="'+esc(c)+'" data-old="'+esc(String(r[c]??''))+'">';
+      cells+='<input type="text" value="'+esc(String(r[c]!=null?r[c]:''))+'" data-rowid="'+r.rowid+'" data-col="'+esc(c)+'" data-old="'+esc(String(r[c]!=null?r[c]:''))+'">';
     }
     const favBtn=labHasFavCol()?'<button type="button" class="btn sm '+(r.favor?'btn-gold':'btn-ghost')+'" data-fav="'+r.rowid+'" data-favcur="'+(r.favor?1:0)+'">'+(r.favor?'★':'☆')+'</button>':'';
     const dragBtn=(labHasChanNum()&&!LAB.grpView)?'<span class="btn sm btn-ghost" draggable="true" data-dragrow="'+r.rowid+'" style="cursor:grab;user-select:none">⋮⋮</span>':'';
-    const grpBtn=LAB.grpView?'<button type="button" class="btn sm btn-danger" data-grprm="'+(r.db_id??r.rowid)+'">✕</button>':'';
+    const grpBtn=LAB.grpView?'<button type="button" class="btn sm btn-danger" data-grprm="'+(r.db_id!=null?r.db_id:r.rowid)+'">✕</button>':'';
     const selBox='<input type="checkbox" data-sel="'+r.rowid+'"'+(LAB.selection&&LAB.selection.has(r.rowid)?' checked':'')+' style="width:16px;height:16px;accent-color:var(--teal);cursor:pointer">';
     const infoBtn='<button type="button" class="btn sm btn-ghost" data-info="'+r.rowid+'" title="تفاصيل تقنية">ⓘ</button>';
     const mvBtns=(labHasChanNum()&&!LAB.grpView)?'<span style="display:flex;flex-direction:column;gap:2px"><button type="button" class="btn sm btn-ghost" data-mv="'+r.rowid+'" data-dir="-1" title="طلّع خطوة" style="padding:0 7px;line-height:1.1">▲</button><button type="button" class="btn sm btn-ghost" data-mv="'+r.rowid+'" data-dir="1" title="نزّل خطوة" style="padding:0 7px;line-height:1.1">▼</button></span>':'';
@@ -1461,10 +1461,10 @@ function labGrpAddVisible(grpId){
   try{
     let added=0; const ids=[];
     for(const r of LAB.sqlRows){
-      const ex=LAB.sqlDb.exec('SELECT COUNT(*) FROM grp_map_table WHERE db_grp_id=? AND db_srv_id=?',[grpId, r.db_id??r.rowid])[0].values[0][0];
+      const ex=LAB.sqlDb.exec('SELECT COUNT(*) FROM grp_map_table WHERE db_grp_id=? AND db_srv_id=?',[grpId, (r.db_id!=null?r.db_id:r.rowid)])[0].values[0][0];
       if(ex) continue;
       const nid=LAB.sqlDb.exec('SELECT COALESCE(MAX(db_id),0)+1 FROM grp_map_table')[0].values[0][0];
-      LAB.sqlDb.run('INSERT INTO grp_map_table (db_id, db_srv_id, db_grp_id, service_type) VALUES (?,?,?,?)',[nid, r.db_id??r.rowid, grpId, r.service_type||1]);
+      LAB.sqlDb.run('INSERT INTO grp_map_table (db_id, db_srv_id, db_grp_id, service_type) VALUES (?,?,?,?)',[nid, (r.db_id!=null?r.db_id:r.rowid), grpId, r.service_type||1]);
       ids.push(nid); added++;
     }
     if(added) labPushOp('إضافة '+added+' قناة للجروب #'+grpId,{kind:'sqldelrows', table:'grp_map_table', ids});
@@ -1542,7 +1542,7 @@ function labExpCsv(){
     const rows=LAB.sqlDb.exec('SELECT s.name, s.service_type, t.freq, t.polar, t.symb, s.service_id, p.sat_name FROM srv_table s JOIN ts_table t ON t.db_id=s.db_ts_id JOIN sat_para_table p ON p.db_id=s.db_sat_para_id ORDER BY s.chan_num, s.db_id')[0];
     let csv='\uFEFF"الرقم","الاسم","النوع","التردد","الاستقطاب","الترميز","SID","القمر"\n';
     (rows?rows.values:[]).forEach((v,i)=>{
-      const q=x=>'"'+String(x??'').replace(/"/g,'""')+'"';
+      const q=x=>'"'+String(x!=null?x:'').replace(/"/g,'""')+'"';
       csv+=[i+1,q(v[0]),(+v[1]===2?'Radio':'TV'),Math.round(v[2]/1000),(+v[3]===0?'H':'V'),Math.round(v[4]/1000),v[5],q(v[6])].join(',')+'\n';
     });
     labDl((LAB.name||'channels')+'.csv', csv, 'text/csv;charset=utf-8');
