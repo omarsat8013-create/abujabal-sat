@@ -66,7 +66,7 @@ function labReset(){
   LAB.buf=null; LAB.orig=null; LAB.name=''; LAB.type=''; LAB.ops=[]; LAB.errors=[]; LAB.media=[];
   LAB.page=0; LAB.unlocked=false;
   if(LAB.sqlDb){ try{LAB.sqlDb.close();}catch(e){} }
-  LAB.sqlDb=null; LAB.sqlTables=[]; LAB.sqlTable=''; LAB.sqlRows=[]; LAB.sqlOffset=0; LAB.sqlSearch=''; LAB.favOnly=false;
+  LAB.sqlDb=null; LAB.sqlTables=[]; LAB.sqlTable=''; LAB.sqlRows=[]; LAB.sqlOffset=0; LAB.sqlSearch=''; LAB.favOnly=false; LAB.grpView=null; LAB.arabize=null;
 }
 async function labLoadFile(file){
   labReset();
@@ -249,6 +249,7 @@ function labSqlLoadRows(){
       conds.push('('+tcols.map(c=>'"'+c.name+'" LIKE \'%'+q+'%\'').join(' OR ')+')');
     }
     if(LAB.favOnly&&labHasFavCol()) conds.push('favor=1');
+    if(LAB.grpView&&LAB.sqlCols.some(c=>/^db_id$/i.test(c.name))) conds.push('db_id IN (SELECT db_srv_id FROM grp_map_table WHERE db_grp_id='+LAB.grpView+')');
     if(conds.length) where=' WHERE '+conds.join(' AND ');
     const r=LAB.sqlDb.exec('SELECT rowid,* FROM "'+LAB.sqlTable+'"'+where+' LIMIT '+LAB.sqlLimit+' OFFSET '+LAB.sqlOffset);
     if(r[0]){
@@ -345,6 +346,7 @@ function viewLab(){
       +'<button type="button" class="btn sm btn-sec" id="labPrevPage"'+(LAB.sqlOffset>0?'':' disabled')+'>السابق</button>'
       +'<button type="button" class="btn sm btn-sec" id="labNextPage"'+(LAB.sqlRows.length>=LAB.sqlLimit?'':' disabled')+'>التالي</button>'
       +(labHasFavCol()?'<button type="button" class="btn sm '+(LAB.favOnly?'btn-gold':'btn-ghost')+'" id="labFavOnly">★ المفضلة بس</button>':'')
+      +(labHasChanNum()?'<button type="button" class="btn sm btn-ghost" id="labRenumber" title="إعادة ترقيم الكل من ١ للنهاية">🔢 إعادة ترقيم</button>':'')
       +'<span style="align-self:center;font-size:12px;color:var(--mut)">سطور '+(LAB.sqlOffset+1)+' - '+(LAB.sqlOffset+LAB.sqlRows.length)+'</span></div>'
       +'<div class="labops" style="max-height:340px">'+labSqlRowsHtml()+'</div>'
       +'</div></div>'
@@ -382,6 +384,23 @@ function viewLab(){
       +'<input type="text" id="chSid" dir="ltr" placeholder="SID" style="width:80px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:8px 10px">'
       +'<select id="chType" style="background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:8px 10px"><option value="1">تلفزيون</option><option value="2">إذاعة</option></select>'
       +'<button type="button" class="btn btn-gold" id="chAdd">إضافة القناة</button></div>'
+      +'</div></div>';
+  }
+  if(LAB.type==='sqlite'&&LAB.sqlDb&&LAB.sqlTables.indexOf('grp_table')>=0){
+    const grps=labGrpList();
+    main+='<div class="toolcard t-gold">'+labToolHead('t-gold','🗂','الباقات (الجروبات)','مجموعات قنوات مخصصة زي FAV — إنشاء وتسمية وملء من القنوات الظاهرة')
+      +'<div class="toolbody">'
+      +'<div class="field"><label>الجروب</label><select id="grpSel">'
+      +grps.map(g=>'<option value="'+g.id+'"'+(LAB.grpView===g.id?' selected':'')+'>'+esc(g.name)+' ('+g.count+')</option>').join('')
+      +'</select></div>'
+      +'<div class="btnrow" style="margin-bottom:8px">'
+      +'<button type="button" class="btn sm btn-primary" id="grpView">عرض قنوات الجروب</button>'
+      +(LAB.grpView?'<button type="button" class="btn sm btn-ghost" id="grpExit">خروج من عرض الجروب</button>':'')
+      +'<button type="button" class="btn sm btn-sec" id="grpAddVisible">إضافة القنوات الظاهرة للجروب</button>'
+      +'<button type="button" class="btn sm btn-ghost" id="grpRename">إعادة تسمية</button>'
+      +'<button type="button" class="btn sm btn-danger" id="grpDel">حذف الجروب</button></div>'
+      +'<div class="btnrow"><input type="text" id="grpNewName" placeholder="اسم جروب جديد زي SPORTS" style="flex:1;min-width:140px;background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:8px 10px">'
+      +'<button type="button" class="btn btn-gold" id="grpAdd">إنشاء جروب</button></div>'
       +'</div></div>';
   }
   main+='<div class="toolcard t-blue">'+labToolHead('t-blue','🆔','مغيّر ID السوفت (من ملف لملف)','بيكتب ID الملف المانح في ملفك — زي ما بيتعمل عشان جهاز يقبل سوفت محوّل')
@@ -482,7 +501,9 @@ function labSqlRowsHtml(){
       cells+='<input type="text" value="'+esc(String(r[c]??''))+'" data-rowid="'+r.rowid+'" data-col="'+esc(c)+'" data-old="'+esc(String(r[c]??''))+'">';
     }
     const favBtn=labHasFavCol()?'<button type="button" class="btn sm '+(r.favor?'btn-gold':'btn-ghost')+'" data-fav="'+r.rowid+'" data-favcur="'+(r.favor?1:0)+'">'+(r.favor?'★':'☆')+'</button>':'';
-    return '<div class="chrow" style="grid-template-columns:52px 1fr auto auto"><span style="color:var(--mut);font-size:12px">'+label+'</span>'+cells+favBtn+'</div>';
+    const dragBtn=(labHasChanNum()&&!LAB.grpView)?'<span class="btn sm btn-ghost" draggable="true" data-dragrow="'+r.rowid+'" style="cursor:grab;user-select:none">⋮⋮</span>':'';
+    const grpBtn=LAB.grpView?'<button type="button" class="btn sm btn-danger" data-grprm="'+(r.db_id??r.rowid)+'">✕</button>':'';
+    return '<div class="chrow" data-row="'+r.rowid+'" style="grid-template-columns:auto 52px 1fr auto auto auto">'+dragBtn+'<span style="color:var(--mut);font-size:12px">'+label+'</span>'+cells+favBtn+grpBtn+'</div>';
   }).join('');
 }
 /* ---------- bindings ---------- */
@@ -514,6 +535,23 @@ function bindLab(){
   on('#labFavAll',()=>labFavBulk(1));
   on('#labFavClear',()=>labFavBulk(0));
   document.querySelectorAll('[data-fav]').forEach(b=>b.addEventListener('click',()=>labFavToggle(+b.dataset.fav, +b.dataset.favcur)));
+  on('#labRenumber',labRenumberAll);
+  on('#grpAdd',()=>labGrpAdd($('#grpNewName').value));
+  on('#grpRename',()=>{ const id=+$('#grpSel').value; const n=$('#grpNewName').value.trim()||prompt('الاسم الجديد:'); if(n) labGrpRename(id,n); });
+  on('#grpDel',()=>labGrpDel(+$('#grpSel').value));
+  on('#grpView',()=>{ LAB.grpView=+$('#grpSel').value; LAB.sqlTable='srv_table'; LAB.sqlOffset=0; labSqlLoadRows(); render(); });
+  on('#grpExit',()=>{ LAB.grpView=null; LAB.sqlOffset=0; labSqlLoadRows(); render(); });
+  on('#grpAddVisible',()=>labGrpAddVisible(+$('#grpSel').value));
+  document.querySelectorAll('[data-grprm]').forEach(b=>b.addEventListener('click',()=>labGrpRemoveMember(LAB.grpView, +b.dataset.grprm)));
+  let dragId=null;
+  document.querySelectorAll('[data-dragrow]').forEach(h=>{
+    h.addEventListener('dragstart',e=>{ dragId=+h.dataset.dragrow; e.dataTransfer.effectAllowed='move'; });
+  });
+  document.querySelectorAll('.chrow[data-row]').forEach(row=>{
+    row.addEventListener('dragover',e=>{ e.preventDefault(); row.style.borderTop='2px solid var(--teal)'; });
+    row.addEventListener('dragleave',()=>{ row.style.borderTop=''; });
+    row.addEventListener('drop',e=>{ e.preventDefault(); row.style.borderTop=''; if(dragId) labMoveRow(dragId, +row.dataset.row); dragId=null; });
+  });
   on('#labArzScan',arzScan);
   on('#arzAll',()=>arzSetAll(true));
   on('#arzNone',()=>arzSetAll(false));
@@ -598,6 +636,13 @@ labUndo=function(){
   if(op&&op.inverse&&op.inverse.kind==='sqlarabize'){
     LAB.ops.pop();
     try{ for(const c of op.inverse.changes) LAB.sqlDb.run('UPDATE "'+LAB.sqlTable+'" SET "'+op.inverse.col+'"=? WHERE rowid=?',[c.old,c.rowid]); }catch(e){}
+    labSqlLoadRows(); labChecks(); render();
+    toast('تم التراجع عن: '+op.desc);
+    return;
+  }
+  if(op&&op.inverse&&op.inverse.kind==='sqlexec'){
+    LAB.ops.pop();
+    try{ for(const st of op.inverse.stmts) LAB.sqlDb.run(st[0], st[1]); }catch(e){ toast('خطأ في التراجع: '+e.message); }
     labSqlLoadRows(); labChecks(); render();
     toast('تم التراجع عن: '+op.desc);
     return;
@@ -1039,6 +1084,122 @@ function labFavBulk(setVal){
     labPushOp((setVal?'إضافة كل القنوات للمفضلة':'تفريغ المفضلة')+' ('+rows.length+' سطر)',
       {kind:'sqlarabize', col:'favor', changes:rows.map(r=>({rowid:r[0], old:r[1]}))});
     toast('تم');
+  }catch(e){ toast('فشل: '+e.message); }
+  labSqlLoadRows(); labChecks(); render();
+}
+/* ---------- drag reorder + renumber ---------- */
+LAB.grpView=null;
+function labHasChanNum(){ return LAB.sqlCols.some(c=>/^chan_num$/i.test(c.name)); }
+function labMoveRow(dragRowid, targetRowid){
+  if(!LAB.sqlDb) return;
+  if(!labHasChanNum()){ toast('الجدول ده مفيهوش ترقيم قنوات'); return; }
+  if(LAB.sqlSearch||LAB.favOnly||LAB.grpView){ toast('الترتيب بالسحب شغال في العرض الكامل بس — امسح البحث والفلاتر الأول'); return; }
+  if(dragRowid===targetRowid) return;
+  try{
+    const r=LAB.sqlDb.exec('SELECT rowid FROM "'+LAB.sqlTable+'" ORDER BY chan_num, rowid');
+    const ids=r[0].values.map(v=>v[0]);
+    const from=ids.indexOf(dragRowid), to=ids.indexOf(targetRowid);
+    if(from<0||to<0) return;
+    ids.splice(to,0,ids.splice(from,1)[0]);
+    const lo=Math.min(from,to), hi=Math.max(from,to);
+    const changes=[];
+    for(let i=lo;i<=hi;i++){
+      const old=LAB.sqlDb.exec('SELECT chan_num FROM "'+LAB.sqlTable+'" WHERE rowid='+ids[i])[0].values[0][0];
+      const nw=i+1;
+      if(old!==nw){ LAB.sqlDb.run('UPDATE "'+LAB.sqlTable+'" SET chan_num=? WHERE rowid=?',[nw,ids[i]]); changes.push({rowid:ids[i], old}); }
+    }
+    if(changes.length) labPushOp('نقل قناة من رقم '+(from+1)+' لرقم '+(to+1)+' ('+changes.length+' إعادة ترقيم)',{kind:'sqlarabize', col:'chan_num', changes});
+    toast('تم النقل');
+  }catch(e){ toast('فشل: '+e.message); }
+  labSqlLoadRows(); labChecks(); render();
+}
+function labRenumberAll(){
+  if(!LAB.sqlDb||!labHasChanNum()) return;
+  openModal('إعادة ترقيم شاملة','<p>هيتم إعادة ترقيم كل القنوات من ١ للنهاية حسب الترتيب الحالي. الأرقام القديمة هتتغير كلها (مع تراجع متاح). متأكد؟</p>','نعم، رقّم',()=>{
+    try{
+      const r=LAB.sqlDb.exec('SELECT rowid, chan_num FROM "'+LAB.sqlTable+'" ORDER BY chan_num, rowid');
+      const changes=[];
+      r[0].values.forEach((row,i)=>{
+        const nw=i+1;
+        if(row[1]!==nw){ LAB.sqlDb.run('UPDATE "'+LAB.sqlTable+'" SET chan_num=? WHERE rowid=?',[nw,row[0]]); changes.push({rowid:row[0], old:row[1]}); }
+      });
+      if(changes.length){ labPushOp('إعادة ترقيم شاملة ('+changes.length+' قناة)',{kind:'sqlarabize', col:'chan_num', changes}); toast('اترقّم '+changes.length); }
+      else toast('الترقيم مظبوط أصلاً');
+    }catch(e){ toast('فشل: '+e.message); }
+    labSqlLoadRows(); labChecks(); render();
+  });
+}
+/* ---------- groups / bouquets ---------- */
+function labGrpList(){
+  if(!LAB.sqlDb||LAB.sqlTables.indexOf('grp_table')<0) return [];
+  try{
+    const r=LAB.sqlDb.exec('SELECT g.db_id, g.name, (SELECT COUNT(*) FROM grp_map_table m WHERE m.db_grp_id=g.db_id) FROM grp_table g ORDER BY g.db_id');
+    return r[0]?r[0].values.map(v=>({id:v[0], name:String(v[1]||''), count:v[2]})):[];
+  }catch(e){ return []; }
+}
+function labGrpAdd(name){
+  name=(name||'').trim();
+  if(!name){ toast('اكتب اسم الجروب'); return; }
+  try{
+    const dup=LAB.sqlDb.exec('SELECT COUNT(*) FROM grp_table WHERE name=?',[name])[0].values[0][0];
+    if(dup){ toast('فيه جروب بنفس الاسم'); return; }
+    const nid=LAB.sqlDb.exec('SELECT MAX(db_id) FROM grp_table')[0].values[0][0]+1;
+    LAB.sqlDb.run('INSERT INTO grp_table (db_id, name, grp_reserveInt1) VALUES (?,?,1)',[nid,name]);
+    labPushOp('إنشاء جروب "'+name+'"',{kind:'sqldelrows', table:'grp_table', ids:[nid]});
+    toast('اتعمل الجروب');
+  }catch(e){ toast('فشل: '+e.message); }
+  labChecks(); render();
+}
+function labGrpRename(id, name){
+  name=(name||'').trim(); if(!name) return;
+  try{
+    const old=LAB.sqlDb.exec('SELECT name FROM grp_table WHERE db_id=?',[id])[0].values[0][0];
+    LAB.sqlDb.run('UPDATE grp_table SET name=? WHERE db_id=?',[name,id]);
+    labPushOp('إعادة تسمية جروب "'+old+'" ← "'+name+'"',{kind:'sql', sql:'UPDATE grp_table SET name=? WHERE db_id=?', params:[old,id]});
+    toast('تم');
+  }catch(e){ toast('فشل: '+e.message); }
+  labChecks(); render();
+}
+function labGrpDel(id){
+  const g=labGrpList().find(x=>x.id===id);
+  openModal('حذف جروب','<p>هيتم حذف جروب "'+esc(g?g.name:id)+'" وكل القنوات المسجلة فيه (القنوات نفسها مش هتتمسح من الملف). متأكد؟</p>','نعم، احذف',()=>{
+    try{
+      const gRow=LAB.sqlDb.exec('SELECT * FROM grp_table WHERE db_id=?',[id])[0];
+      const mRows=LAB.sqlDb.exec('SELECT * FROM grp_map_table WHERE db_grp_id=?',[id])[0];
+      const undo=[];
+      LAB.sqlDb.run('DELETE FROM grp_map_table WHERE db_grp_id=?',[id]);
+      LAB.sqlDb.run('DELETE FROM grp_table WHERE db_id=?',[id]);
+      if(gRow&&gRow.values.length){ const v=gRow.values[0]; undo.push(['INSERT INTO grp_table VALUES ('+v.map(()=>'?').join(',')+')', Array.from(v)]); }
+      if(mRows) for(const v of mRows.values) undo.push(['INSERT INTO grp_map_table VALUES ('+v.map(()=>'?').join(',')+')', Array.from(v)]);
+      labPushOp('حذف جروب "'+(g?g.name:id)+'"',{kind:'sqlexec', stmts:undo.reverse()});
+      toast('اتحذف');
+    }catch(e){ toast('فشل: '+e.message); }
+    labChecks(); render();
+  });
+}
+function labGrpAddVisible(grpId){
+  if(!LAB.sqlRows.length){ toast('مفيش قنوات ظاهرة'); return; }
+  try{
+    let added=0; const ids=[];
+    for(const r of LAB.sqlRows){
+      const ex=LAB.sqlDb.exec('SELECT COUNT(*) FROM grp_map_table WHERE db_grp_id=? AND db_srv_id=?',[grpId, r.db_id??r.rowid])[0].values[0][0];
+      if(ex) continue;
+      const nid=LAB.sqlDb.exec('SELECT COALESCE(MAX(db_id),0)+1 FROM grp_map_table')[0].values[0][0];
+      LAB.sqlDb.run('INSERT INTO grp_map_table (db_id, db_srv_id, db_grp_id, service_type) VALUES (?,?,?,?)',[nid, r.db_id??r.rowid, grpId, r.service_type||1]);
+      ids.push(nid); added++;
+    }
+    if(added) labPushOp('إضافة '+added+' قناة للجروب #'+grpId,{kind:'sqldelrows', table:'grp_map_table', ids});
+    toast(added?'اتضاف '+added+' قناة':'كل الظاهر موجود في الجروب أصلاً');
+  }catch(e){ toast('فشل: '+e.message); }
+  labChecks(); render();
+}
+function labGrpRemoveMember(grpId, srvDbId){
+  try{
+    const row=LAB.sqlDb.exec('SELECT * FROM grp_map_table WHERE db_grp_id=? AND db_srv_id=?',[grpId,srvDbId])[0];
+    LAB.sqlDb.run('DELETE FROM grp_map_table WHERE db_grp_id=? AND db_srv_id=?',[grpId,srvDbId]);
+    const undo=row&&row.values.length?[['INSERT INTO grp_map_table VALUES ('+row.values[0].map(()=>'?').join(',')+')', Array.from(row.values[0])]]:[];
+    labPushOp('إزالة قناة من الجروب #'+grpId,{kind:'sqlexec', stmts:undo});
+    toast('اتشالت من الجروب');
   }catch(e){ toast('فشل: '+e.message); }
   labSqlLoadRows(); labChecks(); render();
 }
