@@ -1,0 +1,1276 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ابوجبل سات - محرر القنوات الاحترافي</title>
+<meta name="description" content="ابوجبل سات: محرر قنوات احترافي للفني - أقمار وترددات وقنوات، أدوات ترتيب وتعريب وبحث عن المكرر، تصدير لكل صيغ الأجهزة، مكتبة سوفتات ومرجع لودرات.">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0b1226">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ابوجبل سات">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a1122; --panel:#101b31; --panel2:#0c1526; --line:#1f2d50; --line2:#27396b;
+  --txt:#e7edfa; --mut:#8fa0c2; --teal:#2dd4bf; --teal2:#0d9488; --gold:#f0b429;
+  --blue:#3b82f6; --danger:#ef4444; --sel:#1a3a63; --shadow:0 10px 30px rgba(2,8,23,.5);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:radial-gradient(1200px 600px at 80% -10%, #12203f 0%, var(--bg) 55%);
+  color:var(--txt);
+  font-family:"Tajawal","Segoe UI",Tahoma,"Noto Kufi Arabic",sans-serif;
+  line-height:1.6;
+  -webkit-text-size-adjust:100%;
+}
+button{font:inherit}
+input,select,textarea{font:inherit;color:var(--txt)}
+a{color:var(--teal)}
+.hidden-input{display:none}
+/* ===== titlebar ===== */
+.titlebar{
+  position:sticky;top:0;z-index:40;
+  display:flex;align-items:center;gap:12px;
+  padding:10px 16px;
+  background:linear-gradient(180deg,#0e1930,#0b1327);
+  border-bottom:1px solid var(--line2);
+}
+.titlebar .logo{width:38px;height:38px;flex-shrink:0}
+.titlebar .logo svg{width:100%;height:100%;display:block;border-radius:10px}
+.titlebar .tt{flex:1;min-width:0}
+.brand{font-size:20px;font-weight:800;line-height:1.2}
+.brand b{color:var(--gold);font-weight:800}
+.tag{font-size:11.5px;color:var(--mut)}
+.verchip{font-size:11px;border:1px solid var(--line2);color:var(--mut);border-radius:999px;padding:3px 10px;white-space:nowrap}
+/* ===== sections tabs ===== */
+.tabs{
+  position:sticky;top:59px;z-index:35;
+  display:flex;gap:2px;overflow-x:auto;
+  background:rgba(10,17,34,.94);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line);padding:0 12px;
+}
+.tabs button{
+  appearance:none;background:none;border:0;cursor:pointer;
+  color:var(--mut);padding:12px 14px;min-height:46px;white-space:nowrap;
+  border-bottom:2px solid transparent;
+}
+.tabs button.on{color:var(--txt);font-weight:700;border-bottom-color:var(--teal)}
+.wrap{max-width:1280px;margin:0 auto;padding:14px 14px 46px}
+.narrow{max-width:840px;margin:0 auto}
+/* ===== buttons ===== */
+.btn{appearance:none;border:1px solid var(--line2);background:#15213c;color:var(--txt);border-radius:10px;padding:9px 14px;cursor:pointer;min-height:40px}
+.btn:hover{border-color:var(--teal2)}
+.btn-primary{background:linear-gradient(180deg,#14b8a6,#0d9488);border-color:#0f766e;color:#04211d;font-weight:700}
+.btn-gold{background:linear-gradient(180deg,#fbbf24,#d97706);border-color:#b45309;color:#221503;font-weight:700}
+.btn-sec{background:#1b2a4d}
+.btn-ghost{background:transparent}
+.btn-danger{background:#3f1d1d;border-color:#7f1d1d;color:#fecaca}
+.btn.sm{padding:5px 10px;min-height:34px;font-size:13px;border-radius:8px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+/* ===== cards / shared ===== */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.card h2{margin:0 0 10px;font-size:17px}
+.card h2 .sub{display:block;font-size:12px;color:var(--mut);font-weight:400;margin-top:2px}
+.caption{font-size:12px;color:var(--mut);margin:8px 2px}
+.callout{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:13.5px;background:var(--panel2)}
+.callout b{display:block;margin-bottom:4px}
+.callout.note{border-color:#134e4a}
+.callout.note b{color:var(--teal)}
+.callout.warn{border-color:#713f12}
+.callout.warn b{color:var(--gold)}
+.field{margin-bottom:12px}
+.field>label{display:block;font-size:12.5px;color:var(--mut);margin-bottom:5px}
+.field input[type=text],.field input:not([type]),.field select{width:100%;background:#0b1425;border:1px solid var(--line2);border-radius:10px;padding:9px 12px;min-height:42px}
+.field input:focus,.field select:focus{outline:none;border-color:var(--teal)}
+.choices{display:flex;flex-wrap:wrap;gap:6px}
+.choices button{appearance:none;border:1px solid var(--line2);background:#0b1425;color:var(--mut);border-radius:999px;padding:7px 14px;cursor:pointer;min-height:38px}
+.choices button.on{background:rgba(45,212,191,.14);border-color:var(--teal);color:var(--teal);font-weight:700}
+.rows{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.row .main{flex:1;min-width:0}
+.row .name{font-weight:700}
+.row .meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:11.5px;color:var(--mut);margin-top:3px}
+.row .notes{font-size:12px;color:var(--mut);margin-top:3px}
+.row .actions{display:flex;gap:6px;flex-shrink:0}
+.badge{font-size:10.5px;border:1px solid var(--line2);border-radius:999px;padding:2px 8px;color:var(--mut)}
+.badge.kind{color:var(--gold);border-color:#713f12}
+.num{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;border-radius:8px;background:#15213c;color:var(--mut);font-size:12px}
+.fams{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.fam{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}
+.fam .head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.fam .nm{font-weight:800}
+.fam .ct{font-size:11px;color:var(--mut)}
+.fam .ds{font-size:12px;color:var(--mut);margin-top:6px}
+.drop{display:block;border:1.5px dashed var(--line2);border-radius:14px;padding:18px;text-align:center;cursor:pointer;margin-bottom:14px;background:rgba(45,212,191,.04)}
+.drop .t{display:block;font-weight:800}
+.drop .s{display:block;font-size:12px;color:var(--mut);margin-top:4px}
+.loader{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:var(--panel2)}
+.loader .head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:center}
+.loader .nm{font-weight:800}
+.loader .does{font-size:13px;color:var(--mut);margin-top:6px}
+ol.steps{margin:10px 0 0;padding:0 18px 0 0;font-size:13px}
+ol.steps li{margin-bottom:5px}
+.facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.fact{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.fact .k{font-size:11.5px;color:var(--mut)}
+.fact .v{font-size:20px;font-weight:800;margin-top:2px}
+.install{background:linear-gradient(135deg,#123047,#0d2b2a);border:1px solid #134e4a;border-radius:16px;padding:18px;margin-bottom:14px}
+.install p{font-size:13px;color:var(--mut);margin:6px 0 10px}
+.install .how{font-size:12px;color:var(--mut);margin-top:10px;border-top:1px dashed #134e4a;padding-top:10px}
+.hero{border-radius:16px;overflow:hidden;border:1px solid var(--line);margin-bottom:6px}
+.hero img{width:100%;display:block}
+.footer{margin-top:22px;font-size:11.5px;color:var(--mut);text-align:center;line-height:1.9}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#0d9488;color:#04211d;font-weight:700;border-radius:999px;padding:10px 20px;z-index:300;box-shadow:var(--shadow)}
+/* ===== channel editor ===== */
+.edhead{position:relative;overflow:hidden;border:1px solid var(--line2);border-radius:16px;background:linear-gradient(135deg,#16244a 0%,#0d1a33 60%,#0b1527 100%);padding:16px;margin-bottom:12px}
+.edhead .row1{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.edhead .ttl{flex:1;min-width:220px}
+.edhead h1{margin:0;font-size:19px;font-weight:800}
+.edhead h1 b{color:var(--gold)}
+.edhead .sub2{font-size:12px;color:var(--mut);margin-top:3px}
+.edhead .acts{display:flex;flex-wrap:wrap;gap:8px}
+.menubar{display:flex;gap:2px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:12px;position:relative;z-index:30}
+.menu{position:relative}
+.menu>button{appearance:none;background:none;border:0;color:var(--mut);padding:8px 14px;min-height:38px;border-radius:8px;cursor:pointer}
+.menu.open>button,.menu>button:hover{background:#15213c;color:var(--txt)}
+.drop-menu{position:absolute;top:calc(100% + 6px);right:0;min-width:260px;background:#0f1a30;border:1px solid var(--line2);border-radius:12px;box-shadow:var(--shadow);padding:6px;display:none;z-index:60}
+.menu.open .drop-menu{display:block}
+.drop-menu button{display:flex;width:100%;text-align:right;align-items:center;gap:8px;appearance:none;background:none;border:0;color:var(--txt);padding:9px 12px;border-radius:8px;cursor:pointer;font-size:13.5px}
+.drop-menu button:hover{background:#1a2a4d}
+.drop-menu .sep{height:1px;background:var(--line);margin:5px 8px}
+.seg{display:none;gap:6px;margin-bottom:10px}
+.seg button{flex:1;appearance:none;border:1px solid var(--line2);background:var(--panel2);color:var(--mut);border-radius:10px;padding:9px;cursor:pointer;font-weight:700}
+.seg button.on{background:rgba(45,212,191,.14);border-color:var(--teal);color:var(--teal)}
+.edgrid{display:grid;grid-template-columns:270px 370px 1fr;gap:12px;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.phead{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--panel2)}
+.phead h3{margin:0;font-size:15px;font-weight:800;flex:1}
+.phead h3::before{content:"";display:inline-block;width:4px;height:14px;background:var(--gold);border-radius:2px;margin-left:7px;vertical-align:-2px}
+.cnt{font-size:10.5px;background:#15213c;border:1px solid var(--line2);color:var(--mut);border-radius:999px;padding:2px 9px;white-space:nowrap}
+.psearch{padding:8px 10px;border-bottom:1px solid var(--line)}
+.psearch input{width:100%;background:#0b1425;border:1px solid var(--line2);border-radius:9px;padding:7px 10px;min-height:36px;font-size:13px}
+.psearch input:focus{outline:none;border-color:var(--teal)}
+.ptools{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;border-bottom:1px solid var(--line);align-items:center}
+.ptools select{background:#0b1425;border:1px solid var(--line2);border-radius:8px;padding:5px 8px;font-size:12px;min-height:32px}
+.chk{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--mut);cursor:pointer}
+.ptable{overflow:auto;max-height:480px;flex:1}
+table.grid{width:100%;border-collapse:collapse;font-size:13px}
+table.grid th{position:sticky;top:0;background:#0c1526;color:var(--mut);font-weight:500;font-size:11.5px;padding:7px 8px;border-bottom:1px solid var(--line2);text-align:right;white-space:nowrap;z-index:2}
+table.grid td{padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap;color:var(--txt)}
+table.grid tbody tr{cursor:pointer}
+table.grid tbody tr:hover{background:#13203c}
+table.grid tbody tr.sel{background:var(--sel)}
+table.grid td.cname{white-space:normal;min-width:130px;font-weight:600}
+table.grid .wname{font-weight:800;letter-spacing:.7px}
+.star{appearance:none;background:none;border:0;cursor:pointer;font-size:15px;color:#3b4a6e;padding:0 2px;line-height:1}
+.star.on{color:var(--gold)}
+body.compact table.grid td{padding:4px 8px;font-size:12px}
+body.boldtable table.grid td{font-weight:700}
+.pfoot{display:flex;flex-wrap:wrap;gap:6px;padding:9px 10px;border-top:1px solid var(--line);background:var(--panel2)}
+.statusbar{position:sticky;bottom:8px;z-index:30;display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;background:#0b1327;border:1px solid var(--line2);border-radius:12px;padding:8px 14px;margin-top:12px;font-size:12px;color:var(--mut);box-shadow:var(--shadow)}
+.statusbar .st{display:flex;align-items:center;gap:6px;color:var(--teal);font-weight:700}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--teal);display:inline-block}
+.dot.mod{background:var(--gold)}
+.statusbar .fname{margin-inline-start:auto;color:var(--gold);font-weight:700}
+/* ===== modal ===== */
+.mback{position:fixed;inset:0;background:rgba(3,7,18,.72);backdrop-filter:blur(3px);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{width:100%;max-width:470px;max-height:88vh;overflow:auto;background:#0f1a30;border:1px solid var(--line2);border-radius:16px;box-shadow:var(--shadow)}
+.mhead{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line)}
+.mhead h3{margin:0;font-size:16px;flex:1}
+.mx{appearance:none;background:#15213c;border:1px solid var(--line2);color:var(--mut);width:30px;height:30px;border-radius:8px;cursor:pointer}
+.mbody{padding:16px}
+.mfoot{display:flex;gap:8px;justify-content:flex-start;padding:12px 16px;border-top:1px solid var(--line)}
+.mnote{font-size:12px;color:var(--mut);margin-top:10px}
+/* ===== advanced drawer ===== */
+.dback{position:fixed;inset:0;background:rgba(3,7,18,.55);z-index:85;display:none}
+.dback.open{display:block}
+.drawer{position:fixed;top:0;bottom:0;left:0;width:min(360px,92vw);background:#0c1425;border-inline-end:1px solid var(--line2);z-index:90;transform:translateX(-105%);transition:transform .25s ease;display:flex;flex-direction:column}
+.drawer.open{transform:none}
+.drawer .dhead{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.drawer .dhead h3{margin:0;flex:1;font-size:16px}
+.drawer .dhead small{display:block;color:var(--mut);font-weight:400}
+.drawer .dbody{overflow:auto;padding:10px 14px;flex:1}
+.dgroup .gt{font-size:12.5px;color:var(--teal);font-weight:800;margin:14px 2px 8px}
+.ditem{display:block;width:100%;text-align:right;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:7px;cursor:pointer;color:var(--txt);font-size:13.5px}
+.ditem:hover{border-color:var(--teal2)}
+.ditem small{display:block;color:var(--mut);font-size:11px;margin-top:2px}
+.ditem.soon{opacity:.55;cursor:default}
+.ditem.soon:hover{border-color:var(--line)}
+.soonbadge{font-size:10px;border:1px solid #713f12;color:var(--gold);border-radius:999px;padding:1px 7px;margin-inline-start:6px}
+@media (max-width:980px){
+  .edgrid{grid-template-columns:1fr}
+  .seg{display:flex}
+  .panel{display:none}
+  .panel.active{display:flex}
+  .ptable{max-height:56vh}
+  .tabs{top:58px}
+}
+
+/* ===== home screen (receiver-style icon grid) ===== */
+.homehero{position:relative;overflow:hidden;border:1px solid var(--line2);border-radius:20px;padding:26px 18px 20px;margin-bottom:14px;background:radial-gradient(900px 400px at 85% -20%,#1d3a6e 0%,transparent 60%),radial-gradient(700px 500px at 10% 120%,#0d3b3a 0%,transparent 55%),linear-gradient(180deg,#0c1730,#0a1122)}
+.homehero::before{content:"";position:absolute;inset:0;background-image:radial-gradient(2px 2px at 20px 30px,rgba(255,255,255,.5) 50%,transparent 51%),radial-gradient(1.5px 1.5px at 70px 90px,rgba(255,255,255,.35) 50%,transparent 51%),radial-gradient(1.5px 1.5px at 130px 40px,rgba(255,255,255,.4) 50%,transparent 51%),radial-gradient(2px 2px at 200px 110px,rgba(255,255,255,.3) 50%,transparent 51%),radial-gradient(1.5px 1.5px at 260px 60px,rgba(255,255,255,.35) 50%,transparent 51%);background-size:300px 150px;opacity:.55}
+.homehero .inner{position:relative}
+.hometitle{font-size:34px;font-weight:800;margin:0;line-height:1.25}
+.hometitle b{color:var(--gold)}
+.hometag{color:var(--mut);font-size:13px;margin-top:5px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.tile{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:9px;text-decoration:none;color:#fff;border-radius:16px;padding:14px;min-height:112px;border:1px solid rgba(255,255,255,.14);overflow:hidden;box-shadow:var(--shadow)}
+.tile:hover{filter:brightness(1.12)}
+.tile .tic{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center}
+.tile .tic svg{width:26px;height:26px}
+.tile .tn{font-weight:800;font-size:15px}
+.tile .td{font-size:11px;color:rgba(255,255,255,.78)}
+.tile.teal{background:linear-gradient(135deg,#0d9488,#115e59)}
+.tile.gold{background:linear-gradient(135deg,#d97706,#92400e)}
+.tile.blue{background:linear-gradient(135deg,#2563eb,#1e3a8a)}
+.tile.purple{background:linear-gradient(135deg,#7c3aed,#4c1d95)}
+.tile.slate{background:linear-gradient(135deg,#334155,#0f172a)}
+</style>
+</head>
+<body>
+<div class="titlebar">
+  <span class="logo"><svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="شعار ابوجبل سات">
+    <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1a2c5a"/><stop offset="1" stop-color="#0b1226"/></linearGradient></defs>
+    <rect width="48" height="48" rx="11" fill="url(#lg)"/>
+    <path d="M12 31c6.5 0 12-5.5 12-12l-4.5-1c0 5-3.5 9-7.5 9z" fill="#2dd4bf"/>
+    <path d="M24.5 20.5l7-8" stroke="#e7edfa" stroke-width="2.4" stroke-linecap="round"/>
+    <circle cx="33.5" cy="10.5" r="2.3" fill="#e7edfa"/>
+    <path d="M37 8c2.6 1.7 2.6 5.3 0 7" fill="none" stroke="#f0b429" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M40.5 5.5c4.2 2.8 4.2 9.2 0 12" fill="none" stroke="#f0b429" stroke-width="1.8" stroke-linecap="round"/>
+    <rect x="9" y="35" width="17" height="4" rx="2" fill="#e7edfa"/>
+  </svg></span>
+  <span class="tt"><span class="brand">ابوجبل <b>سات</b></span><div class="tag">محرر القنوات الاحترافي للفنيين</div></span>
+  <span class="verchip">نسخة 3.0</span>
+</div>
+<nav class="tabs" id="tabs" aria-label="أقسام البرنامج"></nav>
+<main id="view" class="wrap"></main>
+<div id="modalRoot"></div>
+<script>
+'use strict';
+const FAMILIES = [
+  { id:'sunplus', name:'صن بلص', desc:'Sunplus - أشهر المعالجات في السوق المصري، زي 1506 و 2501 و 2507' },
+  { id:'vanilla', name:'فانيلا', desc:'بوردات صينية منتشرة، أغلبها مبني على معالجات صن بلص وليها سوفتاتها ومينوهاتها الخاصة' },
+  { id:'dachi',   name:'داكي',   desc:'قريبة من فانيلا ومنتشرة في الأجهزة الاقتصادية، وغالبًا على معالجات صن بلص بردو' },
+  { id:'ali',     name:'علي',    desc:'ALi - عائلة أقدم ومستقرة، منتشرة في أجهزة الميني HD الاقتصادية' },
+];
+const KINDS = ['سوفت وير','ملف قنوات','فلاشة كاملة','أخرى'];
+const CABLE_STEPS = [
+  'نزّل اللودر من المصدر وفك الضغط على الكمبيوتر.',
+  'وصّل الرسيفر بكابل الترقية RS232 وهو مطفي من الكهربا.',
+  'افتح اللودر، اختار موديل المعالج وحجم الفلاشة، وبعدها اختار ملف السوفت أو الفلاشة.',
+  'اضغط بدء الشحن ووصّل كهربا الرسيفر، واستنى لحد ما يوصل 100%. متفصلش الكابل ولا الكهربا في نص الشحن عشان الجهاز ميبوظش.',
+];
+const SD_STEPS = [
+  'حمّل السوفت أو ملف القنوات المناسب لموديل جهازك بالظبط.',
+  'حط الملف على كارت الـ SD في الأساس، من غير ما تحطه جوه أي فولدر.',
+  'ركّب الكارت في الرسيفر وهو مطفي، وبعدها شغّله من الكهربا.',
+  'من قائمة الترقية في الجهاز اختار الملف وابدأ التحميل، ومتسحبش الكارت غير بعد ما توصلك رسالة إن الشحن خلص.',
+];
+const LOADERS = [
+  { family:'sunplus', items:[
+    { name:'Sunplus Loader Tools 1506 / 1507 (v1.5.08)', does:'شحن السوفت وير وملف القنوات لمعالجات صن بلص 1506 و 1507.', conn:'كابل ترقية RS232', steps:CABLE_STEPS, src:'https://dwdvb.com/sunplus-loader-tools-1506-1507-v-1-5-08/', srcName:'dwdvb.com' },
+    { name:'اللودر الشامل لكل الصن بلص', does:'سحب وشحن الفلاشة 4 و 8 ميجا، وبيدعم أجهزة الداكي وفانيلا الجديد 1506 / 2507.', conn:'كابل ترقية RS232', steps:CABLE_STEPS, src:'https://www.amalqtsat.com/vb/showthread.php?t=35850', srcName:'منتديات عمالقة السات' },
+    { name:'لودرات صن بلص G / C / F / TV', does:'شحن الفلاشة حسب حرف المعالج: G أو C أو F أو TV، كل حرف ليه لودره.', conn:'كابل ترقية RS232', steps:CABLE_STEPS, src:'https://masrysat.com/threads/570/', srcName:'منتدى مصرى سات' },
+  ]},
+  { family:'vanilla', items:[
+    { name:'اللودر المعدل لفانيلا 1507G', does:'تحميل السوفت وير والفلاشات لأجهزة فانيلا 1507G فلاشة 8 ميجا.', conn:'كابل ترقية RS232', steps:CABLE_STEPS, src:'https://masrawysat.com/vb/showthread.php?t=3060294', srcName:'منتدى مصراوى سات' },
+    { name:'اللودر الشامل لكل الصن بلص', does:'بيدعم فانيلا الجديد 1506 / 2507 جنب الداكي، فبيغطي أغلب أجهزة فانيلا المنتشرة.', conn:'كابل ترقية RS232', steps:CABLE_STEPS, src:'https://www.amalqtsat.com/vb/showthread.php?t=35850', srcName:'منتديات عمالقة السات' },
+  ]},
+  { family:'dachi', items:[
+    { name:'لودر شحن فلاشات داكي 2507L', does:'شحن فلاشة أجهزة داكي اللي شغالة بمعالج 2507L.', conn:'كابل ترقية RS232', steps:CABLE_STEPS, src:'https://masrysat.com/threads/4696/', srcName:'منتدى مصرى سات' },
+    { name:'اللودر الشامل لكل الصن بلص', does:'بيدعم الداكي 1506 / 2507 مع فانيلا الجديد، وهو الأشهر لشحن أجهزة داكي.', conn:'كابل ترقية RS232', steps:CABLE_STEPS, src:'https://www.amalqtsat.com/vb/showthread.php?t=35850', srcName:'منتديات عمالقة السات' },
+  ]},
+  { family:'ali', items:[
+    { name:'لودر علي SD (الشعبي)', does:'الأشهر للأجهزة الميني HD الصينية بمعالج ALi SD زي 3606: بيشحن السوفت وير وملف القنوات عن طريق كارت الميموري SD من غير كمبيوتر، أو بكابل الترقية.', conn:'كارت SD أو كابل الترقية', steps:SD_STEPS, src:'https://www.migosat.com/2025/09/ali-sd.html', srcName:'migosat.com' },
+    { name:'STB EROM Upgrade', does:'حل مشاكل سوفتات معالجات ALi: شحن وسحب الفلاشة وإنقاذ الجهاز بعد سوفت غلط أو لمبة حمرا.', conn:'كابل ترقية RS232', steps:CABLE_STEPS, src:'https://www.east-sat.com/loader-stb-erom-upgrade-tool-free-download/', srcName:'east-sat.com' },
+    { name:'لودرات ALi 3510C / 3510D و 3511 / 3516 / 3606', does:'شحن وسحب الفلاشات العنيدة (زي فلاشات boyamicro) لموديلات علي المختلفة.', conn:'كابل ترقية RS232', steps:CABLE_STEPS, src:'https://www.amalqtsat.com/vb/showthread.php?t=6775', srcName:'منتديات عمالقة السات' },
+  ]},
+];
+const LOADER_TOTAL = LOADERS.reduce((n,g)=>n+g.items.length,0);
+/* ================= التحديثات: سوفتات وتحويلات وملفات قنوات ================= */
+/* الملفات بتترفع على مستودع البرنامج نفسه (مجلد dl/ جنب البرنامج)، فالتحميل مباشر من جوه
+   البرنامج بدون تسجيل ولا منتديات خارجية. entry.dl فاضي معناه: لسه في قايمة الرفع. */
+const UPD_TYPES=['الكل','سوفت وير','تحويل','ملف قنوات'];
+const UPDATES=[
+  { type:'سوفت وير', name:'سوفتات صن بلص 1506 / 1507 / 2507', family:'sunplus', note:'الأصلية والمعدلة لأجهزة الداكي وفانيلا والشعبي، بالسيرفرات والإضافات', dl:null },
+  { type:'سوفت وير', name:'سوفتات GX6605 (فوريفر / كيوماكس / المنيو الذهبي)', note:'سوفتات عائلة الجي اكس بموديلاتها', dl:null },
+  { type:'سوفت وير', name:'سوفتات علي ALi 3510 / 3511 / 3516 / 3606', family:'ali', note:'لأجهزة الميني HD الاقتصادية', dl:null },
+  { type:'سوفت وير', name:'فلاشات كاملة جاهزة 4 و 8 ميجا', note:'فلاشات مسحوبة وجاهزة للشحن باللودر حسب الموديل', dl:null },
+  { type:'تحويل', name:'تحويلات داكي ↔ فانيلا (نفس المعالج)', family:'sunplus', note:'تحويل السوفت بين الأجهزة اللي شغالة على نفس المعالج', dl:null },
+  { type:'تحويل', name:'تحويلات الشعبي والكومبو صن بلص', family:'sunplus', note:'مينوهات وسوفتات محولة للأجهزة الشعبي والكومبو', dl:null },
+  { type:'ملف قنوات', name:'ملف قنوات نايل سات مرتب (داكي / فانيلا / شعبي)', family:'sunplus', note:'ترتيب محدث بالترددات الجديدة، بيتجدد باستمرار', dl:null },
+  { type:'ملف قنوات', name:'ملفات قنوات GX6605 وعلي ALi جاهزة', note:'ملفات مرتبة بالصيغ اللي بتقبلها الأجهزة دي', dl:null },
+];
+let updFilter='الكل';
+function viewUpdates(){
+  const shown=UPDATES.filter(u=>updFilter==='الكل'||u.type===updFilter);
+  const ready=UPDATES.filter(u=>u.dl).length;
+  return '<div class="callout note"><b>قسم التحديثات بيتجدد باستمرار</b>سوفتات وتحويلات وملفات قنوات بتترفع تباعاً على مستودع البرنامج نفسه، فالتحميل بيكون مباشر من جوه البرنامج بضغطة واحدة: من غير تسجيل ولا منتديات خارجية. اللي لسه بيترفع حالته «قريباً».</div>'+
+  '<div class="card"><h2>التحديثات<span class="sub">'+ready+' من '+UPDATES.length+' جاهزين للتحميل المباشر دلوقتي</span></h2>'+
+  '<div class="choices" id="updFilter">'+
+    UPD_TYPES.map(t=>'<button type="button" data-v="'+t+'" class="'+(updFilter===t?'on':'')+'">'+t+'</button>').join('')+'</div></div>'+
+  '<div class="card">'+
+  shown.map(u=>'<div class="loader"><div class="head"><span class="nm">'+esc(u.name)+'</span><span class="badge">'+esc(u.type)+(u.family?' · '+esc(familyName(u.family)):'')+'</span></div>'+
+    (u.note?'<div class="does">'+esc(u.note)+'</div>':'')+
+    '<div style="margin-top:10px">'+(u.dl?
+      '<a class="btn btn-primary" href="'+esc(u.dl)+'" download>⬇ تحميل مباشر'+(u.size?' ('+esc(u.size)+')':'')+'</a>':
+      '<span class="badge">⏳ قريباً، في قايمة الرفع</span>')+'</div></div>').join('')+
+  '</div>'+
+  '<div class="card"><h2>محتاج ملف معين؟</h2><p>لو محتاج سوفت أو تحويلة أو ملف قنوات باسمه ومعالجه، ابعته وهيتضاف لقايمة الرفع بأولوية، وأول ما يترفع هيظهر هنا بزرار تحميل مباشر.</p></div>';
+}
+function bindUpdates(){
+  const f=$('#updFilter');
+  if(f) f.addEventListener('click',e=>{ const b=e.target.closest('button'); if(b){ updFilter=b.dataset.v; render(); } });
+}
+/* ================= editor data ================= */
+const CATS=['الكل','ديني','أطفال','رياضي','دراما','أخبار','أفلام','موسيقى','وثائقي','ترفيه','تعليم','دولي','محلي','أخرى'];
+const FORMATS=[
+  'داكي V1 قديم','داكي V2 جديد','داكي V3 جديد',
+  'فانيلا ال ام قديم','فانيلا ال ام جديد','فانيلا v2 جديد','فانيلا v3 جديد',
+  'الأجهزة الشعبي','كومبو داكي 4 ميجا','كومبو داكي 8 ميجا','داكي كومبو مالتي ستريم',
+  'كومبو فانيلا 8 ميجا','كومبو فانيلا 2517','PUB EVB V1','1200S',
+  'جي اكس كيوماكس قديم','جي اكس كيوماكس جديد','جي اكس فوريفر 6605H',
+  'جي اكس فوريفر (chl)','جي اكس فوريفر (sdx)','جي اكس المنيو الذهبي',
+  'جي اكس H3/H5/H6/H7','توين','بي أوت كيو'
+];
+function seedEditor(){
+  const sats=[
+    ['نايل سات','7.0W'],['عموس 4','4.0W'],['إنتلسات 3','3.0E'],['الأوربي 13','13.0E'],
+    ['أسترا 19','19.0E'],['إنتلسات 9','9.0E'],['إنتلسات 16','16.0E'],['بدر سهيل','26.0E'],
+    ['تركسات 42','42.0E'],['عرب 30','30.5E'],['ياه سات 52','52.0E'],['النور 1','1.0W']
+  ].map((a,i)=>({ id:'sat'+(i+1), name:a[0], pos:a[1] }));
+  const tps=[
+    ['12226','27500','V','Network 2'],['11919','27500','H','SBA'],
+    ['12284','27500','V','Nilesat'],['12206','27500','V','Nilesat'],
+    ['11430','27500','V',''],['11488','27500','H',''],
+    ['10853','27500','H',''],['11862','27500','V',''],
+    ['11393','27500','V',''],['12073','27500','V','']
+  ].map((a,i)=>({ id:'tp'+(i+1), satId:'sat1', freq:a[0], sr:a[1], pol:a[2], prov:a[3] }));
+  const tv=['مصر قرآن|ديني','مكة المكرمة|ديني','المدينة المنورة|ديني','أفريقيا قرآن|ديني','قطر قرآن|ديني','الشارقة قرآن|ديني','الرحمة|ديني',
+    'النهار|ترفيه','سي بي سي|ترفيه','سي بي سي دراما|دراما','أون|ترفيه','أون دراما|دراما','إم بي سي مصر|ترفيه','إم بي سي مصر 2|ترفيه',
+    'الحياة|ترفيه','الحياة دراما|دراما','المحور|ترفيه','صدى البلد|أخبار','صدى البلد 2|أخبار','TEN|أخبار','القاهرة والناس|ترفيه','دي إم سي|ترفيه',
+    'ماسبيرو زمان|دراما','نايل دراما|دراما','نايل سينما|أفلام','نايل لايف|ترفيه','النيل للأخبار|أخبار',
+    'روتانا سينما|أفلام','روتانا خليجية|ترفيه','روتانا كلاسيك|موسيقى','ذكريات زمان|موسيقى',
+    'سعودية سبورت 1|رياضي','سعودية سبورت 2|رياضي','أبوظبي الرياضية|رياضي','أون تايم سبورت|رياضي',
+    'الإخبارية|أخبار','السعودية|دولي','طيور الجنة|أطفال','طيور بيبي|أطفال','سبيستون|أطفال','ماجد|أطفال','كرتون نتورك بالعربية|أطفال',
+    'الشاشة أفلام|أفلام','بيروت أفلام|أفلام','ميلودي أفلام|أفلام','شبابيك مسلسلات|دراما','الوثائقية|وثائقي','ناشيونال جيوغرافيك|وثائقي'];
+  const radio=['إذاعة القرآن الكريم','راديو مصر','نجوم إف إم','راديو 90 90','إذاعة الأغاني','البرنامج العام'];
+  const chs=[];
+  let no=1, sid=101;
+  tv.forEach((entry,i)=>{
+    const p=entry.split('|');
+    const tp=tps[i%tps.length];
+    chs.push({ id:'c'+(i+1), satId:'sat1', tpId:tp.id, no:no++, name:p[0], type:'TV', cat:p[1]||'أخرى', sid:sid, pid:sid+100, pmt:sid+200, wide:false, fav:false });
+    sid+=7;
+  });
+  radio.forEach((nm,i)=>{
+    const tp=tps[(i*3)%tps.length];
+    chs.push({ id:'r'+(i+1), satId:'sat1', tpId:tp.id, no:no++, name:nm, type:'راديو', cat:'موسيقى', sid:sid, pid:sid+100, pmt:sid+200, wide:false, fav:false });
+    sid+=7;
+  });
+  return { sats, tps, chs, fileName:'قنوات نايل سات - ابوجبل سات', dirty:false };
+}
+/* editor UI state */
+let edSat='all', edTp=null, edCh=null;
+let satQ='', tpQ='', chQ='', chType='الكل', chCat='الكل', chSort='file';
+let edPanel='ch';
+/* ================= helpers ================= */
+const $ = (sel, el) => (el||document).querySelector(sel);
+function esc(s){ return String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function uid(){ try{ return crypto.randomUUID(); }catch(e){ return 'id-'+Date.now()+'-'+Math.floor(Math.random()*1e6); } }
+function fmtSize(n){
+  if(!n) return '';
+  if(n>=1048576) return (n/1048576).toFixed(1)+' ميجابايت';
+  if(n>=1024) return Math.round(n/1024)+' كيلوبايت';
+  return n+' بايت';
+}
+function fmtDate(iso){
+  try{ return new Date(iso).toLocaleDateString('ar-EG-u-nu-latn',{day:'numeric',month:'long'}); }catch(e){ return ''; }
+}
+function familyName(id){ const f=FAMILIES.find(f=>f.id===id); return f?f.name:id; }
+function toast(msg){
+  const t=document.createElement('div'); t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(),2200);
+}
+function moveItem(arr, index, dir){
+  const next=arr.slice(); const target=index+dir;
+  if(target<0||target>=next.length) return next;
+  const item=next.splice(index,1)[0]; next.splice(target,0,item); return next;
+}
+/* ================= storage ================= */
+const LS_CATALOG='ajs.catalog.v1';
+const LS_EDITOR='ajs.editor.v1';
+function loadLS(key, fallback){
+  try{ const raw=localStorage.getItem(key); return raw?JSON.parse(raw):fallback; }catch(e){ return fallback; }
+}
+function saveLS(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
+let catalog = loadLS(LS_CATALOG, []);
+let editor  = loadLS(LS_EDITOR, seedEditor());
+/* IndexedDB: الملفات نفسها بتتخزن جوه البرنامج هنا */
+let db=null;
+function openDB(){
+  return new Promise((resolve)=>{
+    if(!('indexedDB' in window)) return resolve(null);
+    const req=indexedDB.open('abujabal-sat',1);
+    req.onupgradeneeded=()=>{ req.result.createObjectStore('files'); };
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>resolve(null);
+  });
+}
+function idbPut(id, blob){
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction('files','readwrite');
+    tx.objectStore('files').put(blob,id);
+    tx.oncomplete=()=>resolve(); tx.onerror=()=>reject(tx.error);
+  });
+}
+function idbGet(id){
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction('files','readonly');
+    const rq=tx.objectStore('files').get(id);
+    rq.onsuccess=()=>resolve(rq.result||null); rq.onerror=()=>reject(rq.error);
+  });
+}
+function idbDel(id){
+  return new Promise((resolve)=>{
+    const tx=db.transaction('files','readwrite');
+    tx.objectStore('files').delete(id);
+    tx.oncomplete=()=>resolve(); tx.onerror=()=>resolve();
+  });
+}
+function downloadBlob(blob, name){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=name||'file';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),4000);
+}
+/* ================= router ================= */
+const TABS=[
+  { path:'/',        label:'الرئيسية' },
+  { path:'/editor',  label:'المحرر' },
+  { path:'/library', label:'المكتبة' },
+  { path:'/loaders', label:'اللودرات' },
+  { path:'/updates', label:'التحديثات' },
+  { path:'/convert', label:'التحويل' },
+  { path:'/about',   label:'حول البرنامج' },
+];
+function currentPath(){
+  const h=location.hash.replace(/^#/,'');
+  return TABS.some(t=>t.path===h)?h:'/';
+}
+function go(path){ if(location.hash==='#'+path) render(); else location.hash=path; }
+function renderTabs(){
+  const p=currentPath();
+  $('#tabs').innerHTML=TABS.map(t=>
+    '<button type="button" data-tab="'+t.path+'" class="'+(t.path===p?'on':'')+'">'+t.label+'</button>'
+  ).join('');
+}
+/* ================= modal & menus ================= */
+function openModal(title, bodyHtml, okLabel, onOk){
+  const root=$('#modalRoot');
+  root.innerHTML='<div class="mback"><div class="modal" role="dialog" aria-modal="true">'+
+    '<div class="mhead"><h3>'+title+'</h3><button type="button" class="mx" data-mclose aria-label="إغلاق">✕</button></div>'+
+    '<div class="mbody">'+bodyHtml+'</div>'+
+    (okLabel?'<div class="mfoot"><button type="button" class="btn btn-primary" data-mok>'+okLabel+'</button>'+
+    '<button type="button" class="btn btn-ghost" data-mclose>إلغاء</button></div>':'')+
+    '</div></div>';
+  root.querySelectorAll('[data-mclose]').forEach(b=>b.addEventListener('click',()=>{ root.innerHTML=''; }));
+  root.querySelector('.mback').addEventListener('click',e=>{ if(e.target.classList.contains('mback')) root.innerHTML=''; });
+  const ok=root.querySelector('[data-mok]');
+  if(ok) ok.addEventListener('click',()=>{ if(!onOk || onOk(root.querySelector('.modal'))!==false) root.innerHTML=''; });
+}
+function closeMenus(){ document.querySelectorAll('.menu.open').forEach(m=>m.classList.remove('open')); }
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.menu')) closeMenus();
+});
+/* ================= install (PWA) ================= */
+let deferredInstall=null;
+const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault(); deferredInstall=e;
+  const b=$('#installBtn'); if(b) b.disabled=false;
+  render();
+});
+async function doInstall(){
+  if(deferredInstall){
+    deferredInstall.prompt();
+    try{ await deferredInstall.userChoice; }catch(e){}
+    deferredInstall=null; render();
+  }
+}
+function installCard(){
+  if(standalone){
+    return '<div class="install"><b>البرنامج متثبت على جهازك ✅</b><p>شغال دلوقتي من أيقونته، ملء الشاشة، وبياناتك وملفاتك محفوظة جواه.</p></div>';
+  }
+  let how='';
+  if(isIOS){
+    how='<div class="how">على الآيفون: افتح اللينك في سفاري، اضغط زرار المشاركة (المربع اللي فيه سهم)، وبعدها <b>إضافة إلى الشاشة الرئيسية</b>. البرنامج هيتثبت بأيقونته ويفتح ملء الشاشة.</div>';
+  } else if(/android/i.test(navigator.userAgent)){
+    how='<div class="how">على أندرويد: لو زرار التثبيت مظهرش، افتح قائمة المتصفح ⋮ واختار <b>تثبيت التطبيق</b> أو <b>إضافة إلى الشاشة الرئيسية</b>.</div>';
+  } else {
+    how='<div class="how">على الكمبيوتر: لو زرار التثبيت مظهرش، هتلاقي أيقونة تثبيت في شريط العنوان فوق (في كروم)، أو من قائمة المتصفح اختار <b>Install / تثبيت</b>.</div>';
+  }
+  return '<div class="install"><b>ثبّت ابوجبل سات على جهازك</b>'+
+    '<p>بيتثبت بأيقونته الخاصة ويفتح ملء الشاشة زي أي برنامج، من غير شريط المتصفح، وبيشتغل بعدها حتى من غير نت.</p>'+
+    '<button type="button" id="installBtn" class="btn btn-sec" '+(deferredInstall?'':'disabled')+'>ثبّت البرنامج</button>'+
+    how+'</div>';
+}
+let libFilter='all';
+let regState={ name:'', size:0, file:null, family:'sunplus', kind:KINDS[0], place:'', notes:'' };
+let confirmDel='';
+function viewLibrary(){
+  const counts={}; for(const f of catalog) counts[f.family]=(counts[f.family]||0)+1;
+  let html='<div class="card"><h2>عائلات المعالجات<span class="sub">مكتبتك مرتبة على العائلات الأربع اللي بتشتغل عليها، وكل عائلة ليها ملفاتها</span></h2>'+
+  '<div class="fams">'+FAMILIES.map(f=>
+    '<div class="fam"><div class="head"><span class="nm">'+f.name+'</span><span class="ct">'+((counts[f.id]||0)===0?'لسه فاضي':counts[f.id]+' ملف')+'</span></div><div class="ds">'+f.desc+'</div></div>'
+  ).join('')+'</div>'+
+  '<div class="caption">ملخص العائلات من واقع منتديات السات المصرية، وهيتوسع بالتفاصيل اللي هتسجلها بنفسك.</div></div>';
+  html+='<div class="callout note"><b>في النسخة دي الملفات بتتخزن جوه البرنامج فعلًا</b>لما تختار سوفت أو ملف قنوات، البرنامج بيحفظه جواه على جهازك، وتقدر تنزّله منه تاني في أي وقت. الحفظ على الجهاز ده بس: لو وصلت بفلاشة أو جهاز بكابل OTG، نسخة تطبيق الموبايل الأصلية هي اللي هتتعامل معاها مباشرة، ودي على الخطة.</div>';
+  html+='<div class="card"><h2>سجّل ملف</h2>'+
+    '<label class="drop"><input type="file" id="pickFile" class="hidden-input" aria-label="اختار الملف من جهازك عشان يتخزن جوه البرنامج">'+
+    '<span class="t">اختار الملف من جهازك</span><span class="s">سوفت وير، ملف قنوات، أو فلاشة - هيتحفظ جوه البرنامج نفسه</span></label>'+
+    (regState.size>0?'<div class="caption" style="margin:-6px 0 10px">حجم الملف المختار: '+fmtSize(regState.size)+'</div>':'')+
+    '<div class="field"><label>اسم الملف في المكتبة</label><input type="text" id="fName" value="'+esc(regState.name)+'"></div>'+
+    '<div class="field"><label>عائلة المعالج</label><div class="choices" id="fFamily">'+FAMILIES.map(f=>'<button type="button" data-v="'+f.id+'" class="'+(regState.family===f.id?'on':'')+'">'+f.name+'</button>').join('')+'</div></div>'+
+    '<div class="field"><label>نوع الملف</label><div class="choices" id="fKind">'+KINDS.map(k=>'<button type="button" data-v="'+k+'" class="'+(regState.kind===k?'on':'')+'">'+k+'</button>').join('')+'</div></div>'+
+    '<div class="field"><label>مكان النسخة الأصلية عندك (فلاشة USB، فولدر على الموبايل، هارد الكمبيوتر)</label><input type="text" id="fPlace" value="'+esc(regState.place)+'"></div>'+
+    '<div class="field"><label>ملاحظات (الموديل، الإصدار، أي حاجة تفرق معاك)</label><input type="text" id="fNotes" value="'+esc(regState.notes)+'"></div>'+
+    '<button type="button" id="saveFile" class="btn btn-primary">سجّل وخزّن في المكتبة</button></div>';
+  /* list */
+  const shown=(libFilter==='all'?catalog:catalog.filter(f=>f.family===libFilter)).slice().sort((a,b)=>String(b.addedAt).localeCompare(String(a.addedAt)));
+  html+='<div class="card"><h2>ملفاتك المسجلة</h2>';
+  if(catalog.length===0){
+    html+='<div class="callout note"><b>مكتبتك فاضية لسه</b>سجّل أول سوفت وير أو ملف قنوات من الفورم اللي فوق، وهيتحفظ جوه البرنامج هنا مرتب حسب العائلة والنوع.</div>';
+  } else {
+    html+='<div class="field"><label>عرض</label><div class="choices" id="libFilter">'+
+      '<button type="button" data-v="all" class="'+(libFilter==='all'?'on':'')+'">الكل</button>'+
+      FAMILIES.map(f=>'<button type="button" data-v="'+f.id+'" class="'+(libFilter===f.id?'on':'')+'">'+f.name+'</button>').join('')+'</div></div>';
+    html+='<div class="rows">'+shown.map(f=>
+      '<div class="row"><div class="main"><div class="name">'+esc(f.name)+'</div>'+
+      '<div class="meta"><span class="badge">'+familyName(f.family)+'</span><span class="badge kind">'+esc(f.kind)+'</span>'+
+      (f.size>0?'<span>'+fmtSize(f.size)+'</span>':'')+
+      (f.hasFile?'<span class="badge">متخزن جوه البرنامج</span>':'')+
+      '<span>'+fmtDate(f.addedAt)+'</span></div>'+
+      (f.place?'<div class="notes">مكان الأصل: '+esc(f.place)+'</div>':'')+
+      (f.notes?'<div class="notes">'+esc(f.notes)+'</div>':'')+'</div>'+
+      '<div class="actions">'+
+      (f.hasFile?'<button type="button" class="btn btn-sec sm" data-dl="'+f.id+'">نزّل الملف</button>':'')+
+      (confirmDel===f.id
+        ?'<button type="button" class="btn btn-danger sm" data-del-confirm="'+f.id+'">تأكيد المسح؟</button>'
+        :'<button type="button" class="btn btn-ghost sm" data-del="'+f.id+'">مسح</button>')+
+      '</div></div>'
+    ).join('')+'</div>';
+  }
+  html+='</div>';
+  return html;
+}
+function bindLibrary(){
+  const pick=$('#pickFile');
+  if(pick) pick.addEventListener('change',()=>{
+    const f=pick.files&&pick.files[0];
+    if(f){ regState.file=f; regState.size=f.size; if(!regState.name) regState.name=f.name; render(); }
+  });
+  const nf=$('#fName'); if(nf) nf.addEventListener('input',()=>regState.name=nf.value);
+  const pf=$('#fPlace'); if(pf) pf.addEventListener('input',()=>regState.place=pf.value);
+  const tf=$('#fNotes'); if(tf) tf.addEventListener('input',()=>regState.notes=tf.value);
+  const fam=$('#fFamily'); if(fam) fam.addEventListener('click',e=>{ const b=e.target.closest('button'); if(b){ regState.family=b.dataset.v; render(); } });
+  const kind=$('#fKind'); if(kind) kind.addEventListener('click',e=>{ const b=e.target.closest('button'); if(b){ regState.kind=b.dataset.v; render(); } });
+  const lf=$('#libFilter'); if(lf) lf.addEventListener('click',e=>{ const b=e.target.closest('button'); if(b){ libFilter=b.dataset.v; confirmDel=''; render(); } });
+  const save=$('#saveFile');
+  if(save) save.addEventListener('click', async ()=>{
+    const name=(regState.name||'').trim();
+    if(!name){ toast('اكتب اسم الملف أو اختاره من جهازك الأول'); return; }
+    const entry={ id:uid(), name, family:regState.family, kind:regState.kind,
+      place:(regState.place||'').trim(), notes:(regState.notes||'').trim(),
+      size:regState.size||0, addedAt:new Date().toISOString(), hasFile:false };
+    if(regState.file && db){
+      try{ await idbPut(entry.id, regState.file); entry.hasFile=true; }
+      catch(e){ toast('الملف اتسجل، بس متخزنش جوه البرنامج'); }
+    }
+    catalog=catalog.concat([entry]); saveLS(LS_CATALOG,catalog);
+    regState={ name:'', size:0, file:null, family:regState.family, kind:regState.kind, place:'', notes:'' };
+    toast('اتسجل في المكتبة: '+name);
+    render();
+  });
+  document.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{ confirmDel=b.dataset.del; render(); }));
+  document.querySelectorAll('[data-del-confirm]').forEach(b=>b.addEventListener('click', async ()=>{
+    const id=b.dataset.delConfirm;
+    catalog=catalog.filter(f=>f.id!==id); saveLS(LS_CATALOG,catalog);
+    if(db) await idbDel(id);
+    confirmDel=''; toast('اتمسح'); render();
+  }));
+  document.querySelectorAll('[data-dl]').forEach(b=>b.addEventListener('click', async ()=>{
+    if(!db) return;
+    const entry=catalog.find(f=>f.id===b.dataset.dl);
+    try{
+      const blob=await idbGet(b.dataset.dl);
+      if(blob) downloadBlob(blob, entry?entry.name:'file');
+      else toast('الملف مش متخزن جوه البرنامج');
+    }catch(e){ toast('حصلت مشكلة في قراءة الملف'); }
+  }));
+}
+/* ---- loaders ---- */
+let loadersFilter='all';
+function viewLoaders(){
+  const shown=LOADERS.filter(g=>loadersFilter==='all'||g.family===loadersFilter);
+  return '<div class="callout warn"><b>اللودرات برامج ويندوز بتشتغل بره النظام</b>اللودر نفسه برنامج بيتثبت على الكمبيوتر وبيشحن الجهاز بكابل الترقية أو بكارت الـ SD، فمش بيشتغل جوه البرنامج ده. القسم ده مرجع منظم ليك: كل لودر بيشحن إيه، خطوات استخدامه بالترتيب، ومصدر تحميله من منتديات السات.</div>'+
+  '<div class="callout note"><b>تحميل مباشر من البرنامج</b>جاري نقل اللودرات والمرفقات على مستودع البرنامج نفسه: تنزل بضغطة واحدة من هنا من غير تسجيل ولا منتديات خارجية. اللي اتنقل هيظهرله زرار «تحميل مباشر»، ولحد ما يتنقل، لينك المصدر موجود زي ما هو.</div>'+
+  '<div class="card"><h2>اختار العائلة<span class="sub">كل اللودرات اللي بتشغلها في شغلك مرتبة حسب عائلة المعالج، ومنها لودر علي SD الشعبي</span></h2>'+
+  '<div class="choices" id="loadersFilter">'+
+    '<button type="button" data-v="all" class="'+(loadersFilter==='all'?'on':'')+'">الكل</button>'+
+    FAMILIES.map(f=>'<button type="button" data-v="'+f.id+'" class="'+(loadersFilter===f.id?'on':'')+'">'+f.name+'</button>').join('')+'</div>'+
+  '<div class="caption">المرجع فيه '+LOADER_TOTAL+' لودرات بمصادرها، متجمعة من منتديات السات المصرية والعربية، 26 نوفمبر 2026.</div></div>'+
+  shown.map(g=>'<div class="card"><h2>لودرات '+familyName(g.family)+'</h2>'+
+    g.items.map(l=>'<div class="loader"><div class="head"><span class="nm">'+esc(l.name)+'</span><span class="badge">'+l.conn+'</span></div>'+
+      '<div class="does">'+esc(l.does)+'</div>'+
+      '<ol class="steps">'+l.steps.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ol>'+
+      '<div style="margin-top:10px;display:flex;gap:12px;flex-wrap:wrap;align-items:center">'+
+      (l.dl?'<a class="btn btn-primary" href="'+esc(l.dl)+'" download>⬇ تحميل مباشر</a>':'')+
+      '<a href="'+l.src+'" target="_blank" rel="noopener">'+(l.dl?'المصدر والشرح: ':'مصدر التحميل والشرح: ')+esc(l.srcName)+'</a></div></div>'
+    ).join('')+'</div>'
+  ).join('')+
+  '<div class="card"><h2>نصايح الشحن</h2><ol class="steps">'+
+    '<li>اتأكد إن السوفت أو الفلاشة مطابقين لموديل جهازك ومعالجه بالظبط قبل أي شحن، سوفت غلط ممكن يوقف الجهاز خالص.</li>'+
+    '<li>لو الجهاز وقع بعد سوفت غلط وطلعلك لمبة حمرا، لودر زي STB EROM Upgrade هو طريق الإنقاذ بكابل الترقية.</li>'+
+    '<li>سجّل كل لودر بتنزله في المكتبة بمكانه عندك، عشان تلاقيه بسرعة لما تحتاجه في الورشة.</li>'+
+  '</ol></div>';
+}
+function bindLoaders(){
+  const lf=$('#loadersFilter');
+  if(lf) lf.addEventListener('click',e=>{ const b=e.target.closest('button'); if(b){ loadersFilter=b.dataset.v; render(); } });
+}
+/* ================= channel editor ================= */
+function satById(id){ return editor.sats.find(s=>s.id===id); }
+function tpById(id){ return editor.tps.find(t=>t.id===id); }
+function chById(id){ return editor.chs.find(c=>c.id===id); }
+function markDirty(){ editor.dirty=true; saveLS(LS_EDITOR,editor); }
+function edCounts(){
+  return { sats:editor.sats.length, tps:editor.tps.length,
+    tv:editor.chs.filter(c=>c.type!=='راديو').length,
+    radio:editor.chs.filter(c=>c.type==='راديو').length };
+}
+function visSats(){
+  const q=satQ.trim();
+  return editor.sats.filter(s=>!q||s.name.includes(q)||(s.pos||'').includes(q));
+}
+function visTps(){
+  const q=tpQ.trim();
+  return editor.tps.filter(t=>(edSat==='all'||t.satId===edSat)&&(!q||t.freq.includes(q)||t.sr.includes(q)||(t.prov||'').includes(q)));
+}
+function visChs(){
+  const q=chQ.trim();
+  let arr=editor.chs.filter(c=>
+    (edSat==='all'||c.satId===edSat)&&
+    (!edTp||c.tpId===edTp)&&
+    (chType==='الكل'||(chType==='مفضلة'?c.fav:c.type===chType))&&
+    (chCat==='الكل'||c.cat===chCat)&&
+    (!q||c.name.includes(q)||String(c.no)===q));
+  if(chSort==='no-asc') arr=arr.slice().sort((a,b)=>a.no-b.no);
+  else if(chSort==='no-desc') arr=arr.slice().sort((a,b)=>b.no-a.no);
+  else if(chSort==='name') arr=arr.slice().sort((a,b)=>a.name.localeCompare(b.name,'ar'));
+  return arr;
+}
+function satRowsHtml(){
+  const rows=[{id:'all',name:'(الكل)',pos:''}].concat(visSats());
+  return rows.map(s=>'<tr data-act="sat-sel" data-id="'+s.id+'" class="'+(edSat===s.id?'sel':'')+'"><td class="cname">'+esc(s.name)+'</td><td dir="ltr">'+esc(s.pos||'')+'</td></tr>').join('');
+}
+function tpRowsHtml(){
+  return visTps().map(t=>'<tr data-act="tp-sel" data-id="'+t.id+'" class="'+(edTp===t.id?'sel':'')+'">'+
+    '<td dir="ltr">'+esc(t.freq)+'</td><td dir="ltr">'+esc(t.sr)+'</td><td>'+esc(t.pol||'V')+'</td><td>'+esc(t.prov||'—')+'</td></tr>').join('');
+}
+function chRowsHtml(){
+  return visChs().map(c=>{
+    const tp=tpById(c.tpId);
+    return '<tr data-act="ch-sel" data-id="'+c.id+'" class="'+(edCh===c.id?'sel':'')+'">'+
+    '<td>'+c.no+'</td>'+
+    '<td><button type="button" class="star'+(c.fav?' on':'')+'" data-act="ch-fav" data-id="'+c.id+'" title="مفضلة">★</button></td>'+
+    '<td class="cname"><span class="'+(c.wide?'wname':'')+'">'+esc(c.name)+'</span></td>'+
+    '<td>'+(c.type==='راديو'?'راديو':'TV')+'</td>'+
+    '<td>'+esc(c.cat||'أخرى')+'</td>'+
+    '<td dir="ltr">'+c.sid+'</td><td dir="ltr">'+c.pid+'</td><td dir="ltr">'+c.pmt+'</td>'+
+    '<td dir="ltr">'+(tp?esc(tp.freq)+'/'+esc(tp.sr):'—')+'</td></tr>';
+  }).join('');
+}
+function refreshTables(){
+  const sb=$('#satBody'); if(sb) sb.innerHTML=satRowsHtml();
+  const tb=$('#tpBody'); if(tb) tb.innerHTML=tpRowsHtml();
+  const cb=$('#chBody'); if(cb) cb.innerHTML=chRowsHtml();
+  const tc=$('#tpCnt'); if(tc) tc.textContent=visTps().length+' عنصر';
+  const cc=$('#chCnt'); if(cc) cc.textContent=visChs().length+' عنصر';
+}
+function menuHtml(label, items){
+  return '<div class="menu"><button type="button" data-act="menu">'+label+'</button><div class="drop-menu">'+
+    items.map(it=> it==='sep' ? '<div class="sep"></div>' : '<button type="button" data-act="'+it[0]+'">'+it[1]+'</button>').join('')+
+  '</div></div>';
+}
+function viewEditor(){
+  const c=edCounts();
+  return '<div class="edhead"><div class="row1">'+
+    '<div class="ttl"><h1>تعديل ملفات <b>القنوات</b></h1><div class="sub2">تعديل وتحويل ملفات الصن بلص والجي اكس وفانيلا والداكي، بواجهة أسرع وأنضف من أي محرر تاني</div></div>'+
+    '<div class="acts">'+
+      '<button type="button" class="btn btn-sec sm" data-act="f-open">📂 فتح</button>'+
+      '<button type="button" class="btn btn-gold sm" data-act="f-save">💾 حفظ</button>'+
+      '<button type="button" class="btn btn-sec sm" data-act="f-export">⬆ تحويل إلى</button>'+
+      '<button type="button" class="btn btn-primary sm" data-act="adv-open">☰ الأدوات المتقدمة</button>'+
+    '</div></div></div>'+
+  '<div class="menubar" id="menubar">'+
+    menuHtml('ملف',[['f-open','📂 فتح ملف قنوات…'],['f-save','💾 حفظ الملف'],['f-export','⬆ تصدير لصيغة جهاز…'],'sep',['f-backup','⬇ نسخة احتياطية كاملة (المشروع + المكتبة)'],['f-restore','⬆ استعادة نسخة احتياطية…'],'sep',['f-new','🗒 ملف جديد']])+
+    menuHtml('أدوات',[['t-sort-no','ترتيب حسب الرقم'],['t-sort-name','ترتيب حسب الاسم'],['t-apply-order','تطبيق الترتيب على ملف القنوات'],'sep',['t-find-dup','بحث عن المكرر'],['t-fix-spaces','إصلاح مسافات الأسماء'],'sep',['t-wide-on','تحويل إلى الخط العريض'],['t-wide-off','إزالة الخط العريض'],'sep',['t-arabize','تعريب القنوات من ملف آخر…']])+
+    menuHtml('عرض',[['v-density','تبديل العرض المضغوط'],['v-bold','تبديل خط الجدول العريض']])+
+    menuHtml('مساعدة',[['h-about','حول البرنامج'],['h-otg','توصيل الرسيفر بالموبايل (OTG)']])+
+  '</div>'+
+  '<div class="seg">'+
+    '<button type="button" data-act="seg" data-id="ch" class="'+(edPanel==='ch'?'on':'')+'">القنوات</button>'+
+    '<button type="button" data-act="seg" data-id="tp" class="'+(edPanel==='tp'?'on':'')+'">الترددات</button>'+
+    '<button type="button" data-act="seg" data-id="sat" class="'+(edPanel==='sat'?' on':'')+'">الأقمار</button>'+
+  '</div>'+
+  '<div class="edgrid">'+
+    '<section class="panel'+(edPanel==='sat'?' active':'')+'">'+
+      '<div class="phead"><h3>الأقمار</h3><span class="cnt">'+editor.sats.length+' عنصر</span></div>'+
+      '<div class="psearch"><input type="text" id="satQ" placeholder="بحث في الأقمار…" value="'+esc(satQ)+'"></div>'+
+      '<div class="ptable"><table class="grid"><thead><tr><th>الاسم</th><th>الموقع</th></tr></thead><tbody id="satBody">'+satRowsHtml()+'</tbody></table></div>'+
+      '<div class="pfoot">'+
+        '<button type="button" class="btn btn-primary sm" data-act="sat-add">إضافة</button>'+
+        '<button type="button" class="btn btn-sec sm" data-act="sat-edit">تعديل</button>'+
+        '<button type="button" class="btn btn-sec sm" data-act="sat-del">حذف</button>'+
+        '<button type="button" class="btn btn-ghost sm" data-act="sat-up">لأعلى</button>'+
+        '<button type="button" class="btn btn-ghost sm" data-act="sat-down">لأسفل</button>'+
+      '</div></section>'+
+    '<section class="panel'+(edPanel==='tp'?' active':'')+'">'+
+      '<div class="phead"><h3>الترددات</h3><span class="cnt" id="tpCnt">'+visTps().length+' عنصر</span></div>'+
+      '<div class="psearch"><input type="text" id="tpQ" placeholder="بحث في الترددات…" value="'+esc(tpQ)+'"></div>'+
+      '<div class="ptable"><table class="grid"><thead><tr><th>التردد</th><th>الترميز</th><th>الاستقطاب</th><th>المزود</th></tr></thead><tbody id="tpBody">'+tpRowsHtml()+'</tbody></table></div>'+
+      '<div class="pfoot">'+
+        '<button type="button" class="btn btn-primary sm" data-act="tp-add">إضافة</button>'+
+        '<button type="button" class="btn btn-sec sm" data-act="tp-edit">تعديل</button>'+
+        '<button type="button" class="btn btn-sec sm" data-act="tp-del">حذف</button>'+
+      '</div></section>'+
+    '<section class="panel'+(edPanel==='ch'?' active':'')+'">'+
+      '<div class="phead"><h3>القنوات</h3><span class="cnt" id="chCnt">'+visChs().length+' عنصر</span></div>'+
+      '<div class="psearch"><input type="text" id="chQ" placeholder="بحث في القنوات…" value="'+esc(chQ)+'"></div>'+
+      '<div class="ptools">'+
+        '<select id="chType" aria-label="نوع القنوات">'+['الكل','TV','راديو','مفضلة'].map(t=>'<option'+(chType===t?' selected':'')+'>'+t+'</option>').join('')+'</select>'+
+        '<select id="chCat" aria-label="التصنيف">'+CATS.map(t=>'<option'+(chCat===t?' selected':'')+'>'+t+'</option>').join('')+'</select>'+
+        '<select id="chSort" aria-label="الترتيب">'+[['file','ترتيب الملف'],['no-asc','تصاعدي'],['no-desc','تنازلي'],['name','حسب الاسم']].map(o=>'<option value="'+o[0]+'"'+(chSort===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select>'+
+      '</div>'+
+      '<div class="ptable"><table class="grid"><thead><tr><th>#</th><th></th><th>الاسم</th><th>النوع</th><th>التصنيف</th><th>SID</th><th>PID</th><th>PMT</th><th>التردد</th></tr></thead><tbody id="chBody">'+chRowsHtml()+'</tbody></table></div>'+
+      '<div class="pfoot">'+
+        '<button type="button" class="btn btn-primary sm" data-act="ch-add">إضافة</button>'+
+        '<button type="button" class="btn btn-sec sm" data-act="ch-edit">تعديل</button>'+
+        '<button type="button" class="btn btn-sec sm" data-act="ch-del">حذف</button>'+
+        '<button type="button" class="btn btn-sec sm" data-act="ch-dup">تكرار</button>'+
+        '<button type="button" class="btn btn-ghost sm" data-act="ch-up">لأعلى</button>'+
+        '<button type="button" class="btn btn-ghost sm" data-act="ch-down">لأسفل</button>'+
+        '<button type="button" class="btn btn-ghost sm" data-act="ch-num">تغيير رقم القناة</button>'+
+      '</div></section>'+
+  '</div>'+
+  '<div class="statusbar">'+
+    '<span class="st"><span class="dot'+(editor.dirty?' mod':'')+'"></span>'+(editor.dirty?'تم التعديل':'جاهز')+'</span>'+
+    '<span>الأقمار: '+c.sats+'</span><span>الترددات: '+c.tps+'</span><span>TV: '+c.tv+'</span><span>راديو: '+c.radio+'</span>'+
+    '<span class="fname">'+esc(editor.fileName||'ملف قنوات')+'</span>'+
+  '</div>'+
+  drawerHtml()+
+  '<input type="file" id="openFile" class="hidden-input" accept=".json,.txt,.csv">'+
+  '<input type="file" id="arabizeFile" class="hidden-input" accept=".txt,.csv">'+
+  '<input type="file" id="restoreFile" class="hidden-input" accept=".json,application/json">';
+}
+function drawerItem(act,title,sub,soon,badge){
+  const b=soon?'<span class="soonbadge">'+(badge||'في التطبيق الأصلي')+'</span>':'';
+  return '<button type="button" class="ditem'+(soon?' soon':'')+'" '+(act?'data-act="'+act+'"':'disabled')+'>'+title+b+'<small>'+sub+'</small></button>';
+}
+function drawerHtml(){
+  return '<div class="dback" id="advBack" data-act="adv-close"></div>'+
+  '<aside class="drawer" id="advDrawer" aria-label="الأدوات المتقدمة">'+
+    '<div class="dhead"><h3>الأدوات المتقدمة<small>اختيارية، بعضها يتطلب اختيار ملف الجهاز أولًا</small></h3><button type="button" class="mx" data-act="adv-close">✕</button></div>'+
+    '<div class="dbody">'+
+    '<div class="dgroup"><div class="gt">نقل وتحويل الصيغ</div>'+
+      drawerItem('f-export','تصدير القنوات لصيغة جهاز','كل صيغ الأجهزة: داكي، فانيلا، جي اكس، كومبو، توين وأكثر')+
+      drawerItem('f-open','فتح / استيراد ملف قنوات','JSON محفوظ من البرنامج أو قائمة CSV / TXT')+
+      drawerItem(null,'عكسي: SDX ← صن بلص','من sdx, db15 إلى ملف صن بلص (كقالب)',true)+
+      drawerItem(null,'داكي ← فانيلا','سجل القناة من ٩٢ بايت إلى ٨٨ بايت',true)+
+      drawerItem(null,'دمج داكي إلى SQLite (تلقائي)','دمج ملف صن بلص داكي في ملف V4 الهدف بامتداد db',true)+
+    '</div>'+
+    '<div class="dgroup"><div class="gt">ملفات db في الجهاز</div>'+
+      drawerItem(null,'صن بلص ← ملف CHL','حفظ ملف chl جديد دون المساس بالأصلي',true)+
+      drawerItem(null,'صن بلص ← ملف SSU','حفظ ملف ssu جديد دون المساس بالأصلي',true)+
+      drawerItem(null,'صن بلص ← ملف DBN / DBM','حفظ ملف DBN و DBM جديد دون المساس بالأصلي',true)+
+      drawerItem(null,'تصدير / استيراد ملفات db مع الجهاز','مباشرة بتوصيل OTG في نسخة الموبايل الأصلية',true)+
+      drawerItem(null,'استخراج كل ملفات DATA','سحب ملفات sat / tp / prog / fav في مجلد بدون فلاش',true)+
+    '</div>'+
+    '<div class="dgroup"><div class="gt">أدوات الملف الحالي</div>'+
+      drawerItem('t-find-dup','بحث عن المكرر','إيجاد القنوات المكررة بالاسم وحذفها')+
+      drawerItem('t-fix-spaces','إصلاح مسافات الأسماء','تنضيف أسماء القنوات من المسافات الزيادة')+
+      drawerItem('t-arabize','تعريب القنوات من ملف آخر','استبدال الأسماء اللاتينية بأسماء عربية من ملف ترجمة')+
+    '</div>'+
+    '<div class="dgroup"><div class="gt">خطة التطوير الجاية</div>'+
+      drawerItem(null,'دمج ملف القنوات جوه السوفت أون لاين','أتقل نقطة فنياً: هتتبني معالج معالج بداية بالأكثر استخداماً في شغلك. ولما ترفع سوفت للتعديل أو الدمج، البرنامج هيحفظ نسختين دايماً: الأصلية زي ما هي والمعدلة، وهينبهك فوراً بأي مشكلة في التحويل أو التعديل',true,'في الخطة')+
+      drawerItem(null,'تحميل مباشر لكل اللودرات والسوفتات','نقل الملفات على مستودع البرنامج نفسه، تحميل بضغطة من غير تسجيل ولا منتديات، بدأ فعلاً في قسم التحديثات',true,'بدأ التنفيذ')+
+      drawerItem(null,'أكواد تفعيل واشتراكات','حماية البرنامج من النسخ بنظام أكواد تفعيل واشتراكات بتحقق أون لاين، كل نسخة مربوطة بكود صاحبها وجهازه، في نسخة الويندوز والموبايل الأصلية',true,'في الخطة')+
+      drawerItem(null,'تصدير binary حقيقي لصيغة جهاز','أول صيغة حقيقية بملف قنوات ترفعه على الجهاز مباشرة، هتتظبط بملف عينة من شغلك',true,'في الخطة')+
+      drawerItem(null,'توصيل الرسيفر بالموبايل OTG','قراءة وكتابة ملفات الجهاز مباشرة في نسخة التطبيق الأصلي للموبايل',true,'في التطبيق الأصلي')+
+    '</div>'+
+    '</div></aside>';
+}
+/* ---- editor modals & file IO ---- */
+function renumber(){ editor.chs.forEach((c,i)=>c.no=i+1); }
+function satModal(existing){
+  const s=existing||{name:'',pos:''};
+  openModal(existing?'تعديل قمر':'إضافة قمر',
+    '<div class="field"><label>اسم القمر</label><input type="text" id="mName" value="'+esc(s.name)+'"></div>'+
+    '<div class="field"><label>الموقع المداري (زي 7.0W)</label><input type="text" id="mPos" dir="ltr" value="'+esc(s.pos||'')+'"></div>',
+    existing?'حفظ':'إضافة',(m)=>{
+      const name=m.querySelector('#mName').value.trim(); if(!name) return false;
+      const pos=m.querySelector('#mPos').value.trim();
+      if(existing){ existing.name=name; existing.pos=pos; }
+      else editor.sats.push({id:uid(),name,pos});
+      markDirty(); render();
+    });
+}
+function tpModal(existing){
+  const t=existing||{freq:'',sr:'27500',pol:'V',prov:'',satId:(edSat!=='all'?edSat:(editor.sats[0]||{}).id)};
+  openModal(existing?'تعديل تردد':'إضافة تردد',
+    '<div class="field"><label>التردد</label><input type="text" id="mFreq" dir="ltr" inputmode="numeric" value="'+esc(t.freq)+'"></div>'+
+    '<div class="field"><label>معدل الترميز</label><input type="text" id="mSr" dir="ltr" inputmode="numeric" value="'+esc(t.sr)+'"></div>'+
+    '<div class="field"><label>الاستقطاب</label><select id="mPol"><option value="V"'+(t.pol==='V'?' selected':'')+'>رأسي V</option><option value="H"'+(t.pol==='H'?' selected':'')+'>أفقي H</option></select></div>'+
+    '<div class="field"><label>القمر</label><select id="mSat">'+editor.sats.map(s=>'<option value="'+s.id+'"'+(t.satId===s.id?' selected':'')+'>'+esc(s.name)+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>المزود (اختياري)</label><input type="text" id="mProv" value="'+esc(t.prov||'')+'"></div>',
+    existing?'حفظ':'إضافة',(m)=>{
+      const freq=m.querySelector('#mFreq').value.trim();
+      if(!/^\d{4,5}$/.test(freq)){ toast('التردد لازم يكون رقم زي 12226'); return false; }
+      const vals={freq,sr:m.querySelector('#mSr').value.trim()||'27500',pol:m.querySelector('#mPol').value,satId:m.querySelector('#mSat').value,prov:m.querySelector('#mProv').value.trim()};
+      if(existing) Object.assign(existing,vals); else editor.tps.push({id:uid(),...vals});
+      markDirty(); render();
+    });
+}
+function chModal(existing){
+  if(!editor.tps.length){ toast('أضف قمر وتردد الأول'); return; }
+  const maxNo=editor.chs.reduce((m,x)=>Math.max(m,x.no||0),0);
+  const c=existing||{no:maxNo+1,name:'',type:'TV',cat:'أخرى',sid:'',pid:'',pmt:'',tpId:(edTp||(visTps()[0]||editor.tps[0]).id)};
+  const tpOpts=editor.tps.map(t=>{const s=satById(t.satId);return '<option value="'+t.id+'"'+(c.tpId===t.id?' selected':'')+'>'+t.freq+' '+(t.pol||'V')+'/'+t.sr+(s?' - '+esc(s.name):'')+'</option>';}).join('');
+  openModal(existing?'تعديل قناة':'إضافة قناة',
+    '<div class="field"><label>رقم القناة</label><input type="text" id="mNo" dir="ltr" inputmode="numeric" value="'+c.no+'"></div>'+
+    '<div class="field"><label>اسم القناة</label><input type="text" id="mName" value="'+esc(c.name)+'"></div>'+
+    '<div class="field"><label>النوع</label><select id="mType"><option'+(c.type!=='راديو'?' selected':'')+'>TV</option><option'+(c.type==='راديو'?' selected':'')+'>راديو</option></select></div>'+
+    '<div class="field"><label>التصنيف</label><select id="mCat">'+CATS.filter(x=>x!=='الكل').map(x=>'<option'+(c.cat===x?' selected':'')+'>'+x+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>التردد</label><select id="mTp">'+tpOpts+'</select></div>'+
+    '<div class="field"><label>SID</label><input type="text" id="mSid" dir="ltr" inputmode="numeric" value="'+c.sid+'"></div>'+
+    '<div class="field"><label>PID</label><input type="text" id="mPid" dir="ltr" inputmode="numeric" value="'+c.pid+'"></div>'+
+    '<div class="field"><label>PMT</label><input type="text" id="mPmt" dir="ltr" inputmode="numeric" value="'+c.pmt+'"></div>',
+    existing?'حفظ':'إضافة',(m)=>{
+      const name=m.querySelector('#mName').value.trim(); if(!name) return false;
+      const no=parseInt(m.querySelector('#mNo').value,10)||(maxNo+1);
+      const tpId=m.querySelector('#mTp').value;
+      const tp=tpById(tpId);
+      const sid=parseInt(m.querySelector('#mSid').value,10)||(1000+no);
+      const vals={no,name,type:m.querySelector('#mType').value,cat:m.querySelector('#mCat').value,
+        tpId,satId:tp?tp.satId:(editor.sats[0]||{}).id,
+        sid,pid:parseInt(m.querySelector('#mPid').value,10)||(sid+100),pmt:parseInt(m.querySelector('#mPmt').value,10)||(sid+200)};
+      if(existing) Object.assign(existing,vals);
+      else editor.chs.push({id:uid(),wide:false,fav:false,...vals});
+      markDirty(); render();
+    });
+}
+function chNumModal(){
+  const c=chById(edCh); if(!c){ toast('اختار قناة من الجدول الأول'); return; }
+  openModal('تغيير رقم القناة','<div class="field"><label>الرقم الجديد للقناة "'+esc(c.name)+'"</label><input type="text" id="mNewNo" dir="ltr" inputmode="numeric" value="'+c.no+'"></div>','نقل',(m)=>{
+    const n=parseInt(m.querySelector('#mNewNo').value,10);
+    if(!n||n<1) return false;
+    const arr=editor.chs; arr.splice(arr.indexOf(c),1);
+    arr.splice(Math.min(n-1,arr.length),0,c);
+    renumber(); markDirty(); render();
+  });
+}
+function confirmModal(title, text, okLabel, onOk){
+  openModal(title,'<p>'+text+'</p>',okLabel,onOk);
+}
+function findDuplicates(){
+  const groups={};
+  editor.chs.forEach(c=>{ const k=c.name.trim().replace(/\s+/g,' '); (groups[k]=groups[k]||[]).push(c); });
+  const dups=Object.keys(groups).filter(k=>groups[k].length>1);
+  if(!dups.length){ openModal('بحث عن المكرر','<p>مفيش قنوات مكررة بالاسم في الملف.</p>',null); return; }
+  const body='<p>اتلاقى '+dups.length+' اسم مكرر:</p><div style="max-height:300px;overflow:auto">'+
+    dups.map(k=>'<div class="row" style="margin-bottom:6px"><div class="main"><div class="name">'+esc(k)+'</div><div class="meta">'+groups[k].length+' نسخة</div></div></div>').join('')+
+    '</div><p class="mnote">حذف المكرر بيخلي أول نسخة من كل اسم ويمسح الباقي.</p>';
+  openModal('بحث عن المكرر',body,'حذف المكررات',()=>{
+    const seen={}, keep=[];
+    editor.chs.forEach(c=>{ const k=c.name.trim().replace(/\s+/g,' '); if(seen[k]) return; seen[k]=1; keep.push(c); });
+    const removed=editor.chs.length-keep.length;
+    editor.chs=keep; renumber(); markDirty(); render(); toast('اتمسحت '+removed+' قناة مكررة');
+  });
+}
+function fixSpaces(){
+  let n=0;
+  editor.chs.forEach(c=>{
+    const fixed=c.name.replace(/ـ/g,'').replace(/\s+/g,' ').trim();
+    if(fixed!==c.name){ c.name=fixed; n++; }
+  });
+  if(n>0){ markDirty(); render(); }
+  toast(n>0?'اتصلحت '+n+' قناة':'الأسماء كلها سليمة');
+}
+function setWide(on){
+  editor.chs.forEach(c=>c.wide=on);
+  markDirty(); refreshTables();
+  toast(on?'اتحولت الأسماء للخط العريض':'اتشال الخط العريض');
+}
+function normLatin(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); }
+function arabizeFromFile(file){
+  const rd=new FileReader();
+  rd.onload=()=>{
+    const map={};
+    String(rd.result||'').split(/\r?\n/).forEach(l=>{
+      const p=l.split(/[=:|،,]/).map(x=>x.trim()).filter(Boolean);
+      if(p.length>=2&&/[A-Za-z]/.test(p[0])) map[normLatin(p[0])]=p[1];
+    });
+    let n=0;
+    editor.chs.forEach(c=>{
+      if(/[A-Za-z]/.test(c.name)){
+        const ar=map[normLatin(c.name)];
+        if(ar){ c.name=ar; n++; }
+      }
+    });
+    if(n>0){ markDirty(); render(); toast('اتعربت '+n+' قناة'); }
+    else toast('مفيش أسماء اتطابقت - لازم كل سطر يكون: الاسم اللاتيني = الاسم العربي');
+  };
+  rd.readAsText(file);
+}
+function openChannelFile(file){
+  const rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const text=String(rd.result||'');
+      if(/\.json$/i.test(file.name)||text.trim().startsWith('{')){
+        const data=JSON.parse(text);
+        if(data&&Array.isArray(data.sats)&&Array.isArray(data.tps)&&Array.isArray(data.chs)){
+          editor=data; editor.dirty=false; edSat='all'; edTp=null; edCh=null;
+          saveLS(LS_EDITOR,editor); render(); toast('تم فتح الملف'); return;
+        }
+        throw new Error('bad');
+      }
+      const added=importTextLines(text);
+      if(added>0){ markDirty(); render(); toast('اتضافت '+added+' قناة من الملف'); }
+      else toast('مقدرتش أقرأ قنوات من الملف ده');
+    }catch(e){ toast('الملف ده مش بصيغة معروفة عند البرنامج'); }
+  };
+  rd.readAsText(file);
+}
+function importTextLines(text){
+  const lines=text.split(/\r?\n/).map(l=>l.trim()).filter(l=>l&&!l.startsWith('#')&&!l.startsWith('الرقم'));
+  if(!lines.length) return 0;
+  const satId=(edSat!=='all')?edSat:(editor.sats[0]?editor.sats[0].id:null);
+  if(!satId) return 0;
+  let added=0;
+  let no=editor.chs.reduce((m,c)=>Math.max(m,c.no||0),0);
+  lines.forEach(l=>{
+    let name='', freq='', pol='V', sr='27500', sid=0;
+    const cells=l.split(/[,\t;]/).map(x=>x.trim().replace(/^"|"$/g,''));
+    if(cells.length>=7&&/^\d+$/.test(cells[4]||'')){
+      name=cells[1]; freq=cells[4]; pol=cells[5]==='H'?'H':'V'; sr=cells[6]||'27500'; sid=parseInt(cells[7],10)||0;
+    } else {
+      const m=l.match(/^(.+?)\s*[-–]\s*(\d{4,5})\s*([HVhv])?\s*(\d{4,5})?/);
+      if(m){ name=m[1].trim(); freq=m[2]; pol=(m[3]||'V').toUpperCase(); sr=m[4]||'27500'; }
+      else name=l;
+    }
+    if(!name) return;
+    let tp=freq?editor.tps.find(t=>t.satId===satId&&t.freq===freq):null;
+    if(!tp&&freq){ tp={id:uid(),satId,freq,sr,pol,prov:''}; editor.tps.push(tp); }
+    if(!tp){ tp=editor.tps.find(t=>t.satId===satId)||editor.tps[0]||null; }
+    if(!tp) return;
+    const base=1000+editor.chs.length*7;
+    editor.chs.push({ id:uid(), satId, tpId:tp.id, no:++no, name, type:'TV', cat:'أخرى', sid:sid||base, pid:(sid||base)+100, pmt:(sid||base)+200, wide:false, fav:false });
+    added++;
+  });
+  return added;
+}
+function exportCsv(format, fname){
+  const rows=[['الرقم','الاسم','النوع','التصنيف','التردد','الاستقطاب','الترميز','SID','PID','PMT','القمر']];
+  editor.chs.slice().sort((a,b)=>a.no-b.no).forEach(c=>{
+    const tp=tpById(c.tpId)||{}; const sat=satById(c.satId)||{};
+    rows.push([c.no,c.name,c.type,c.cat||'',tp.freq||'',tp.pol||'',tp.sr||'',c.sid,c.pid,c.pmt,sat.name||'']);
+  });
+  const csv='﻿'+('# صيغة الجهاز: '+format)+'\r\n'+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),(fname||'channels')+'.csv');
+}
+function exportDialog(){
+  const body='<div class="field"><label>حفظ بالإصدار (صيغة الجهاز)</label><select id="expFmt">'+FORMATS.map(f=>'<option>'+f+'</option>').join('')+'</select></div>'+
+  '<div class="field"><label>اسم الملف</label><input type="text" id="expName" dir="ltr" value="channels"></div>'+
+  '<div class="mnote">التصدير بيطلع ملف CSV فيه كل بيانات القنوات مرتبة برقمها، مسجل فيه صيغة الجهاز المختارة. توليد ملفات الباينري نفسها لكل جهاز (bin / sdx / chl / db) في نسخة التطبيق الأصلي، وهتلاقيها متسجلة في الأدوات المتقدمة.</div>';
+  openModal('إصدار ملف القنوات',body,'موافق',(m)=>{
+    const fmt=m.querySelector('#expFmt').value;
+    const fn=(m.querySelector('#expName').value||'channels').trim();
+    exportCsv(fmt,fn);
+    toast('تم تصدير '+editor.chs.length+' قناة بصيغة '+fmt);
+  });
+}
+function saveProject(){
+  editor.dirty=false; saveLS(LS_EDITOR,editor);
+  downloadBlob(new Blob([JSON.stringify(editor,null,1)],{type:'application/json'}),(editor.fileName||'channels')+'.json');
+  render(); toast('اتحفظت نسخة JSON من الملف على جهازك');
+}
+/* ---- full backup & restore (project + library + stored files) ---- */
+function blobToDataURL(blob){
+  return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(blob); });
+}
+function dataURLToBlob(d){
+  const parts=String(d).split(',');
+  const mime=(parts[0].match(/data:(.*?);/)||[])[1]||'application/octet-stream';
+  const bin=atob(parts[1]||'');
+  const arr=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+  return new Blob([arr],{type:mime});
+}
+async function backupAll(){
+  try{
+    const files=[];
+    for(const f of catalog){
+      if(f.hasFile&&db){
+        try{ const blob=await idbGet(f.id); if(blob) files.push({id:f.id,data:await blobToDataURL(blob)}); }catch(e){}
+      }
+    }
+    const payload={ app:'abujabal-sat', kind:'full-backup', version:3, exportedAt:new Date().toISOString(), editor, catalog, files };
+    const stamp=new Date().toISOString().slice(0,10);
+    downloadBlob(new Blob([JSON.stringify(payload)],{type:'application/json'}),'abujabal-sat-backup-'+stamp+'.json');
+    toast('اتجهزت النسخة الاحتياطية: '+editor.chs.length+' قناة و '+catalog.length+' ملف مكتبة'+(files.length?' ('+files.length+' متخزن)':''));
+  }catch(e){ toast('حصلت مشكلة في تجهيز النسخة الاحتياطية'); }
+}
+function restoreAll(file){
+  const rd=new FileReader();
+  rd.onload=async ()=>{
+    try{
+      const data=JSON.parse(String(rd.result||''));
+      if(!data||data.kind!=='full-backup'||!data.editor||!Array.isArray(data.catalog)){ toast('الملف ده مش نسخة احتياطية من البرنامج'); return; }
+      editor=data.editor; editor.dirty=false;
+      catalog=data.catalog;
+      saveLS(LS_EDITOR,editor); saveLS(LS_CATALOG,catalog);
+      let restored=0;
+      if(db&&Array.isArray(data.files)){
+        for(const f of data.files){
+          try{ await idbPut(f.id, dataURLToBlob(f.data)); restored++; }catch(e){}
+        }
+      }
+      edSat='all'; edTp=null; edCh=null; satQ=tpQ=chQ=''; chType='الكل'; chCat='الكل'; chSort='file';
+      render();
+      toast('اترجعت النسخة: '+editor.chs.length+' قناة و '+catalog.length+' ملف مكتبة'+(restored?' ('+restored+' متخزن)':''));
+    }catch(e){ toast('مقدرتش أقرأ النسخة الاحتياطية دي'); }
+  };
+  rd.readAsText(file);
+}
+/* ---- editor events (single delegated handler) ---- */
+function editorClick(e){
+  const el=e.target.closest('[data-act]');
+  if(!el) return;
+  const act=el.dataset.act, id=el.dataset.id;
+  if(act==='menu'){
+    const m=el.parentElement, was=m.classList.contains('open');
+    closeMenus(); if(!was) m.classList.add('open');
+    return;
+  }
+  if(act==='seg'){ edPanel=id; render(); return; }
+  if(act==='adv-open'){ closeMenus(); const d=$('#advDrawer'),b=$('#advBack'); if(d) d.classList.add('open'); if(b) b.classList.add('open'); return; }
+  if(act==='adv-close'){ const d=$('#advDrawer'),b=$('#advBack'); if(d) d.classList.remove('open'); if(b) b.classList.remove('open'); return; }
+  /* selections */
+  if(act==='sat-sel'){ edSat=id; edTp=null; refreshTables(); return; }
+  if(act==='tp-sel'){ edTp=(edTp===id?null:id); refreshTables(); return; }
+  if(act==='ch-sel'){ edCh=id; refreshTables(); return; }
+  if(act==='ch-fav'){ const c=chById(id); if(c){ c.fav=!c.fav; markDirty(); refreshTables(); } return; }
+  closeMenus();
+  /* satellites */
+  if(act==='sat-add'){ satModal(null); return; }
+  if(act==='sat-edit'){ if(edSat==='all'){ toast('اختار قمر من القايمة الأول'); return; } satModal(satById(edSat)); return; }
+  if(act==='sat-del'){
+    if(edSat==='all'){ toast('اختار قمر من القايمة الأول'); return; }
+    const s=satById(edSat); if(!s) return;
+    confirmModal('حذف قمر','هيمسح قمر "'+esc(s.name)+'" وكل الترددات والقنوات اللي عليه. متأكد؟','حذف',()=>{
+      editor.sats=editor.sats.filter(x=>x.id!==edSat);
+      editor.tps=editor.tps.filter(x=>x.satId!==edSat);
+      editor.chs=editor.chs.filter(x=>x.satId!==edSat);
+      edSat='all'; edTp=null; edCh=null; markDirty(); render();
+    }); return;
+  }
+  if(act==='sat-up'||act==='sat-down'){
+    const i=editor.sats.findIndex(s=>s.id===edSat);
+    if(i<0){ toast('اختار قمر من القايمة الأول'); return; }
+    editor.sats=moveItem(editor.sats,i,act==='sat-up'?-1:1); markDirty(); render(); return;
+  }
+  /* transponders */
+  if(act==='tp-add'){ if(!editor.sats.length){ toast('أضف قمر الأول'); return; } tpModal(null); return; }
+  if(act==='tp-edit'){ const t=tpById(edTp); if(!t){ toast('اختار تردد من الجدول الأول'); return; } tpModal(t); return; }
+  if(act==='tp-del'){
+    const t=tpById(edTp); if(!t){ toast('اختار تردد من الجدول الأول'); return; }
+    confirmModal('حذف تردد','هيمسح التردد '+t.freq+' والقنوات اللي عليه. متأكد؟','حذف',()=>{
+      editor.tps=editor.tps.filter(x=>x.id!==edTp);
+      editor.chs=editor.chs.filter(x=>x.tpId!==edTp);
+      edTp=null; markDirty(); render();
+    }); return;
+  }
+  /* channels */
+  if(act==='ch-add'){ chModal(null); return; }
+  if(act==='ch-edit'){ const c=chById(edCh); if(!c){ toast('اختار قناة من الجدول الأول'); return; } chModal(c); return; }
+  if(act==='ch-del'){
+    const c=chById(edCh); if(!c){ toast('اختار قناة من الجدول الأول'); return; }
+    confirmModal('حذف قناة','هيمسح قناة "'+esc(c.name)+'". متأكد؟','حذف',()=>{
+      editor.chs=editor.chs.filter(x=>x.id!==edCh); renumber(); edCh=null; markDirty(); render();
+    }); return;
+  }
+  if(act==='ch-dup'){
+    const c=chById(edCh); if(!c){ toast('اختار قناة من الجدول الأول'); return; }
+    const copy={...c,id:uid()};
+    editor.chs.splice(editor.chs.indexOf(c)+1,0,copy);
+    renumber(); edCh=copy.id; markDirty(); render(); toast('اتعملت نسخة من القناة'); return;
+  }
+  if(act==='ch-up'||act==='ch-down'){
+    const i=editor.chs.findIndex(c=>c.id===edCh);
+    if(i<0){ toast('اختار قناة من الجدول الأول'); return; }
+    editor.chs=moveItem(editor.chs,i,act==='ch-up'?-1:1); renumber(); markDirty(); refreshTables(); return;
+  }
+  if(act==='ch-num'){ chNumModal(); return; }
+  /* tools menu */
+  if(act==='t-sort-no'){ editor.chs.sort((a,b)=>a.no-b.no); chSort='file'; markDirty(); render(); toast('اترتب الملف حسب الرقم'); return; }
+  if(act==='t-sort-name'){ editor.chs.sort((a,b)=>a.name.localeCompare(b.name,'ar')); chSort='file'; markDirty(); render(); toast('اترتب الملف حسب الاسم، استخدم تطبيق الترتيب لإعادة الترقيم'); return; }
+  if(act==='t-apply-order'){ renumber(); markDirty(); refreshTables(); toast('اترقمت القنوات من 1 لـ '+editor.chs.length); return; }
+  if(act==='t-find-dup'){ findDuplicates(); return; }
+  if(act==='t-fix-spaces'){ fixSpaces(); return; }
+  if(act==='t-wide-on'){ setWide(true); return; }
+  if(act==='t-wide-off'){ setWide(false); return; }
+  if(act==='t-arabize'){ const f=$('#arabizeFile'); if(f) f.click(); return; }
+  /* view menu */
+  if(act==='v-density'){ document.body.classList.toggle('compact'); return; }
+  if(act==='v-bold'){ document.body.classList.toggle('boldtable'); return; }
+  /* help */
+  if(act==='h-about'){ go('/about'); return; }
+  if(act==='h-otg'){
+    openModal('توصيل الرسيفر بالموبايل (OTG)','<p>توصيل الرسيفر أو الفلاشة بالموبايل بكابل OTG محتاج صلاحية وصول للأجهزة، والمتصفح مش بيديها. عشان كده دي محجوزة لنسخة التطبيق الأصلي للموبايل: هتقدر توصّل الجهاز أو الفلاشة وتشتغل عليهم مباشرة من شاشة ابوجبل سات.</p><p class="mnote">دلوقتي: استخدم فتح/حفظ/تصدير من قايمة ملف، والملفات بتتخزن جوه البرنامج على جهازك.</p>',null);
+    return;
+  }
+  /* file menu */
+  if(act==='f-open'){ const f=$('#openFile'); if(f) f.click(); return; }
+  if(act==='f-save'){ saveProject(); return; }
+  if(act==='f-export'){ exportDialog(); return; }
+  if(act==='f-backup'){ backupAll(); return; }
+  if(act==='f-restore'){ const f=$('#restoreFile'); if(f) f.click(); return; }
+  if(act==='f-new'){
+    confirmModal('ملف جديد','هيبدأ ملف قنوات جديد بالبيانات الافتراضية، واللي عملته في الملف الحالي هيتبدل. خد نسخة بحفظ الملف الأول لو محتاجه.','ملف جديد',()=>{
+      editor=seedEditor(); edSat='all'; edTp=null; edCh=null; satQ=tpQ=chQ=''; chType='الكل'; chCat='الكل'; chSort='file';
+      saveLS(LS_EDITOR,editor); render(); toast('اتفتح ملف جديد');
+    }); return;
+  }
+}
+function bindEditor(){
+  const view=$('#view');
+  if(!view.dataset.edBound){ view.dataset.edBound='1'; view.addEventListener('click',editorClick); }
+  const satQEl=$('#satQ'); if(satQEl) satQEl.addEventListener('input',()=>{ satQ=satQEl.value; const sb=$('#satBody'); if(sb) sb.innerHTML=satRowsHtml(); });
+  const tpQEl=$('#tpQ'); if(tpQEl) tpQEl.addEventListener('input',()=>{ tpQ=tpQEl.value; const tb=$('#tpBody'); if(tb) tb.innerHTML=tpRowsHtml(); const tc=$('#tpCnt'); if(tc) tc.textContent=visTps().length+' عنصر'; });
+  const chQEl=$('#chQ'); if(chQEl) chQEl.addEventListener('input',()=>{ chQ=chQEl.value; const cb=$('#chBody'); if(cb) cb.innerHTML=chRowsHtml(); const cc=$('#chCnt'); if(cc) cc.textContent=visChs().length+' عنصر'; });
+  const ct=$('#chType'); if(ct) ct.addEventListener('change',()=>{ chType=ct.value; refreshTables(); });
+  const cc2=$('#chCat'); if(cc2) cc2.addEventListener('change',()=>{ chCat=cc2.value; refreshTables(); });
+  const cs=$('#chSort'); if(cs) cs.addEventListener('change',()=>{ chSort=cs.value; refreshTables(); });
+  const of=$('#openFile'); if(of) of.addEventListener('change',()=>{ if(of.files&&of.files[0]) openChannelFile(of.files[0]); of.value=''; });
+  const af=$('#arabizeFile'); if(af) af.addEventListener('change',()=>{ if(af.files&&af.files[0]) arabizeFromFile(af.files[0]); af.value=''; });
+  const rf=$('#restoreFile'); if(rf) rf.addEventListener('change',()=>{ if(rf.files&&rf.files[0]) restoreAll(rf.files[0]); rf.value=''; });
+}
+/* ---- convert ---- */
+function viewConvert(){
+  return '<div class="card"><h2>الحقيقة بصراحة</h2><ol class="steps">'+
+    '<li>تحويل ملفات القنوات بين أجهزة من نفس عائلة المعالج ممكن فعلًا، ببرامج مونتاج القنوات المخصصة لكل عائلة.</li>'+
+    '<li>تعديل السوفت وير نفسه (اللوجو، المينيو، السيرفرات) بيتم بأدوات متخصصة على ملف السوفت، وده شغل خبرة وممارسة.</li>'+
+    '<li>تحويل السوفت وير من معالج لمعالج مختلف مفيش أداة جاهزة بتعمله، لأن السوفت مكتوب للمعالج نفسه. اللي بيتعمل في السوق هو فلاش سوفت معدل مبني لنفس المعالج.</li>'+
+    '<li>أقرب حاجة للتحويل بين الأجهزة هي نقل ملف القنوات جوه نفس العائلة، وده أول حاجة هنبنيها هنا.</li>'+
+  '</ol></div>'+
+  '<div class="callout warn"><b>قيد التطوير</b>رفع ملف قنوات وتحويله بين أجهزة نفس العائلة من جوه البرنامج، وبعدها التصدير لصيغة الرسيفر مباشرة. ودمج ملف القنوات جوه السوفت وير أون لاين لكل المعالجات متسجل في خطة التطوير: هيتبنى معالج معالج بداية بالأكثر استخداماً. التعديل العميق على باينات السوفت وير هيفضل بأدواته المتخصصة، والبرنامج هينظمها ويرشدك ليها.</div>'+
+  '<div class="card"><h2>أدوات النهارده</h2><p>لحد ما قسم التحويلات يجهز: محرر القنوات بيحفظ ترتيبك بالعربي ويصدّره نص أو ملف، والمكتبة بتخزن ملفاتك نفسها جوه البرنامج مرتبة حسب العائلة، وتنزّلها منه تاني وقت ما تحتاجها.</p></div>';
+}
+/* ---- about ---- */
+function viewAbout(){
+  return '<div class="narrow">'+
+  installCard()+
+  '<div class="hero"><img src="hero.jpg" alt="رسم توضيحي لرسيفر حديث بجانب طبق ستلايت"></div>'+
+  '<div class="caption" style="margin-bottom:16px">رسم توضيحي بالذكاء الاصطناعي</div>'+
+  '<div class="card"><h2>ابوجبل سات<span class="sub">محرر القنوات الاحترافي للفني، على الموبايل والكمبيوتر</span></h2>'+
+  '<p>برنامج واحد بيجمع شغل الفني: محرر قنوات احترافي بثلاث شاشات (أقمار، ترددات، قنوات) ببحث وفرز وتصنيفات ومفضلة، أدوات ملف كاملة (ترتيب، إعادة ترقيم، بحث عن المكرر، إصلاح أسماء، خط عريض، تعريب)، تصدير لكل صيغ الأجهزة (داكي، فانيلا، جي اكس، كومبو، توين، بي أوت كيو وأكثر)، مكتبة بتخزن السوفتات والفلاشات نفسها جوه البرنامج، ومرجع لودرات منظم لكل عائلة معالج.</p></div>'+
+  '<div class="callout note"><b>بياناتك على جهازك بس</b>كل اللي بتعمله، بما فيه الملفات نفسها، بيتحفظ جوه البرنامج على الجهاز ده، ومش بيتبعت لأي سيرفر. لو مسحت بيانات البرنامج أو شلته، المحفوظ بيتمسح معاه، فخد نسخة احتياطية كاملة (مشروع القنوات + المكتبة بالملفات المتخزنة) من قايمة ملف في المحرر، وتقدر ترجعها على أي جهاز أو لينك تاني.</div>'+
+  '<div class="callout warn"><b>توصيل الرسيفر بالموبايل (OTG)</b>وصّل الرسيفر أو الفلاشة بكابل OTG وتعامل معاها مباشرة من البرنامج: دي محتاجة صلاحية أجهزة مش متاحة للمتصفح، فهي متطلب أساسي في نسخة التطبيق الأصلي للموبايل، ومتسجلة في الأدوات المتقدمة.</div>'+
+  '<div class="footer">ابوجبل سات، نسخة 3.0. ملاحظات العائلات ومرجع اللودرات من منتديات السات المصرية والعربية، 26 نوفمبر 2026. قسم التحديثات بيتجدد باستمرار بسوفتات وتحويلات وملفات قنوات بتحميل مباشر من البرنامج.</div>'+
+  '</div>';
+}
+/* ---- home ---- */
+function tile(href,cls,icon,tn,td){
+  return '<a class="tile '+cls+'" href="#'+href+'"><span class="tic">'+icon+'</span><span class="tn">'+tn+'</span><span class="td">'+td+'</span></a>';
+}
+const ICO_DISH='<svg viewBox="0 0 48 48" fill="none"><path d="M12 31c6.5 0 12-5.5 12-12l-4.5-1c0 5-3.5 9-7.5 9z" fill="#fff"/><path d="M24.5 20.5l7-8" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="33.5" cy="10.5" r="2.4" fill="#fff"/><path d="M37 8c2.6 1.7 2.6 5.3 0 7" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/><rect x="9" y="35" width="17" height="4" rx="2" fill="#fff"/></svg>';
+const ICO_FOLDER='<svg viewBox="0 0 48 48" fill="none"><path d="M6 12a3 3 0 013-3h11l4 5h15a3 3 0 013 3v19a3 3 0 01-3 3H9a3 3 0 01-3-3V12z" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><path d="M6 20h36" stroke="#fff" stroke-width="2.6"/></svg>';
+const ICO_CHIP='<svg viewBox="0 0 48 48" fill="none"><rect x="13" y="13" width="22" height="22" rx="4" stroke="#fff" stroke-width="2.6"/><rect x="20" y="20" width="8" height="8" rx="2" fill="#fff"/><path d="M18 13V7m6 6V7m6 6V7M18 41v-6m6 6v-6m6 6v-6M13 18H7m6 6H7m6 6H7m34-12h-6m6 6h-6m6 6h-6" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>';
+const ICO_UPD='<svg viewBox="0 0 48 48" fill="none"><path d="M24 8v20m0 0l-8-8m8 8l8-8" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 37h28" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>';
+const ICO_CONVERT='<svg viewBox="0 0 48 48" fill="none"><path d="M10 17h24l-6-6M38 31H14l6 6" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICO_INFO='<svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="17" stroke="#fff" stroke-width="2.6"/><path d="M24 21v11" stroke="#fff" stroke-width="3" stroke-linecap="round"/><circle cx="24" cy="15" r="2" fill="#fff"/></svg>';
+function viewHome(){
+  const c=edCounts();
+  return '<div class="homehero"><div class="inner">'+
+    '<h1 class="hometitle">ابوجبل <b>سات</b></h1>'+
+    '<div class="hometag">برنامج الفني الكامل: محرر قنوات احترافي، مكتبة سوفتات، مرجع لودرات، وتصدير لكل الأجهزة</div>'+
+  '</div></div>'+
+  installCard()+
+  '<div class="tiles">'+
+    tile('/editor','teal',ICO_DISH,'محرر القنوات','أقمار وترددات وقنوات، ترتيب وتعريب وتصدير')+
+    tile('/library','gold',ICO_FOLDER,'المكتبة','سوفتات وفلاشات وملفات قنوات متخزنة جوه البرنامج')+
+    tile('/loaders','blue',ICO_CHIP,'اللودرات','مرجع اللودرات حسب المعالج بخطوات الشحن')+
+    tile('/updates','teal',ICO_UPD,'التحديثات','سوفتات وتحويلات وملفات قنوات بتحميل مباشر، بتتجدد باستمرار')+
+    tile('/convert','purple',ICO_CONVERT,'التحويل','إيه الممكن في التحويل بين الأجهزة بصراحة')+
+    tile('/about','slate',ICO_INFO,'حول البرنامج','التثبيت والحفظ وتوصيل OTG')+
+  '</div>'+
+  '<div class="card"><h2>ملف القنوات الحالي</h2><div class="facts">'+
+    '<div class="fact"><div class="k">الأقمار</div><div class="v">'+c.sats+'</div></div>'+
+    '<div class="fact"><div class="k">الترددات</div><div class="v">'+c.tps+'</div></div>'+
+    '<div class="fact"><div class="k">قنوات TV</div><div class="v">'+c.tv+'</div></div>'+
+    '<div class="fact"><div class="k">راديو</div><div class="v">'+c.radio+'</div></div>'+
+  '</div><div class="caption">'+esc(editor.fileName||'')+'</div></div>'+
+  '<div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn btn-sec" id="shareBtn">مشاركة البرنامج</button><a class="btn btn-ghost" href="#/editor" style="text-decoration:none;display:inline-flex;align-items:center">افتح المحرر</a></div>';
+}
+function bindHome(){
+  const b=$('#installBtn'); if(b) b.addEventListener('click',doInstall);
+  const sh=$('#shareBtn'); if(sh) sh.addEventListener('click',async ()=>{
+    const data={title:'ابوجبل سات',text:'محرر القنوات الاحترافي للفنيين',url:location.href};
+    try{ if(navigator.share){ await navigator.share(data); } else { throw 0; } }
+    catch(e){
+      try{ await navigator.clipboard.writeText(location.href); toast('اتنسخ لينك البرنامج'); }
+      catch(e2){ toast('انسخ اللينك من شريط العنوان'); }
+    }
+  });
+}
+/* ================= render ================= */
+function render(){
+  renderTabs();
+  const p=currentPath();
+  const view=$('#view');
+  if(p==='/library'){ view.innerHTML='<div class="narrow">'+viewLibrary()+'</div>'; bindLibrary(); }
+  else if(p==='/loaders'){ view.innerHTML='<div class="narrow">'+viewLoaders()+'</div>'; bindLoaders(); }
+  else if(p==='/updates'){ view.innerHTML='<div class="narrow">'+viewUpdates()+'</div>'; bindUpdates(); }
+  else if(p==='/convert'){ view.innerHTML='<div class="narrow">'+viewConvert()+'</div>'; }
+  else if(p==='/about'){ view.innerHTML=viewAbout(); const b=$('#installBtn'); if(b) b.addEventListener('click',doInstall); }
+  else if(p==='/editor'){ view.innerHTML=viewEditor(); bindEditor(); }
+  else { view.innerHTML=viewHome(); bindHome(); }
+}
+window.addEventListener('hashchange', render);
+/* ================= boot ================= */
+$('#tabs').addEventListener('click',e=>{
+  const b=e.target.closest('[data-tab]');
+  if(b) go(b.dataset.tab);
+});
+(async function(){
+  db=await openDB();
+  if('serviceWorker' in navigator){
+    try{ await navigator.serviceWorker.register('sw.js'); }catch(e){}
+  }
+  render();
+})();
+</script>
+</body>
+</html>
