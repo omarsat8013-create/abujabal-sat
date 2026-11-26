@@ -1352,6 +1352,52 @@ function svgRails(){
   '<text x="385" y="285" text-anchor="middle" fill="#8ea2d6" font-size="11.5">كل خط فيهم منظم مستقل (ملف + أيسي صغير أو MOSFET). خط ناقص = الجزء اللي بيتغذى منه ميت، والباقي شغال</text>'+
   '</svg>';
 }
+function svgAvout(){
+  return '<svg viewBox="0 0 770 240" xmlns="http://www.w3.org/2000/svg" font-family="inherit">'+M_ARR_DEF+
+  mBox(620,90,130,56,'المعالج SoC','فيديو + صوت')+
+  mBox(430,25,150,44,'مقاومات + حماية ESD')+
+  mBox(230,25,130,44,'فيشة HDMI')+
+  mBox(430,155,150,44,'دايود/مكثف ترشيح')+
+  mBox(230,155,130,44,'مخرج AV','صوت + صورة كومبوزيت')+
+  mBox(20,90,150,56,'الشاشة')+
+  mArrow(620,110,583,47)+mArrow(430,47,363,47)+
+  mArrow(620,132,583,177)+mArrow(430,177,363,177)+
+  mArrow(230,47,180,90)+mArrow(230,177,180,132)+
+  '<text x="385" y="222" text-anchor="middle" fill="#8ea2d6" font-size="11.5">لو الصورة طالعة من AV ومش طالعة من HDMI: العطل في مسار HDMI (فيشة، حماية ESD، لحام بارد) مش في المعالج</text>'+
+  '</svg>';
+}
+function svgPanel(){
+  return '<svg viewBox="0 0 770 250" xmlns="http://www.w3.org/2000/svg" font-family="inherit">'+M_ARR_DEF+
+  mBox(610,90,140,56,'المعالج SoC','البوردة الرئيسية')+
+  mBox(400,90,150,56,'كنكتور البانل','CLK · DIO · STB · تغذية')+
+  mBox(200,25,150,44,'درايفر الشاشة','TM1628 وشبابه · 5V/3.3V')+
+  mBox(10,25,150,44,'شاشة LED الأمامية')+
+  mBox(200,165,150,44,'أزرار البانل')+
+  mBox(200,95,150,44,'حساس IR','تغذية 5V/3.3V')+
+  mBox(10,165,150,44,'الريموت')+
+  mArrow(610,118,553,118)+
+  mArrow(400,100,353,47)+mArrow(200,47,163,47)+
+  mArrow(400,118,353,117)+
+  mArrow(400,136,353,187)+
+  '<line x1="125" y1="165" x2="125" y2="140" stroke="#8ea2d6" stroke-width="1.8" stroke-dasharray="5 4" marker-end="url(#mArrHead)"/>'+
+  '<text x="275" y="135" text-anchor="middle" fill="#fbbf24" font-size="11">طرف الإشارة: ~3-5V بيهبط لحظة الضغط</text>'+
+  '<text x="385" y="240" text-anchor="middle" fill="#8ea2d6" font-size="11.5">الشاشة والأزرار والحساس كلهم على بوردة البانل الصغيرة — كنكتور فك أو لحام بارد يطفيهم مع بعض</text>'+
+  '</svg>';
+}
+function svgUart(){
+  return '<svg viewBox="0 0 770 250" xmlns="http://www.w3.org/2000/svg" font-family="inherit">'+M_ARR_DEF+
+  mBox(600,80,150,88,'هيدر UART على البوردة','4 بنات: 3.3V · GND · TX · RX')+
+  mBox(330,80,150,88,'محول USB-TTL','(اللودر) 3.3V')+
+  mBox(60,80,150,88,'الكمبيوتر','برنامج اللودر · باود 115200')+
+  '<line x1="600" y1="110" x2="483" y2="110" stroke="#14b8a6" stroke-width="2.2" marker-end="url(#mArrHead)"/>'+
+  '<line x1="483" y1="138" x2="600" y2="138" stroke="#fbbf24" stroke-width="2.2" marker-end="url(#mArrHead)"/>'+
+  '<text x="540" y="104" text-anchor="middle" fill="#14b8a6" font-size="11" font-weight="700">TX ← RX</text>'+
+  '<text x="540" y="156" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="700">RX ← TX</text>'+
+  mArrow(330,124,213,124)+
+  '<text x="270" y="112" text-anchor="middle" fill="#8ea2d6" font-size="11">USB</text>'+
+  '<text x="385" y="215" text-anchor="middle" fill="#f87171" font-size="11.5" font-weight="700">تحذير: أطراف الرسيفر 3.3V — محول 5V ممكن يحرق المعالج. الترتيب بيختلف من بوردة لبوردة: الأرضي تتعرف عليه بالبازر مع الشاسيه</text>'+
+  '</svg>';
+}
 const MAINT_GUIDES=[
   { id:'dead', title:'الجهاز ميت تمامًا (مفيش ولا لمبة استعداد)', fam:'كل الأجهزة الصينية ميني HD', diagram:'smps', keys:'ميت لا يعمل مفيش نور لمبة باور dead power فصل',
     steps:[
@@ -1381,7 +1427,7 @@ const MAINT_GUIDES=[
       '<b>لو في سويتش DiSEqC:</b> جرب من غيره على طول، ولو اشتغل يبقى العطل في السويتش أو إعداداته في الجهاز.',
       '<b>الفولت سليم ومفيش إشارة؟</b> اشحن السوفت المناسب الأول (إعدادات/تلف سوفت)، ولو ما زالت يبقى تيونر أو ديموود — وده تبديل بوردة/تيونر.',
     ]},
-  { id:'novideo', title:'فيه صوت بس مفيش صورة', fam:'كل الأجهزة الصينية ميني HD', diagram:'', keys:'صورة صوت اسود شاشة سوداء hdmi video no picture',
+  { id:'novideo', title:'فيه صوت بس مفيش صورة', fam:'كل الأجهزة الصينية ميني HD', diagram:'avout', keys:'صورة صوت اسود شاشة سوداء hdmi video no picture',
     steps:[
       '<b>جرب مخرج تاني:</b> لو شغال HDMI جرب مخرج AV (كابل الصوت والصورة) — طلعت صورة على AV؟ المشكلة في مسار HDMI: فيشة، دايودات حماية ESD، أو لحام بارد.',
       '<b>غيّر دقة العرض</b> من إعدادات الجهاز (من 1080 لـ 720) — عدم توافق الدقة مع شاشة قديمة بيطلع صوت بلا صورة.',
@@ -1389,7 +1435,7 @@ const MAINT_GUIDES=[
       '<b>قس فولتات الذاكرة:</b> <span class="v">DDR 1.35-1.8V</span> والكور <span class="v">1.0-1.2V</span> — نقص أو اهتزاز فيهم بيعمل صورة مفقودة أو مشوهة مع صوت سليم.',
       '<b>لو كل ده سليم:</b> اشحن السوفت، وبعدها الاحتمال الأكبر معالج أو ذاكرة — وده شغل BGA/محترف.',
     ]},
-  { id:'nodisplay', title:'الشاشة الأمامية ميتة (والجهاز شغال وطلع صورة)', fam:'كل الأجهزة الصينية ميني HD', diagram:'', keys:'شاشة امامية ديسبلاي بانل display ارقام نور واجهة',
+  { id:'nodisplay', title:'الشاشة الأمامية ميتة (والجهاز شغال وطلع صورة)', fam:'كل الأجهزة الصينية ميني HD', diagram:'panel', keys:'شاشة امامية ديسبلاي بانل display ارقام نور واجهة',
     steps:[
       '<b>تأكد إن الجهاز نفسه شغال:</b> طلع صورة على الشاشة؟ يبقى العطل في البانل فقط. لو مفيش صورة أصلًا، شوف دليل "ميت تمامًا".',
       '<b>كنكتور البانل:</b> سلك رفيع من البوردة الرئيسية لبوردة البانل — افكه وركبه، وافحص لحامه في الجهتين.',
@@ -1404,6 +1450,15 @@ const MAINT_GUIDES=[
       '<b>طرف الإشارة في الحساس:</b> واقف على فولت عالي (~3-5V) وبيهبط لحظة الضغط على الريموت — لو ثابت، الحساس بايظ (قطعة رخيصة وشائعة التلف).',
       '<b>نظف فتحة الحساس</b> وشيل أي لاصق شفاف قديم على وش البانل حاجب الإشارة.',
       '<b>بعد سوفت جديد:</b> كود الريموت ممكن يتغير — جرب ريموت يونيفرسال بكود الجهاز أو ريموت من جهاز مماثل.',
+    ]},
+  { id:'uart', title:'توصيل اللودر (سيريال UART) لشحن السوفت', fam:'صن بلص · GX · علي · مونتاج', diagram:'uart', keys:'لودر سيريال uart شحن فلاش كابل ترقية rs232 ttl توصيل',
+    steps:[
+      '<b>مكان الهيدر:</b> 4 بنات جنب المعالج غالبًا (3.3V · GND · TX · RX). الأرضي تتعرف عليه بالبازر مع الشاسيه أو فيشة الـ USB.',
+      '<b>التوصيل متقاطع:</b> TX الرسيفر على RX المحول، وRX الرسيفر على TX المحول، وGND مع GND. خطأ التقاطع مش بيضر بس الشحن مش هيشتغل.',
+      '<b>الفولت:</b> أطراف الرسيفر <span class="v">3.3V</span> — استخدم محول USB-TTL بمستوى 3.3V، ومتصلش طرف التغذية إلا لو اللودر طالبها.',
+      '<b>إعداد اللودر:</b> الباود <span class="v">115200</span> في أغلب العائلات.',
+      '<b>اختار اللودر الصح لعائلة المعالج من قسم اللودرات</b> — لودر غلط ممكن يبوظ الفلاشة.',
+      '<b>نصيحة:</b> سجّل قراءة الفلاشة الأصلية (backup) قبل أي شحن — دي أرخص حماية من سوفت غلط.',
     ]},
   { id:'rails', title:'خريطة الفولتات الثانوية داخل الجهاز (مرجع سريع)', fam:'كل الأجهزة الصينية ميني HD', diagram:'rails', keys:'فولتات منظم خطوط vcc خريطة جهد ريل rails',
     steps:[
@@ -1425,7 +1480,7 @@ function maintListHtml(){
   const list=MAINT_GUIDES.filter(g=>!q || (g.title+' '+g.keys+' '+g.fam).includes(q));
   if(!list.length) return '<div class="card"><p style="color:var(--mut)">مفيش دليل مطابق لبحثك لسه. ابعتلنا العطل أو الموديل وهنضيفه.</p></div>';
   return list.map(g=>{
-    const svg=g.diagram==='smps'?svgSmps():(g.diagram==='boot'?svgBoot():(g.diagram==='signal'?svgSignal():(g.diagram==='rails'?svgRails():'')));
+    const svg=g.diagram==='smps'?svgSmps():(g.diagram==='boot'?svgBoot():(g.diagram==='signal'?svgSignal():(g.diagram==='rails'?svgRails():(g.diagram==='avout'?svgAvout():(g.diagram==='panel'?svgPanel():(g.diagram==='uart'?svgUart():''))))));
     return '<div class="mguide"><h3>'+esc(g.title)+'<span class="fam">'+esc(g.fam)+'</span></h3>'+
       (svg?'<div class="mdiagram">'+svg+'<div class="mdisc">مخطط نموذجي عام للمعمارية الشائعة، مش schematic لموديل بعينه</div></div>':'')+
       '<ol class="steps">'+g.steps.map(s=>'<li>'+s+'</li>').join('')+'</ol></div>';
