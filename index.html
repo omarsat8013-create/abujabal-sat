@@ -460,6 +460,11 @@ body.boldtable table.grid td{font-weight:700}
 .runrow .ro{font-size:10.5px;color:var(--gold);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;white-space:nowrap}
 .runrow .rt{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .runrow .rl{font-size:10px;color:var(--mut);white-space:nowrap}
+.runrow{cursor:default}
+.runrow .rt{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:none;border:0;color:inherit;font:inherit;text-align:start;padding:0;cursor:pointer}
+.runrow .ract{display:flex;gap:4px;flex:0 0 auto}
+.rbtn{appearance:none;background:#16233d;border:1px solid var(--line2);color:var(--txt);border-radius:6px;width:28px;height:28px;font-size:11px;line-height:1;cursor:pointer}
+.rbtn:active{background:#1e3054}
 .hexwrap{overflow-x:auto;border:1px solid var(--line2);border-radius:10px;background:#080f1f;padding:6px;direction:ltr}
 .hx{display:flex;align-items:center;gap:2px;direction:ltr;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1;padding:1px 0}
 .hxo{color:#64748b;width:46px;flex:0 0 46px}
@@ -745,8 +750,8 @@ function downloadBlob(blob, name){
   setTimeout(()=>URL.revokeObjectURL(url),4000);
 }
 /* ================= router ================= */
-const APP_VER='3.2.8';
-const APP_BUILD='v48 · 27/11/2026';
+const APP_VER='3.2.9';
+const APP_BUILD='v49 · 27/11/2026';
 const TABS=[
   { path:'/',        label:'الرئيسية' },
   { path:'/editor',  label:'المحرر' },
@@ -2397,7 +2402,7 @@ const BIN_FILES=[
   {g:'pub',n:'PUB_V2.bin',s:89388},
   {g:'rl',n:'RedLine_128.bin',s:105696},
   {g:'rl',n:'RedLine_256.bin',s:105696},];
-let bin=null, binQ='', binPage=0, binFilter='', binLimit=60, binKind='all';
+let bin=null, binQ='', binPage=0, binFilter='', binLimit=60, binKind='all', binTab='ch';
 const BIN_PAGE_BYTES=768, BIN_COLS=8;
 /* ---- الترميز: UTF-8 أو ISO-8859-6 (عربي 8-بت) ---- */
 let _iso6tab=null,_iso6rev=null,_iso6ok=null;
@@ -2533,7 +2538,7 @@ function binDiffList(){
 function binOpen(bytes,name){
   const b=bytes instanceof Uint8Array?bytes:new Uint8Array(bytes);
   bin={ name:name||'file.bin', orig:b, cur:b.slice(), enc:binDetect(b), sha0:'', diff:0, off:0 };
-  binPage=0; binQ=''; binLimit=60; binKind='all';
+  binPage=0; binQ=''; binLimit=60; binKind='all'; binTab='ch';
   binSha(b).then(h=>{ if(bin){ bin.sha0=h; if(currentPath()==='/bin') render(); } });
   render();
   toast('اتفتح: '+bin.name);
@@ -2633,7 +2638,11 @@ function binEditor(){
       '<button type="button" class="btn btn-ghost" data-b="orig">نزّل نسخة من الأصل</button>'+
     '</div>'+
     '<div class="caption">مفيش checksum معروف في الصيغة دي، فالبرنامج مش بيقدر يتأكد إن الملف سليم بعد التعديل. اللي بيوريك حجمه وبصمته وعدد البايتات اللي اتغيرت وبس.</div></div>';
+  h+='<div class="choices" id="binTabs" style="margin:14px 0 0">'+
+    [['ch','قنوات الملف'],['hex','البايتات (متقدم)']].map(k=>'<button type="button" data-tab="'+k[0]+'" class="'+(binTab===k[0]?'on':'')+'">'+k[1]+'</button>').join('')+
+    '</div><div class="caption">القنوات هي الصفحة الأساسية. البايتات صفحة متقدمة للفني اللي عايز يشوف الملف خام.</div>';
   const runsAll=binRuns(b.cur,b.enc);
+  let chPart='', hexPart='';
   const runs=runsAll.filter(r=>binLooksName(r.t));
   const isAr=t=>/[\u0600-\u06FF]/.test(t);
   const q=binNorm(binQ);
@@ -2642,23 +2651,28 @@ function binEditor(){
   if(binKind==='en') shown=shown.filter(r=>!isAr(r.t));
   const LIM=Math.max(40,binLimit);
   const nAr=runs.filter(r=>isAr(r.t)).length, nEn=runs.length-nAr;
-  h+='<div class="card" id="chListCard"><h2>قائمة القنوات في الملف<span class="sub">'+runs.length+' اسم مقروء (منهم '+nAr+' عربي و'+nEn+' إنجليزي) — بترتيب الملف، اضغط أي اسم تعدّله</span></h2>'+
+  chPart+='<div class="card" id="chListCard"><h2>قائمة القنوات في الملف<span class="sub">'+runs.length+' اسم مقروء (منهم '+nAr+' عربي و'+nEn+' إنجليزي) — بترتيب الملف، اضغط أي اسم تعدّله</span></h2>'+
     '<div class="binsearch"><input type="text" id="binQ" placeholder="ابحث باسم القناة (عربي أو إنجليزي)" value="'+esc(binQ)+'"></div>'+
     '<div class="choices" id="binKind" style="margin:0 0 10px">'+
       [['all','الكل'],['ar','عربي'],['en','إنجليزي']].map(k=>'<button type="button" data-kind="'+k[0]+'" class="'+(binKind===k[0]?'on':'')+'">'+k[1]+'</button>').join('')+
     '</div>';
-  h+='<div class="runlist" id="chRunList">';
+  chPart+='<div class="runlist" id="chRunList">';
   if(!runs.length){
-    h+='<div class="caption">البرنامج ملقاش أسماء مقروءة في الملف ده. ممكن يكون مشفّر أو بصيغة تانية، وفي الحالة دي استخدم تبويب البايتات.</div>';
+    chPart+='<div class="caption">البرنامج ملقاش أسماء مقروءة في الملف ده. ممكن يكون مشفّر أو بصيغة تانية، وفي الحالة دي استخدم تبويب البايتات.</div>';
   }else if(!shown.length){
-    h+='<div class="caption">مفيش اسم مطابق لـ«'+esc(binQ)+'». جرّب كلمة تانية.</div>';
+    chPart+='<div class="caption">مفيش اسم مطابق لـ«'+esc(binQ)+'». جرّب كلمة تانية.</div>';
   }else{
     shown.slice(0,LIM).forEach((r,idx)=>{
-      h+='<button type="button" class="runrow" data-run="'+r.o+'" data-runl="'+r.l+'"><span class="rno" dir="ltr">'+(idx+1)+'</span><span class="ro" dir="ltr">'+r.o.toString(16).toUpperCase().padStart(6,'0')+'</span><span class="rt">'+esc(r.t.trim())+'</span><span class="rl">'+r.l+' ب</span></button>';
+      chPart+='<div class="runrow"><span class="rno" dir="ltr">'+(idx+1)+'</span><span class="ro" dir="ltr">'+r.o.toString(16).toUpperCase().padStart(6,'0')+'</span>'+
+        '<button type="button" class="rt" data-run="'+r.o+'" data-runl="'+r.l+'">'+esc(r.t.trim())+'</button><span class="rl">'+r.l+' ب</span>'+
+        '<span class="ract"><button type="button" class="rbtn" data-mv="up" data-run="'+r.o+'" title="حرّك لفوق" aria-label="حرّك لفوق">▲</button>'+
+        '<button type="button" class="rbtn" data-mv="dn" data-run="'+r.o+'" title="حرّك لتحت" aria-label="حرّك لتحت">▼</button></span></div>';
     });
-    if(shown.length>LIM) h+='<button type="button" class="btn btn-sec sm" data-b="more" style="margin-top:8px">عرض '+Math.min(80,shown.length-LIM)+' اسم كمان (فيه '+shown.length+')</button>';
+    if(shown.length>LIM) chPart+='<button type="button" class="btn btn-sec sm" data-b="more" style="margin-top:8px">عرض '+Math.min(80,shown.length-LIM)+' اسم كمان (فيه '+shown.length+')</button>';
   }
-  h+='</div><div class="caption">دي كل الأسماء المقروءة اللي البرنامج لقاها جوه الملف (قنوات وأقمار ومزودين) بترتيبها وموضعها، بدون الخربشة القصيرة. الصيغة مش مفكوكة بالكامل، فالحقول الرقمية زي التردد وSID مش معروضة، والتعديل بيتم على الاسم بنفس عدد البايتات.</div></div>';
+  chPart+='</div><div class="caption">دي كل الأسماء المقروءة اللي البرنامج لقاها جوه الملف (قنوات وأقمار ومزودين) بترتيبها وموضعها، بدون الخربشة القصيرة. الصيغة مش مفكوكة بالكامل، فالحقول الرقمية زي التردد وSID مش معروضة، والتعديل بيتم على الاسم بنفس عدد البايتات.</div>'+
+    '<div class="callout note" style="margin-top:10px"><b>التحريك بيبدّل الأسماء بين مكانين</b>زرار ▲▼ بياخد اسم القناة ويحطه في مكان اللي قبله أو اللي بعده (مع تكميل الباقي بمسافات) — يعني ترتيب القنوات بيتغيّر من غير ما حجم الملف يتغيّر. السجل نفسه مش بينتقل، لأن حدود السجل جوه الملف لسه مش مفكوكة.</div>'+
+    '<div class="callout warn" style="margin-top:10px"><b>اللي لسه مش مدعوم</b>مسح قناة نهائي، وتحريكها لمجموعة أو قمر تاني: الاتنين محتاجين نعرف حدود السجل والأقمار جوه الملف، وده لسه مش مفكوك في العيلة دي. اللي البرنامج متأكد منه هو النصوص (أسماء القنوات والأقمار والمزودين) ومواضعها وطولها بالبايت.</div></div>';
   /* hex */
   const total=Math.ceil(b.cur.length/BIN_PAGE_BYTES)||1;
   if(binPage>=total) binPage=total-1;
@@ -2667,7 +2681,7 @@ function binEditor(){
   const d=binDecode(b.cur,b.enc);
   const cmap={};
   for(let i=0;i<d.chars.length;i++) cmap[d.offs[i]]=d.chars[i];
-  h+='<div class="card"><h2>البايتات<span class="sub">اضغط على أي بايت تعدّله — الصفحة '+ (binPage+1) +' من '+total+'</span></h2>'+
+  hexPart+='<div class="card"><h2>البايتات<span class="sub">اضغط على أي بايت تعدّله — الصفحة '+ (binPage+1) +' من '+total+'</span></h2>'+
     '<div class="hexwrap">';
   for(let o=start;o<end;o+=BIN_COLS){
     let line='<div class="hx"><span class="hxo" dir="ltr">'+o.toString(16).toUpperCase().padStart(6,'0')+'</span>';
@@ -2681,13 +2695,14 @@ function binEditor(){
       prev+= (binTextish(c)&&c.trim())?c:'.';
     }
     line+='<span class="hxt" dir="ltr">'+esc(prev)+'</span></div>';
-    h+=line;
+    hexPart+=line;
   }
-  h+='</div><div class="binpager">'+
+  hexPart+='</div><div class="binpager">'+
     '<button type="button" class="btn btn-sec sm" data-b="prev"'+(binPage<=0?' disabled':'')+'>السابق</button>'+
     '<button type="button" class="btn btn-sec sm" data-b="next"'+(binPage>=total-1?' disabled':'')+'>التالي</button>'+
     '<button type="button" class="btn btn-ghost sm" data-b="goto">اذهب لإزاحة</button>'+
     '</div></div>';
+  h+=(binTab==='ch')?chPart:hexPart;
   if(diff){
     const list=binDiffList();
     h+='<div class="card"><h2>التغييرات<span class="sub">'+list.length+' بايت — من الأصل للجديد</span></h2><div class="difflist">'+
@@ -2833,6 +2848,10 @@ function bindBin(){
   if(v&&!v.dataset.binBound){
     v.dataset.binBound='1';
     v.addEventListener('click',e=>{
+      const tb=e.target.closest('[data-tab]');
+      if(tb){ binTab=tb.dataset.tab; render(); return; }
+      const mv=e.target.closest('[data-mv]');
+      if(mv){ binMoveName(parseInt(mv.dataset.run,10), mv.dataset.mv==='up'?-1:1); return; }
       const by=e.target.closest('[data-byte]');
       if(by){ binEditByte(parseInt(by.dataset.byte,10)); return; }
       const rn=e.target.closest('[data-run]');
@@ -2874,6 +2893,29 @@ function binEditByte(off){
   });
 }
 /* ---- تعديل نص بنفس عدد البايتات ---- */
+function binPadTo(text,len){
+  const e=binEncode(text,bin.enc);
+  if(!e||e.length>len) return null;
+  const out=new Uint8Array(len);
+  out.set(e,0);
+  const sp=binEncode(' ',bin.enc);
+  if(sp&&sp.length){ for(let k=e.length;k+sp.length<=len;k+=sp.length) out.set(sp,k); }
+  return out;
+}
+function binMoveName(off,dir){
+  if(!bin) return;
+  const runs=binRuns(bin.cur,bin.enc).filter(r=>binLooksName(r.t));
+  const i=runs.findIndex(r=>r.o===off);
+  if(i<0){ toast('مش لاقي الاسم ده في الملف'); return; }
+  const j=i+dir;
+  if(j<0||j>=runs.length){ toast(dir<0?'ده أول اسم في الملف':'ده آخر اسم في الملف'); return; }
+  const A=runs[i], B=runs[j];
+  const a=binPadTo(A.t,A.l), b=binPadTo(B.t,B.l);
+  if(!a||!b){ toast('مش قادر أبدّل الاسمين — واحد منهم مش بيتكتب في ترميز الملف ده بنفس الطول'); return; }
+  bin.cur.set(a,A.o); bin.cur.set(b,B.o);
+  toast('اتبدّل «'+A.t.trim()+'» مع «'+B.t.trim()+'»');
+  render();
+}
 function binEditRun(off,len){
   if(!bin) return;
   const raw=bin.cur.subarray(off,off+len);
@@ -2988,7 +3030,7 @@ function binGoto(){
 /* الفكرة: الصفحة نفسها بتقارن رقم بنيتها بالبنية المنشورة على السيرفر.
    لو فيه أحدث: بتنضّف الكاش والـ service worker وتعيد التحميل بعنوان جديد،
    فمستحيل تفضل واقفة على نسخة قديمة زي ما حصل قبل كده. */
-var AJS_BUILD='v48';
+var AJS_BUILD='v49';
 var AJS_REMOTE='https://omarsat8013-create.github.io/abujabal-sat/';
 var AJS_UPDATING=false;
 function ajsLoadRemoteVersion(done){
