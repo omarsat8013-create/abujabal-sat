@@ -750,8 +750,8 @@ function downloadBlob(blob, name){
   setTimeout(()=>URL.revokeObjectURL(url),4000);
 }
 /* ================= router ================= */
-const APP_VER='3.3.0';
-const APP_BUILD='v50 · 27/11/2026';
+const APP_VER='3.3.1';
+const APP_BUILD='v51 · 27/11/2026';
 const TABS=[
   { path:'/',        label:'الرئيسية' },
   { path:'/editor',  label:'المحرر' },
@@ -2910,11 +2910,23 @@ function binMoveName(off,dir){
   const j=i+dir;
   if(j<0||j>=runs.length){ toast(dir<0?'ده أول اسم في الملف':'ده آخر اسم في الملف'); return; }
   const A=runs[i], B=runs[j];
-  const aInB=binPadTo(A.t,B.l), bInA=binPadTo(B.t,A.l);
-  if(!aInB||!bInA){ toast('مش قادر أبدّل الاسمين — واحد منهم أطول من مكان التاني في ترميز الملف ده'); return; }
-  bin.cur.set(bInA,A.o); bin.cur.set(aInB,B.o);
-  toast('اتبدّل «'+A.t.trim()+'» مع «'+B.t.trim()+'»');
-  render();
+  const doSwap=(ta,tb)=>{
+    const x=binPadTo(ta,B.l), y=binPadTo(tb,A.l);
+    if(!x||!y) return false;
+    bin.cur.set(y,A.o); bin.cur.set(x,B.o);
+    return true;
+  };
+  if(doSwap(A.t,B.t)){ toast('اتبدّل «'+A.t.trim()+'» مع «'+B.t.trim()+'»'); render(); return; }
+  const fit=(text,len)=>{ let out=''; for(const ch of text){ const e=binEncode(out+ch,bin.enc); if(!e||e.length>len) break; out+=ch; } return out; };
+  const tB=fit(B.t,A.l), tA=fit(A.t,B.l);
+  if(!tB||!tA){ toast('مش قادر أبدّل الاسمين في ترميز الملف ده'); return; }
+  openModal('الأسماء أطوالها مختلفة',
+    '<div class="callout warn"><b>الاسم أطول من مكان اللي جنبه</b>عشان ترتيب القنوات يتغيّر من غير ما حجم الملف يتغيّر، الاسم لازم يدخل في نفس عدد البايتات. لو كمّلت، الاسم الطويل هيتقصّر عند الآخر (زي اللي في المعاينة).</div>'+
+    '<div class="binkv"><div><span>الاسم اللي هيتقصّر</span><b dir="ltr">'+esc(B.t.trim())+'</b></div><div><span>هيبقى</span><b dir="ltr">'+esc(tB.trim())+'</b></div></div>'+
+    '<div class="caption">تقدر ترجّع الأصل في أي وقت بزر «رجّع الأصل».</div>','طبّق التحريك',(m)=>{
+      if(!doSwap(tA,tB)){ toast('مش قادر أبدّل الاسمين'); return false; }
+      toast('اتبدّلوا — الاسم الطويل اتقصّر'); render();
+    });
 }
 function binEditRun(off,len){
   if(!bin) return;
@@ -3030,7 +3042,7 @@ function binGoto(){
 /* الفكرة: الصفحة نفسها بتقارن رقم بنيتها بالبنية المنشورة على السيرفر.
    لو فيه أحدث: بتنضّف الكاش والـ service worker وتعيد التحميل بعنوان جديد،
    فمستحيل تفضل واقفة على نسخة قديمة زي ما حصل قبل كده. */
-var AJS_BUILD='v50';
+var AJS_BUILD='v51';
 var AJS_REMOTE='https://omarsat8013-create.github.io/abujabal-sat/';
 var AJS_UPDATING=false;
 function ajsLoadRemoteVersion(done){
