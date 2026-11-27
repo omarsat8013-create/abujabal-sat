@@ -596,14 +596,25 @@ function viewUpdates(){
     '<div style="margin-top:10px" class="updbtns">'+(u.dl?
       '<a class="btn btn-primary" href="'+esc(u.dl)+'" download>⬇ تحميل مباشر'+(u.size?' ('+esc(u.size)+')':'')+'</a>':
       '<span class="badge">⏳ قريباً، في قايمة الرفع</span>')+
-      (u.bin?'<button type="button" class="btn btn-sec" data-binopen="'+esc(u.bin)+'">🧩 افتح وحرّر جوه البرنامج</button>':'')+'</div></div>').join('')+
+      (u.dl?'<button type="button" class="btn btn-sec" data-binedit="'+esc(u.dl)+'"'+(u.bin?' data-bingrp="'+esc(u.bin)+'"':'')+'>✎ تعديل / تحرير الملف</button>':'')+'</div></div>').join('')+
   '</div>'+
   '<div class="card"><h2>محتاج ملف معين؟</h2><p>لو محتاج سوفت أو تحويلة أو ملف قنوات باسمه ومعالجه، ابعته وهيتضاف لقايمة الرفع بأولوية، وأول ما يترفع هيظهر هنا بزرار تحميل مباشر.</p></div>';
 }
 function bindUpdates(){
   const f=$('#updFilter');
   if(f) f.addEventListener('click',e=>{ const b=e.target.closest('button'); if(b){ updFilter=b.dataset.v; render(); } });
-  document.querySelectorAll('[data-binopen]').forEach(b=>b.addEventListener('click',()=>{ binFilter=b.dataset.binopen; bin=null; go('/bin'); }));
+  document.querySelectorAll('[data-binedit]').forEach(b=>b.addEventListener('click',()=>{
+    const href=b.dataset.binedit||'', grp=b.dataset.bingrp||'';
+    if(/\.(zip|rar|7z|tar|gz)$/i.test(href)){
+      openModal('ملف مضغوط',
+        '<div class="callout warn"><b>الملف ده مضغوط</b>محرر الباينري بيفتح ملف واحد باينري مش أرشيف مضغوط. فك الضغط على الموبايل أو الكمبيوتر، وبعدها افتح الملف اللي جواه من محرر الباينري (زرار «اختار ملف من جهازك»).</div>'+
+        '<div class="caption">أرشيف: '+esc(href)+'</div>','تمام',()=>{});
+      return;
+    }
+    if(grp){ binFilter=grp; }
+    bin=null; go('/bin');
+    if(/^dl\/chan\/raw\//.test(href)){ setTimeout(()=>binOpenHosted(href.replace('dl/chan/raw/','')),80); }
+  }));
 }
 /* ================= editor data ================= */
 const CATS=['الكل','ديني','أطفال','رياضي','دراما','أخبار','أفلام','موسيقى','وثائقي','ترفيه','تعليم','دولي','محلي','أخرى'];
@@ -729,8 +740,8 @@ function downloadBlob(blob, name){
   setTimeout(()=>URL.revokeObjectURL(url),4000);
 }
 /* ================= router ================= */
-const APP_VER='3.2.4';
-const APP_BUILD='v44 · 27/11/2026';
+const APP_VER='3.2.5';
+const APP_BUILD='v45 · 27/11/2026';
 const TABS=[
   { path:'/',        label:'الرئيسية' },
   { path:'/editor',  label:'المحرر' },
@@ -847,6 +858,7 @@ function viewLibrary(){
       (f.notes?'<div class="notes">'+esc(f.notes)+'</div>':'')+'</div>'+
       '<div class="actions">'+
       (f.hasFile?'<button type="button" class="btn btn-sec sm" data-dl="'+f.id+'">نزّل الملف</button>':'')+
+      (f.hasFile?'<button type="button" class="btn btn-sec sm" data-bineditlib="'+f.id+'" data-binname="'+esc(f.name)+'">✎ تعديل / تحرير</button>':'')+
       (confirmDel===f.id
         ?'<button type="button" class="btn btn-danger sm" data-del-confirm="'+f.id+'">تأكيد المسح؟</button>'
         :'<button type="button" class="btn btn-ghost sm" data-del="'+f.id+'">مسح</button>')+
@@ -890,6 +902,10 @@ function bindLibrary(){
     catalog=catalog.filter(f=>f.id!==id); saveLS(LS_CATALOG,catalog);
     if(db) await idbDel(id);
     confirmDel=''; toast('اتمسح'); render();
+  }));
+  document.querySelectorAll('[data-bineditlib]').forEach(b=>b.addEventListener('click',()=>{
+    bin=null; go('/bin');
+    setTimeout(()=>binOpenLib(b.dataset.bineditlib,b.dataset.binname),80);
   }));
   document.querySelectorAll('[data-dl]').forEach(b=>b.addEventListener('click', async ()=>{
     if(!db) return;
@@ -997,7 +1013,8 @@ function menuHtml(label, items){
 }
 function viewEditor(){
   const c=edCounts();
-  return '<div class="edhead"><div class="row1">'+
+  return '<div class="callout note"><b>بتعدّل ملف .bin من جهازك؟</b>محرر القنوات ده بيشتغل على مشروع القنوات جوه البرنامج (إضافة وترتيب وتصدير). لو عايز تفتح ملف قنوات جاهز (.bin) وتشوف أسماء القنوات اللي جواه وتعدّلها، استخدم <b>محرر الباينري</b>: <button type="button" class="btn btn-sec sm" data-act="bin-open" style="margin-inline-start:6px">افتح محرر الباينري</button></div>'+
+  '<div class="edhead"><div class="row1">'+
     '<div class="ttl"><h1>تعديل ملفات <b>القنوات</b></h1><div class="sub2">تعديل وتحويل ملفات الصن بلص والجي اكس وفانيلا والداكي، بواجهة أسرع وأنضف من أي محرر تاني</div></div>'+
     '<div class="acts">'+
       '<button type="button" class="btn btn-sec sm" data-act="f-open">📂 فتح</button>'+
@@ -2269,6 +2286,10 @@ function viewHome(){
     '<div class="hometag">برنامج الفني الكامل: محرر قنوات احترافي، مكتبة سوفتات، مرجع لودرات، وتصدير لكل الأجهزة</div>'+
   '</div></div>'+
   installCard()+
+  '<div class="card" id="homeBin"><h2>عدّل ملف قنوات من جهازك<span class="sub">افتح أي ملف .bin، شوف أسماء القنوات اللي جواه، عدّلها واحفظ نسخة جديدة</span></h2>'+
+    '<div class="binacts" style="margin-top:0"><button type="button" class="btn btn-primary" data-gobin="1">افتح محرر ملفات القنوات</button>'+
+    '<button type="button" class="btn btn-sec" data-gobin="list">من ملفات البرنامج</button></div>'+
+    '<div class="caption">الأصل ما بيتغيرش، والتحذير قبل الحفظ بيوريك عدد البايتات اللي اتغيرت وحجم الملف وبصمته.</div></div>'+
   '<div class="tiles">'+
     tile('/editor','teal',ICO_DISH,'محرر القنوات','أقمار وترددات وقنوات، ترتيب وتعريب وتصدير')+
     tile('/library','gold',ICO_FOLDER,'المكتبة','سوفتات وفلاشات وملفات قنوات متخزنة جوه البرنامج')+
@@ -2289,6 +2310,11 @@ function viewHome(){
   '<div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn btn-sec" id="shareBtn">مشاركة البرنامج</button><a class="btn btn-ghost" href="#/editor" style="text-decoration:none;display:inline-flex;align-items:center">افتح المحرر</a></div>';
 }
 function bindHome(){
+  document.querySelectorAll('[data-gobin]').forEach(b=>b.addEventListener('click',()=>{
+    bin=null;
+    if(b.dataset.gobin==='list'){ binFilter=''; }
+    go('/bin');
+  }));
   const b=$('#installBtn'); if(b) b.addEventListener('click',doInstall);
   const sh=$('#shareBtn'); if(sh) sh.addEventListener('click',async ()=>{
     const data={title:'ابوجبل سات',text:'محرر القنوات الاحترافي للفنيين',url:location.href};
@@ -2370,19 +2396,16 @@ let bin=null, binQ='', binPage=0, binFilter='', binLimit=60, binKind='all';
 const BIN_PAGE_BYTES=768, BIN_COLS=8;
 /* ---- الترميز: UTF-8 أو ISO-8859-6 (عربي 8-بت) ---- */
 let _iso6tab=null,_iso6rev=null,_iso6ok=null;
+/* جدول ISO-8859-6 مبني جوه البرنامج: مش معتمدين على دعم المتصفح للترميز ده */
+const ISO6_TABLE='\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\u0008\u0009\u000a\u000b\u000c\u000d\u000e\u000f\u0010\u0011\u0012\u0013\u0014\u0015\u0016\u0017\u0018\u0019\u001a\u001b\u001c\u001d\u001e\u001f !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\u007f\u0080\u0081\u0082\u0083\u0084\u0085\u0086\u0087\u0088\u0089\u008a\u008b\u008c\u008d\u008e\u008f\u0090\u0091\u0092\u0093\u0094\u0095\u0096\u0097\u0098\u0099\u009a\u009b\u009c\u009d\u009e\u009f\u00a0\ufffd\ufffd\ufffd\u00a4\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\u060c\u00ad\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\u061b\ufffd\ufffd\ufffd\u061f\ufffd\u0621\u0622\u0623\u0624\u0625\u0626\u0627\u0628\u0629\u062a\u062b\u062c\u062d\u062e\u062f\u0630\u0631\u0632\u0633\u0634\u0635\u0636\u0637\u0638\u0639\u063a\ufffd\ufffd\ufffd\ufffd\ufffd\u0640\u0641\u0642\u0643\u0644\u0645\u0646\u0647\u0648\u0649\u064a\u064b\u064c\u064d\u064e\u064f\u0650\u0651\u0652\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd';
 function iso6(){
   if(_iso6ok===null){
-    _iso6tab=new Array(256); _iso6rev={}; _iso6ok=false;
-    try{
-      const td=new TextDecoder('iso-8859-6');
-      for(let i=0;i<256;i++){
-        let ch='';
-        try{ ch=td.decode(new Uint8Array([i])); }catch(e){ ch=''; }
-        _iso6tab[i]=ch;
-        if(ch && _iso6rev[ch]===undefined) _iso6rev[ch]=i;
-      }
-      _iso6ok=true;
-    }catch(e){ _iso6ok=false; }
+    _iso6tab=new Array(256); _iso6rev={}; _iso6ok=true;
+    for(let i=0;i<256;i++){
+      const ch=ISO6_TABLE.charAt(i);
+      _iso6tab[i]=ch;
+      if(ch && ch!=='\uFFFD' && _iso6rev[ch]===undefined) _iso6rev[ch]=i;
+    }
   }
   return {tab:_iso6tab,rev:_iso6rev,ok:_iso6ok};
 }
@@ -2537,6 +2560,18 @@ function binPicker(){
       '</div></div>';
   });
   h+='<div class="caption">الملفات دي نفس اللي في قسم التحديثات، بس مفتوحة جاهزة للتعديل من غير ما تنزّلها الأول.</div></div>';
+  h+='<div class="card" id="binDiag"><h2>تشخيص سريع<span class="sub">لو حاجة مش شغالة عندك، ابعت صورة الكارت ده</span></h2>'+
+    '<div class="binkv">'+
+      '<div><span>نسخة البرنامج</span><b dir="ltr">'+esc(APP_VER)+' · '+esc(APP_BUILD)+'</b></div>'+
+      '<div><span>بنية الصفحة</span><b dir="ltr">'+esc(AJS_BUILD)+'</b></div>'+
+      '<div><span>العنوان</span><b dir="ltr" class="sha">'+esc(String(location.protocol)+'//'+String(location.host||'ملف محلي'))+'</b></div>'+
+      '<div><span>جسر الحفظ (أندرويد)</span><b>'+((window.AbuJabalBridge&&window.AbuJabalBridge.saveFile)?'موجود':'مش موجود — الحفظ هيبقى تحميل عادي')+'</b></div>'+
+      '<div><span>عدد ملفات القنوات الجاهزة</span><b dir="ltr">'+BIN_FILES.length+'</b></div>'+
+      '<div><span>نتيجة اختبار التحميل</span><b id="diagFetch">لسه</b></div>'+
+      '<div><span>نتيجة قراءة الأسماء</span><b id="diagRead">لسه</b></div>'+
+    '</div>'+
+    '<div class="binacts"><button type="button" class="btn btn-sec sm" data-b="diag">اختبر التحميل والقراءة</button></div>'+
+    '<div class="caption">بيحمّل ملف واحد صغير من ملفات البرنامج ويعدّ الأسماء اللي بيلاقيها. لو فشل، الرسالة هتظهر هنا.</div></div>';
   h+='<div class="card"><h2>البرنامج بيعرف إيه بالظبط؟<span class="sub">عشان تعرف حدود المحرر قبل ما تعدّل</span></h2><ol class="steps">'+
     '<li><b>متحقق:</b> إن الملف من عائلة db15S (أول 5 بايت)، وإن الحقل عند الإزاحة 12..15 قيمته 725 في 17 ملف من 18 من نفس العائلة، وإن الترميز UTF-8 أو ISO-8859-6.</li>'+
     '<li><b>متحقق:</b> النصوص المقروءة جوه الملف (أسماء قنوات عربية وإنجليزية) بمواضعها وطولها بالبايت.</li>'+
@@ -2633,6 +2668,29 @@ function binEditor(){
   }
   return h;
 }
+function binDiag(){
+  const fEl=$('#diagFetch'), rEl=$('#diagRead');
+  if(fEl) fEl.textContent='بيحمّل…';
+  if(rEl) rEl.textContent='—';
+  const t0=Date.now();
+  const url='dl/chan/raw/PUB_V1.bin';
+  fetch(url).then(r=>{
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.arrayBuffer();
+  }).then(ab=>{
+    const ms=Date.now()-t0;
+    if(fEl) fEl.textContent='تمام · '+ab.byteLength+' بايت · '+ms+'ms';
+    try{
+      const bytes=new Uint8Array(ab);
+      const enc=binDetect(bytes);
+      const n=binRuns(bytes,enc).filter(r=>binLooksName(r.t)).length;
+      if(rEl) rEl.textContent='تمام · '+n+' اسم ('+binEncName(enc)+')';
+    }catch(e){ if(rEl) rEl.textContent='فشل: '+e.message; }
+  }).catch(e=>{
+    if(fEl) fEl.textContent='فشل: '+(e.message||e);
+    if(rEl) rEl.textContent='—';
+  });
+}
 function binView(){ return bin?binEditor():binPicker(); }
 function bindBin(){
   const v=$('#view');
@@ -2657,6 +2715,7 @@ function bindBin(){
       if(a==='back'){ bin=null; go('/bin'); return; }
       if(a==='allgrp'){ binFilter=''; render(); return; }
       if(a==='more'){ binLimit+=80; render(); return; }
+      if(a==='diag'){ binDiag(); return; }
       if(a==='prev'){ binPage=Math.max(0,binPage-1); render(); return; }
       if(a==='next'){ binPage++; render(); return; }
       if(a==='goto'){ binGoto(); return; }
@@ -2801,7 +2860,7 @@ function binGoto(){
 /* الفكرة: الصفحة نفسها بتقارن رقم بنيتها بالبنية المنشورة على السيرفر.
    لو فيه أحدث: بتنضّف الكاش والـ service worker وتعيد التحميل بعنوان جديد،
    فمستحيل تفضل واقفة على نسخة قديمة زي ما حصل قبل كده. */
-var AJS_BUILD='v44';
+var AJS_BUILD='v45';
 var AJS_REMOTE='https://omarsat8013-create.github.io/abujabal-sat/';
 var AJS_UPDATING=false;
 function ajsLoadRemoteVersion(done){
