@@ -512,6 +512,11 @@ const UPDATES=[
   { type:'ملف قنوات', name:'ملف قنوات بي أوت كيو BOUTQ — عربي+إنجليزي متحرك', note:'ملف DB بصيغة الجهاز (SQLite متفحصة) لأجهزة بي أوت كيو، نسخة عربي+إنجليزي بالقنوات المتحركة. من مكتبة مصراوي سات نوفمبر 2026', dl:'dl/boutq-channels-ar-en-animated.db', size:'668 ك.ب' },
   { type:'ملف قنوات', name:'ملف قنوات بي أوت كيو BOUTQ — عربي ثابت', note:'ملف DB بصيغة الجهاز لأجهزة بي أوت كيو، نسخة عربي بالترتيب الثابت. من مكتبة مصراوي سات نوفمبر 2026', dl:'dl/boutq-channels-ar-static.db', size:'208 ك.ب' },
   { type:'ملف قنوات', name:'ملف قنوات بي أوت كيو BOUTQ — إنجليزي ثابت', note:'ملف DB بصيغة الجهاز لأجهزة بي أوت كيو، نسخة إنجليزي بالترتيب الثابت. من مكتبة مصراوي سات نوفمبر 2026', dl:'dl/boutq-channels-en-static.db', size:'176 ك.ب' },
+  { type:'ملف قنوات', name:'قوائم قنوات DK — 6 ملفات (صيغة db15)', note:'من مكتبتك على ميديافاير (27/11/2026): DK_Combo4M · DK_Combo8M · DK_Normal · DK_V1 · DK_V2 · DK_V3. توقيع الملفات db15S، وصيغة مختلفة عن ملفات HS 1032/HSB 133 اللي في البرنامج. جواها أقمار زي نايل سات ويوتل سات ونور سات وجولف سات وقنوات عربية وإنجليزية. موديل الجهاز مش مكتوب جوه الملف، فجرّب على جهاز واحد الأول واحتفظ بنسخة من ملفك القديم — متجربتش على جهاز.', dl:'dl/chan/dk-menu-channels-6.zip', size:'157 ك.ب' },
+  { type:'ملف قنوات', name:'قوائم قنوات HSP — 6 ملفات (صيغة db15)', note:'HSP_Combo2517 · HSP_Combo8M · HSP_V1 · HSP_V2 · HSP_V3_EG (مصر) · HSP_V3_JD (الأردن). نفس عائلة db15S وفيها قنوات عربية وإنجليزية. موديل الجهاز مش مكتوب جوه الملف — جرّب على جهاز واحد الأول، ومتجربتش على جهاز.', dl:'dl/chan/hsp-menu-channels-6.zip', size:'149 ك.ب' },
+  { type:'ملف قنوات', name:'قوائم قنوات PUB — ملفين (صيغة db15)', note:'PUB_V1 · PUB_V2. نفس عائلة db15S. موديل الجهاز مش مكتوب جوه الملف — جرّب على جهاز واحد الأول، ومتجربتش على جهاز.', dl:'dl/chan/pub-menu-channels-2.zip', size:'49 ك.ب' },
+  { type:'ملف قنوات', name:'قوائم RedLine 128/256 — ملفين (متطابقين)', note:'RedLine_128.bin وRedLine_256.bin متطابقين بايت ببايت (نفس بصمة sha256) — الملف واحد اتحفظ باسمين. db15S. موديل الجهاز مش مكتوب جوه الملف — متجربش على جهاز.', dl:'dl/chan/redline-menu-channels-2.zip', size:'49 ك.ب' },
+  { type:'ملف قنوات', name:'قوائم Golden / Gray — ملفين', note:'GrayMenu_V1 توقيعه db15S زي الباقي، لكن GoldenMenu_V1 هيدره مختلف وفيه SIPSATA — يعني مش نفس الصيغة بالظبط، خده كملف منفصل ومتجربش على جهاز.', dl:'dl/chan/menus-golden-gray-2.zip', size:'49 ك.ب' },
   { type:'سوفت وير', name:'Sunplus Loader v1.5.0.8 (صن بلص 1506/1507)', note:'لودر شحن وسحب السوفت وملفات القنوات لمعالجات صن بلص 1506 و1507 (داكي وفانيلا والشعبي). برنامج ويندوز + شرح مصور. أداة فنيين مجانية، مصدرها dwdvb.com', dl:'dl/sunplus-loader-1.5.0.8.rar', size:'404 ك.ب', family:'sunplus' },
   { type:'سوفت وير', name:'لودر M3510C (معالجات علي)', note:'لودر RS232 كامل بملفات إعداد DDR لكل موديلات علي M35xx/M36xx/M38xx. أداة فنيين مجانية، مصدرها dwdvb.com', dl:'dl/m3510c-loader.rar', size:'824 ك.ب', family:'ali' },
   { type:'سوفت وير', name:'Erom Upgrade لعلي 351x', note:'أداة إنقاذ وشحن فلاشة معالجات علي 351x بعد سوفت غلط أو لمبة حمرا، مع ملف eromclient.abs. أداة فنيين مجانية، مصدرها dwdvb.com', dl:'dl/erom-upgrade-ali-351x.rar', size:'204 ك.ب', family:'ali' },
@@ -678,8 +683,8 @@ function downloadBlob(blob, name){
   setTimeout(()=>URL.revokeObjectURL(url),4000);
 }
 /* ================= router ================= */
-const APP_VER='3.2.0';
-const APP_BUILD='v40 · 27/11/2026';
+const APP_VER='3.2.1';
+const APP_BUILD='v41 · 27/11/2026';
 const TABS=[
   { path:'/',        label:'الرئيسية' },
   { path:'/editor',  label:'المحرر' },
@@ -2294,7 +2299,7 @@ window.addEventListener('hashchange', render);
 /* الفكرة: الصفحة نفسها بتقارن رقم بنيتها بالبنية المنشورة على السيرفر.
    لو فيه أحدث: بتنضّف الكاش والـ service worker وتعيد التحميل بعنوان جديد،
    فمستحيل تفضل واقفة على نسخة قديمة زي ما حصل قبل كده. */
-var AJS_BUILD='v40';
+var AJS_BUILD='v41';
 var AJS_REMOTE='https://omarsat8013-create.github.io/abujabal-sat/';
 var AJS_UPDATING=false;
 function ajsLoadRemoteVersion(done){

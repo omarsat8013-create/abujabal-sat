@@ -27,13 +27,13 @@ print('bundled copy written')
 PY
 $BT/aapt2 compile --dir res -o build/res.zip
 $BT/aapt2 link -o build/base.apk -I $AJAR --manifest AndroidManifest.xml -R build/res.zip \
-  --java gen --min-sdk-version 21 --target-sdk-version 34 --version-code 40 --version-name 3.2.0 -A assets --auto-add-overlay
+  --java gen --min-sdk-version 21 --target-sdk-version 34 --version-code 41 --version-name 3.2.1 -A assets --auto-add-overlay
 $JAVA_HOME/bin/javac -encoding UTF-8 -nowarn -source 8 -target 8 -bootclasspath $AJAR -d obj $(find src gen -name '*.java')
 $BT/d8 --lib $AJAR --min-api 21 --release --output dex $(find obj -name '*.class')
 cp build/base.apk build/unaligned.apk
 (cd dex && zip -q -X /tmp/android/build/unaligned.apk classes.dex)
 $BT/zipalign -f 4 build/unaligned.apk build/aligned.apk
 $BT/apksigner sign --ks $KS --ks-pass pass:$KSPASS --key-pass pass:$KSPASS --min-sdk-version 21 \
-  --out $OUT/AbuJabalSat-3.2.0-webview.apk build/aligned.apk
-$BT/apksigner verify --print-certs $OUT/AbuJabalSat-3.2.0-webview.apk | head -5
+  --out $OUT/AbuJabalSat-3.2.1-webview.apk build/aligned.apk
+$BT/apksigner verify --print-certs $OUT/AbuJabalSat-3.2.1-webview.apk | head -5
 ls -la $OUT
