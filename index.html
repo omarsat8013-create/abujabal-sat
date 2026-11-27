@@ -344,7 +344,7 @@ body.boldtable table.grid td{font-weight:700}
     <rect x="9" y="35" width="17" height="4" rx="2" fill="#e7edfa"/>
   </svg></span>
   <span class="tt"><span class="brand">ابوجبل <b>سات</b></span><div class="tag">محرر القنوات الاحترافي للفنيين</div></span>
-  <span class="verchip" id="verchip">نسخة</span>
+  <span class="verchip" id="verchip">نسخة</span><button type="button" class="verchip" id="updchip" title="تحقق من وجود نسخة أحدث" style="cursor:pointer;background:transparent;font:inherit;font-size:11px;margin-inline-start:6px">⟳ تحديث</button>
 </div>
 <nav class="tabs" id="tabs" aria-label="أقسام البرنامج"></nav>
 <main id="view" class="wrap"></main>
@@ -576,8 +576,8 @@ function downloadBlob(blob, name){
   setTimeout(()=>URL.revokeObjectURL(url),4000);
 }
 /* ================= router ================= */
-const APP_VER='3.1.5';
-const APP_BUILD='v34 · 26/11/2026';
+const APP_VER='3.1.6';
+const APP_BUILD='v36 · 27/11/2026';
 const TABS=[
   { path:'/',        label:'الرئيسية' },
   { path:'/editor',  label:'المحرر' },
@@ -1758,6 +1758,42 @@ function render(){
   else { view.innerHTML=viewHome(); bindHome(); }
 }
 window.addEventListener('hashchange', render);
+/* ================= نسخة البرنامج والتحديث الذاتي ================= */
+/* الفكرة: الصفحة نفسها بتقارن رقم بنيتها بالبنية المنشورة على السيرفر.
+   لو فيه أحدث: بتنضّف الكاش والـ service worker وتعيد التحميل بعنوان جديد،
+   فمستحيل تفضل واقفة على نسخة قديمة زي ما حصل قبل كده. */
+var AJS_BUILD='v36';
+var AJS_REMOTE='https://omarsat8013-create.github.io/abujabal-sat/';
+var AJS_UPDATING=false;
+function ajsLoadRemoteVersion(done){
+  var s=document.createElement('script');
+  s.src=AJS_REMOTE+'version.js?t='+Date.now();
+  s.onload=function(){ var v=window.AJS_REMOTE_VERSION||null; try{ s.remove(); }catch(e){} done(v); };
+  s.onerror=function(){ try{ s.remove(); }catch(e){} done(null); };
+  (document.head||document.documentElement).appendChild(s);
+}
+function ajsPurge(){
+  try{ if(navigator.serviceWorker && navigator.serviceWorker.getRegistrations){ navigator.serviceWorker.getRegistrations().then(function(rs){ rs.forEach(function(r){ try{ r.unregister(); }catch(e){} }); }); } }catch(e){}
+  try{ if(window.caches && caches.keys){ caches.keys().then(function(ks){ ks.forEach(function(k){ try{ caches.delete(k); }catch(e){} }); }); } }catch(e){}
+}
+function ajsApply(v){
+  if(!v || !v.build || v.build===AJS_BUILD || AJS_UPDATING) return false;
+  AJS_UPDATING=true;
+  ajsPurge();
+  var u=AJS_REMOTE+'index.html?v='+encodeURIComponent(v.build)+(location.hash||'');
+  setTimeout(function(){ location.replace(u); }, 150);
+  return true;
+}
+function ajsCheckUpdate(manual){
+  ajsLoadRemoteVersion(function(v){
+    if(!v){ if(manual) toast('مش قادر أوصل للسيرفر، اتأكد من النت وجرب تاني'); return; }
+    if(v.build===AJS_BUILD){ if(manual) toast('أنت على أحدث نسخة: '+APP_VER+' · '+APP_BUILD); return; }
+    if(manual) toast('فيه نسخة أحدث ('+v.ver+' · '+v.build+')، جاري التحديث…');
+    ajsApply(v);
+  });
+}
+window.__ajsCheckUpdate=ajsCheckUpdate;
+window.__ajsBuild=AJS_BUILD;
 /* ================= boot ================= */
 $('#tabs').addEventListener('click',e=>{
   const b=e.target.closest('[data-tab]');
@@ -1767,7 +1803,7 @@ $('#tabs').addEventListener('click',e=>{
   db=await openDB();
   const vc=document.getElementById('verchip');
   if(vc) vc.textContent='نسخة '+APP_VER+' · بنية '+APP_BUILD;
-  if('serviceWorker' in navigator){
+  if('serviceWorker' in navigator && location.protocol!=='file:'){
     try{
       const reg=await navigator.serviceWorker.register('sw.js');
       try{ reg.update(); }catch(e){}
@@ -1777,6 +1813,12 @@ $('#tabs').addEventListener('click',e=>{
     }catch(e){}
   }
   render();
+  try{
+    var uc=document.getElementById('updchip');
+    if(uc) uc.addEventListener('click',function(){ ajsCheckUpdate(true); });
+  }catch(e){}
+  setTimeout(function(){ try{ ajsCheckUpdate(false); }catch(e){} }, 2500);
+  document.addEventListener('visibilitychange',function(){ if(!document.hidden){ try{ ajsCheckUpdate(false); }catch(e){} } });
 })();
 </script>
 </body>
