@@ -37,8 +37,8 @@ import android.webkit.URLUtil;
  */
 public class MainActivity extends Activity {
 
-    static final String APP_VER = "3.2.2";
-    static final int APP_CODE = 42;
+    static final String APP_VER = "3.2.3";
+    static final int APP_CODE = 43;
     static final String REMOTE_HOST_SUFFIX = "github.io";
     static final String REMOTE_BASE = "https://omarsat8013-create.github.io/abujabal-sat/";
     static final String FALLBACK_URL = "file:///android_asset/www/index.html";
@@ -116,9 +116,22 @@ public class MainActivity extends Activity {
                 if (params != null && params.getMode() == FileChooserParams.MODE_OPEN_MULTIPLE) {
                     i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
                 }
-                if (params != null && params.getAcceptTypes() != null && params.getAcceptTypes().length > 0
-                        && params.getAcceptTypes()[0] != null && params.getAcceptTypes()[0].length() > 0) {
-                    i.setType(params.getAcceptTypes()[0]);
+                // امتدادات زي .bin مش أنواع MIME: لو مفيش نوع MIME حقيقي نفتح كل الملفات
+                java.util.List<String> mimes = new java.util.ArrayList<String>();
+                if (params != null && params.getAcceptTypes() != null) {
+                    for (String t : params.getAcceptTypes()) {
+                        if (t == null) continue;
+                        String at = t.trim();
+                        if (at.contains("/")) mimes.add(at);
+                    }
+                }
+                if (mimes.isEmpty()) {
+                    i.setType("*/*");
+                } else if (mimes.size() == 1) {
+                    i.setType(mimes.get(0));
+                } else {
+                    i.setType("*/*");
+                    i.putExtra(Intent.EXTRA_MIME_TYPES, mimes.toArray(new String[0]));
                 }
                 try {
                     startActivityForResult(Intent.createChooser(i, "اختار ملف"), 1001);
