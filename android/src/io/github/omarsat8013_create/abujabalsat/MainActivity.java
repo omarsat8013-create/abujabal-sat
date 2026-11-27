@@ -37,8 +37,8 @@ import android.webkit.URLUtil;
  */
 public class MainActivity extends Activity {
 
-    static final String APP_VER = "3.2.5";
-    static final int APP_CODE = 45;
+    static final String APP_VER = "3.2.6";
+    static final int APP_CODE = 46;
     static final String REMOTE_HOST_SUFFIX = "github.io";
     static final String REMOTE_BASE = "https://omarsat8013-create.github.io/abujabal-sat/";
     static final String FALLBACK_URL = "file:///android_asset/www/index.html";

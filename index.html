@@ -605,9 +605,14 @@ function bindUpdates(){
   if(f) f.addEventListener('click',e=>{ const b=e.target.closest('button'); if(b){ updFilter=b.dataset.v; render(); } });
   document.querySelectorAll('[data-binedit]').forEach(b=>b.addEventListener('click',()=>{
     const href=b.dataset.binedit||'', grp=b.dataset.bingrp||'';
-    if(/\.(zip|rar|7z|tar|gz)$/i.test(href)){
+    if(/\.zip$/i.test(href)){
+      bin=null; zipState=null; go('/bin');
+      setTimeout(()=>zipOpenHosted(href),60);
+      return;
+    }
+    if(/\.(rar|7z|tar|gz)$/i.test(href)){
       openModal('ملف مضغوط',
-        '<div class="callout warn"><b>الملف ده مضغوط</b>محرر الباينري بيفتح ملف واحد باينري مش أرشيف مضغوط. فك الضغط على الموبايل أو الكمبيوتر، وبعدها افتح الملف اللي جواه من محرر الباينري (زرار «اختار ملف من جهازك»).</div>'+
+        '<div class="callout warn"><b>الصيغة دي مش بتتفك جوه البرنامج</b>ZIP بس هو اللي البرنامج بيفكه لوحده. الملف ده '+esc(href.split('.').pop().toUpperCase())+'، فكه من تطبيق ملفات على الموبايل أو من الكمبيوتر، وبعدها افتح اللي جواه من محرر الباينري.</div>'+
         '<div class="caption">أرشيف: '+esc(href)+'</div>','تمام',()=>{});
       return;
     }
@@ -740,8 +745,8 @@ function downloadBlob(blob, name){
   setTimeout(()=>URL.revokeObjectURL(url),4000);
 }
 /* ================= router ================= */
-const APP_VER='3.2.5';
-const APP_BUILD='v45 · 27/11/2026';
+const APP_VER='3.2.6';
+const APP_BUILD='v46 · 27/11/2026';
 const TABS=[
   { path:'/',        label:'الرئيسية' },
   { path:'/editor',  label:'المحرر' },
@@ -2560,6 +2565,10 @@ function binPicker(){
       '</div></div>';
   });
   h+='<div class="caption">الملفات دي نفس اللي في قسم التحديثات، بس مفتوحة جاهزة للتعديل من غير ما تنزّلها الأول.</div></div>';
+  h+='<div class="card"><h2>افتح أرشيف مضغوط<span class="sub">ZIP بيتفك جوه البرنامج وبتختار الملف اللي جواه</span></h2>'+
+    '<label class="drop"><input type="file" id="zipPickFile" class="hidden-input" accept=".zip,application/zip,application/x-zip-compressed" aria-label="اختار ملف ZIP">'+
+    '<span class="t">اختار ملف .zip</span><span class="s">هيتفك في الذاكرة، وتختار الملف اللي تفتحه</span></label>'+
+    '<div class="caption">RAR و7z مش مدعومين للفك جوه البرنامج — بيحتاجوا فك من تطبيق ملفات.</div></div>';
   h+='<div class="card" id="binDiag"><h2>تشخيص سريع<span class="sub">لو حاجة مش شغالة عندك، ابعت صورة الكارت ده</span></h2>'+
     '<div class="binkv">'+
       '<div><span>نسخة البرنامج</span><b dir="ltr">'+esc(APP_VER)+' · '+esc(APP_BUILD)+'</b></div>'+
@@ -2691,9 +2700,98 @@ function binDiag(){
     if(rEl) rEl.textContent='—';
   });
 }
-function binView(){ return bin?binEditor():binPicker(); }
+/* ===== فك ضغط ZIP جوه البرنامج (من غير مكتبات) ===== */
+let zipState=null;
+function zipName(bytes){
+  try{ return new TextDecoder('utf-8',{fatal:true}).decode(bytes); }catch(e){}
+  try{ return new TextDecoder('utf-8').decode(bytes); }catch(e){}
+  let out='';
+  for(let i=0;i<bytes.length;i++) out+=String.fromCharCode(bytes[i]);
+  return out;
+}
+function zipParse(ab){
+  const b=new Uint8Array(ab), dv=new DataView(ab);
+  let eocd=-1;
+  for(let i=b.length-22;i>=Math.max(0,b.length-66000);i--){ if(dv.getUint32(i,true)===0x06054b50){ eocd=i; break; } }
+  if(eocd<0) throw new Error('الملف مش أرشيف ZIP صالح');
+  const n=dv.getUint16(eocd+10,true);
+  let off=dv.getUint32(eocd+16,true);
+  const list=[];
+  for(let k=0;k<n;k++){
+    if(off+46>b.length || dv.getUint32(off,true)!==0x02014b50) break;
+    const method=dv.getUint16(off+10,true);
+    const csize=dv.getUint32(off+20,true);
+    const usize=dv.getUint32(off+24,true);
+    const nlen=dv.getUint16(off+28,true);
+    const elen=dv.getUint16(off+30,true);
+    const clen=dv.getUint16(off+32,true);
+    const lho=dv.getUint32(off+42,true);
+    list.push({name:zipName(b.subarray(off+46,off+46+nlen)),method,csize,usize,lho});
+    off+=46+nlen+elen+clen;
+  }
+  return list;
+}
+async function zipEntryBytes(ab,e){
+  const b=new Uint8Array(ab), dv=new DataView(ab), o=e.lho;
+  if(o+30>b.length || dv.getUint32(o,true)!==0x04034b50) throw new Error('رأس الملف جوه الأرشيف تالف');
+  const nlen=dv.getUint16(o+26,true), elen=dv.getUint16(o+28,true);
+  const start=o+30+nlen+elen;
+  const raw=b.subarray(start,start+e.csize);
+  if(e.method===0) return raw.slice();
+  if(e.method!==8) throw new Error('نوع ضغط مش مدعوم ('+e.method+')');
+  if(typeof DecompressionStream==='undefined') throw new Error('الجهاز ده مش بيدعم فك الضغط جوه البرنامج — فك الضغط من تطبيق الملفات');
+  const st=new Blob([raw]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+  const buf=await new Response(st).arrayBuffer();
+  return new Uint8Array(buf);
+}
+function zipOpen(ab,name){ zipState={name:name,ab:ab,entries:zipParse(ab)}; bin=null; render(); }
+function zipOpenHosted(href){
+  toast('بيفتح الأرشيف…');
+  fetch(href).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.arrayBuffer(); })
+    .then(ab=>zipOpen(ab,String(href).split('/').pop()))
+    .catch(e=>toast('مش قادر أحمّل الأرشيف: '+(e.message||e)));
+}
+function zipOpenLocal(file){
+  const rd=new FileReader();
+  rd.onload=()=>{ try{ zipOpen(rd.result,file.name); }catch(e){ toast('الملف مش أرشيف ZIP صالح'); } };
+  rd.onerror=()=>toast('مش قادر أقرأ الملف');
+  rd.readAsArrayBuffer(file);
+}
+function zipView(){
+  const z=zipState;
+  const files=z.entries.filter(e=>!/\/$/.test(e.name));
+  let h='<div class="binbar"><button type="button" class="btn btn-sec sm" data-z="back">→ رجوع</button>'+
+    '<div class="binttl"><div class="bn2">'+esc(z.name)+'</div><div class="bs2">'+files.length+' ملف جوه الأرشيف — اضغط أي ملف يفتح في المحرر</div></div></div>';
+  h+='<div class="callout note"><b>فك الضغط بيحصل جوه البرنامج</b>مفيش حاجة بتتحفظ على جهازك: البرنامج بيفك الملف اللي تختاره في الذاكرة ويفتحه في المحرر على طول.</div>';
+  h+='<div class="card"><h2>ملفات الأرشيف</h2><div class="binlist">';
+  files.forEach((e,i)=>{
+    h+='<button type="button" class="binfile" data-zip="'+i+'"><span class="bn">'+esc(e.name)+'</span><span class="bs">'+fmtSize(e.usize||e.csize)+'</span></button>';
+  });
+  h+='</div><div class="caption">ملفات .bin و.db بتفتح في محرر الباينري. ملفات .csv و.json بتفتح في محرر القنوات (استيراد).</div></div>';
+  return h;
+}
+async function zipOpenEntry(i){
+  const z=zipState; if(!z) return;
+  const files=z.entries.filter(x=>!/\/$/.test(x.name));
+  const e=files[i];
+  if(!e) return;
+  toast('بيفك الضغط…');
+  try{
+    const bytes=await zipEntryBytes(z.ab,e);
+    const base=String(e.name).split('/').pop();
+    if(/\.(bin|abs|sdx|chl|db)$/i.test(base)){ zipState=null; binOpen(bytes,base); return; }
+    zipState=null;
+    try{ openChannelFile(new File([bytes],base)); }catch(err){}
+    go('/editor');
+  }catch(err){ toast('مش قادر أفتح الملف: '+(err.message||err)); }
+}
+function binView(){ if(zipState) return zipView(); return bin?binEditor():binPicker(); }
 function bindBin(){
   const v=$('#view');
+  const zf=$('#zipPickFile');
+  if(zf) zf.addEventListener('change',()=>{ if(zf.files&&zf.files[0]) zipOpenLocal(zf.files[0]); zf.value=''; });
+  document.querySelectorAll('[data-zip]').forEach(b=>b.addEventListener('click',()=>zipOpenEntry(parseInt(b.dataset.zip,10))));
+  document.querySelectorAll('[data-z]').forEach(b=>b.addEventListener('click',()=>{ zipState=null; render(); }));
   const pf=$('#binPickFile');
   if(pf) pf.addEventListener('change',()=>{ if(pf.files&&pf.files[0]) binOpenLocal(pf.files[0]); pf.value=''; });
   document.querySelectorAll('[data-binh]').forEach(b=>b.addEventListener('click',()=>binOpenHosted(b.dataset.binh)));
@@ -2860,7 +2958,7 @@ function binGoto(){
 /* الفكرة: الصفحة نفسها بتقارن رقم بنيتها بالبنية المنشورة على السيرفر.
    لو فيه أحدث: بتنضّف الكاش والـ service worker وتعيد التحميل بعنوان جديد،
    فمستحيل تفضل واقفة على نسخة قديمة زي ما حصل قبل كده. */
-var AJS_BUILD='v45';
+var AJS_BUILD='v46';
 var AJS_REMOTE='https://omarsat8013-create.github.io/abujabal-sat/';
 var AJS_UPDATING=false;
 function ajsLoadRemoteVersion(done){
