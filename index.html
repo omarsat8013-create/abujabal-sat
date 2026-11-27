@@ -300,15 +300,61 @@ body.boldtable table.grid td{font-weight:700}
   .panel.active{display:flex}
   .ptable{max-height:56vh}
   /* phone: tabs become a fixed bottom nav bar (standard Android pattern, no top clipping) */
+  /* الموبايل: كل التابات ظاهرة في شبكة (5 فوق و5 تحت) بدل شريط بيتزحلق */
   .tabs{top:auto;position:fixed;bottom:0;left:0;right:0;z-index:60;
     background:#0a1122;border-top:1px solid var(--line);border-bottom:0;
-    padding:0 6px;scrollbar-width:none}
-  .tabs::-webkit-scrollbar{display:none}
-  .tabs button{padding:10px 12px;min-height:54px;font-size:12.5px;
-    border-bottom:0;border-top:2px solid transparent;flex-shrink:0}
-  .tabs button.on{border-top-color:var(--teal);border-bottom-color:transparent}
-  .wrap{padding-bottom:80px}
+    display:grid;grid-template-columns:repeat(5,1fr);gap:3px;
+    padding:5px 5px calc(5px + env(safe-area-inset-bottom,0px));overflow:visible}
+  .tabs button{padding:5px 2px;min-height:42px;font-size:10.5px;line-height:1.2;
+    white-space:normal;text-align:center;border-bottom:0;border-radius:9px;
+    border:1px solid transparent;flex-shrink:0}
+  .tabs button.on{background:#123a4a;border-color:var(--teal2);color:#fff;border-top-color:var(--teal2);font-weight:700}
+  .wrap{padding-bottom:132px}
 }
+
+
+/* ===== gallery of electronic parts ===== */
+.partsgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.partcard{background:#0d1730;border:1px solid var(--line2);border-radius:14px;padding:10px 10px 12px;display:flex;flex-direction:column}
+.partcard svg{width:100%;height:auto;display:block;background:#0a1220;border-radius:10px;margin-bottom:8px}
+.partcard .pn{font-weight:700;font-size:13.5px;margin-bottom:2px}
+.partcard .pe{font-size:11px;color:var(--mut);direction:ltr;text-align:left;margin-bottom:6px}
+.partcard .pp{font-size:12px;line-height:1.65;color:#cfdcf5}
+.partcard .pp b{color:var(--teal)}
+.partcard .pf{font-size:11.5px;line-height:1.6;color:#fca5a5;margin-top:5px}
+.partcard .pt{font-size:11.5px;line-height:1.6;color:#86efac;margin-top:4px}
+.partcard .pbtn{margin-top:auto;padding-top:8px}
+.partcard .pbtn a{display:block;text-align:center;text-decoration:none;font-size:12px;padding:7px 8px}
+@media (max-width:520px){.partsgrid{grid-template-columns:1fr;gap:10px}
+  .partcard{padding:10px}
+  .partcard .pn{font-size:14px}.partcard .pe{font-size:11.5px}
+  .partcard .pp,.partcard .pf,.partcard .pt{font-size:12px}}
+/* ===== board list (phone-friendly board map) ===== */
+.boardlist{display:none}
+.bnode{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:12px;background:#101c3a;border:1px solid var(--line2);margin-bottom:8px}
+.bnode .bt{flex:1;font-size:12.5px;line-height:1.45}
+.bnode .bs{display:block;font-size:10.5px;color:var(--mut);margin-top:2px}
+.bnode .bd{flex:0 0 auto;min-width:60px;min-height:44px;padding:0 8px;border-radius:12px;border:1px solid #14532d;background:#0b3b25;color:#7ef29a;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
+.bnode .bd.sel{background:#0d9488;border-color:#0f766e;color:#04140f}
+.bnode .bna{flex:0 0 auto;font-size:10.5px;color:var(--mut);text-align:center;max-width:64px;line-height:1.3}
+.bnode.hot{border-color:#7f1d1d;background:#1c0f14}
+.bnode.hot .bt{color:#fca5a5}
+@media (max-width:700px){
+  .simgrid .mdiagram.boardwrap{display:none}
+  .boardlist{display:block;background:#0d1730;border:1px solid var(--line2);border-radius:14px;padding:10px}
+}
+@media (max-width:980px){.simgrid .meter{order:-1}}
+/* parts search */
+.psearch{display:flex;gap:8px;margin-bottom:12px}
+.psearch input{flex:1;background:#0b1425;border:1px solid var(--line2);border-radius:10px;padding:10px 12px;min-height:44px;color:var(--txt);font-family:inherit;font-size:14px}
+.pempty{font-size:13px;color:var(--mut);padding:14px 0}
+/* ===== rotary dial of the meter ===== */
+.dial{width:100%;max-width:230px;margin:0 auto 8px;display:block}
+.dial .needle{transition:transform .25s cubic-bezier(.4,1.6,.5,1)}
+.dial .dlbl{font-size:13px;fill:#93a4c6;cursor:pointer;user-select:none}
+.dial .dlbl.on{fill:#7ef29a;font-weight:800}
+.dial .dtick{stroke:#27396b;stroke-width:2}
+.dial .dtap{cursor:pointer}
 
 /* ===== home screen (receiver-style icon grid) ===== */
 .homehero{position:relative;overflow:hidden;border:1px solid var(--line2);border-radius:20px;padding:26px 18px 20px;margin-bottom:14px;background:radial-gradient(900px 400px at 85% -20%,#1d3a6e 0%,transparent 60%),radial-gradient(700px 500px at 10% 120%,#0d3b3a 0%,transparent 55%),linear-gradient(180deg,#0c1730,#0a1122)}
@@ -576,8 +622,8 @@ function downloadBlob(blob, name){
   setTimeout(()=>URL.revokeObjectURL(url),4000);
 }
 /* ================= router ================= */
-const APP_VER='3.1.6';
-const APP_BUILD='v36 · 27/11/2026';
+const APP_VER='3.1.7';
+const APP_BUILD='v37 · 27/11/2026';
 const TABS=[
   { path:'/',        label:'الرئيسية' },
   { path:'/editor',  label:'المحرر' },
@@ -1320,7 +1366,7 @@ function viewConvert(){
 /* ---- محاكي الملتيميتر (secondary side only, generic values) ---- */
 const SIM_MODES=[
   {id:'dcv',label:'فولت DC'},
-  {id:'buzz',label:'استمرارية 🔔'},
+  {id:'buzz',label:'استمرارية )))'},
   {id:'diode',label:'دايود'},
   {id:'ohm',label:'مقاومة Ω'},
 ];
@@ -1445,6 +1491,53 @@ function simReading(){
     '<div class="simcmp"><div class="okb"><b>✔ لوحة سليمة</b>'+esc(m.h)+' '+esc(m.u)+'</div><div class="badb"><b>✘ العطل: '+esc(f.ok?'— (سليمة)':f.name)+'</b>'+(f.ok?'نفس القراءة السليمة':esc(val)+' '+esc(m.u))+'</div></div>'+
     '<div class="simproc"><b>الإجراء الصح:</b> '+esc(m.proc)+'<br><b>القراءة دي معناها:</b> '+esc(note||'')+'</div>';
 }
+
+function simBoardList(){
+  const rows=[
+    {n:'محول التشوبر (SMPS)',s:'مرحلة الباور',hot:true},
+    {n:'دايود شوتكي + فلترة',s:'خروج الباور',tp:'tpschot',lab:'12V'},
+    {n:'منظم الاستعداد 5V',s:'واقف/استاندباي',tp:'tp5vsb',lab:'5V'},
+    {n:'منظم 3.3V',s:'فلاشة + IO',tp:'tp33',lab:'3.3V'},
+    {n:'مولد LNB',s:'Boost 13/18V',tp:'tplnb',lab:'LNB'},
+    {n:'التيونر',s:'دخل الإشارة',tp:'tp12',lab:'12V'},
+    {n:'المعالج SoC',s:'Core 1.0-1.2V'},
+    {n:'فلاشة SPI + DDR',s:'الذاكرة'}
+  ];
+  const h=rows.map(r=>{
+    let btn='';
+    if(r.tp){
+      const on=simState.tp===r.tp?' sel':'';
+      btn='<button type="button" class="bd'+on+'" data-tp="'+r.tp+'" aria-label="نقطة قياس '+r.lab+'">● '+r.lab+'</button>';
+    }else{
+      btn='<span class="bna">مفيش نقطة<br>قياس</span>';
+    }
+    return '<div class="bnode'+(r.hot?' hot':'')+'"><div class="bt">'+esc(r.n)+'<span class="bs">'+esc(r.s)+'</span></div>'+btn+'</div>';
+  }).join('');
+  return '<div class="boardlist"><div class="caption" style="margin:0 0 8px">لوحة نموذجية عامة — دوس على النقطة الخضرا عشان تقيسها. مرحلة الباور الساخنة خارج المحاكاة.</div>'+h+'</div>';
+}
+function simDialSvg(){
+  const lab={dcv:'V DC',buzz:')))',diode:'\u25B7|',ohm:'\u03A9'};
+  const lpos={dcv:[110,54],buzz:[170,114],diode:[110,170],ohm:[50,114]};
+  const stop={dcv:[110,24],buzz:[196,110],diode:[110,196],ohm:[24,110]};
+  const ang={dcv:0,buzz:90,diode:180,ohm:270};
+  const a=ang[simState.mode]||0;
+  let ticks='';
+  for(let i=0;i<36;i++){ const t=i*10*Math.PI/180; const r1=92,r2=i%3===0?83:88;
+    ticks+='<line class="dtick" x1="'+(110+r1*Math.cos(t)).toFixed(1)+'" y1="'+(110+r1*Math.sin(t)).toFixed(1)+'" x2="'+(110+r2*Math.cos(t)).toFixed(1)+'" y2="'+(110+r2*Math.sin(t)).toFixed(1)+'"/>'; }
+  const modes=SIM_MODES.map(m=>{
+    const st=stop[m.id], l=lpos[m.id], on=simState.mode===m.id;
+    return '<circle cx="'+st[0]+'" cy="'+st[1]+'" r="6" fill="'+(on?'#7ef29a':'#27396b')+'"/>'+
+      '<circle class="dtap" data-m="'+m.id+'" cx="'+l[0]+'" cy="'+l[1]+'" r="26" fill="transparent"/>'+
+      '<text class="dlbl'+(on?' on':'')+'" data-m="'+m.id+'" x="'+l[0]+'" y="'+l[1]+'" text-anchor="middle" dominant-baseline="middle" font-weight="800">'+lab[m.id]+'</text>';
+  }).join('');
+  return '<svg class="dial" viewBox="0 0 220 220" role="img" aria-label="\u0645\u0641\u062a\u0627\u062d \u0627\u062e\u062a\u064a\u0627\u0631 \u0648\u0636\u0639 \u0627\u0644\u0642\u064a\u0627\u0633">'+
+    '<circle cx="110" cy="110" r="100" fill="#0b1425" stroke="#27396b" stroke-width="3"/>'+ticks+modes+
+    '<g class="needle" style="transform:rotate('+a+'deg);transform-origin:110px 110px">'+
+      '<path d="M110 110 L110 68" stroke="#f0b429" stroke-width="8" stroke-linecap="round"/>'+
+      '<circle cx="110" cy="110" r="15" fill="#27364f" stroke="#4b5f8a" stroke-width="2"/>'+
+    '</g>'+
+    '<circle cx="110" cy="110" r="5" fill="#8fa0c2"/></svg>';
+}
 function viewSim(){
   return '<div class="card"><h2>محاكي الملتيميتر التفاعلي<span class="sub">اكتب نوع الجهاز والعطل، أو اختار عطل جاهز، وتدرّب على القياس الصح على اللوحة</span></h2>'+
     '<div class="caption">قيم نموذجية عامة لبوردة رسيفر ميني تقليدية — مش قيم موديل بعينه. المحاكاة على الجانب البارد منخفض الجهد بس: مفيش أي قياس حي على جانب الكهربة الرئيسي.</div>'+
@@ -1458,8 +1551,10 @@ function viewSim(){
     (simFault().suspects.length?'<div class="simsuspect"><b>أكثر المشتبه بهم شيوعًا للعطل ده:</b><ol class="steps" style="margin-top:4px">'+simFault().suspects.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ol></div>':'')+
   '</div>'+
     '<div class="simgrid">'+
-    '<div class="mdiagram" style="margin:0">'+simBoardSvg()+'<div class="mdisc">لوحة نموذجية عامة من رسمنا — الدواير الخضرا نقاط قياس تفاعلية. المنطقة الحمرا المنقّطة خارج المحاكاة.</div></div>'+
+    '<div class="mdiagram boardwrap" style="margin:0">'+simBoardSvg()+'<div class="mdisc">لوحة نموذجية عامة من رسمنا — الدواير الخضرا نقاط قياس تفاعلية. المنطقة الحمرا المنقّطة خارج المحاكاة.</div></div>'+
+    simBoardList()+
     '<div class="meter">'+
+      simDialSvg()+
       '<div class="mbtns">'+SIM_MODES.map(m=>'<button type="button" data-m="'+m.id+'" class="'+(simState.mode===m.id?' on':'')+'">'+m.label+'</button>').join('')+'</div>'+
       '<div class="lcd" id="simLcd">'+simReading()+'</div>'+
     '</div>'+
@@ -1468,8 +1563,9 @@ function viewSim(){
 function bindSim(){
   const view=$('#view');
   view.querySelectorAll('.simfaults button').forEach(b=>b.addEventListener('click',()=>{ simState.fault=b.dataset.f; rerenderSim(); }));
-  view.querySelectorAll('.mbtns button').forEach(b=>b.addEventListener('click',()=>{ simState.mode=b.dataset.m; rerenderSim(); }));
+  view.querySelectorAll('[data-m]').forEach(b=>b.addEventListener('click',()=>{ simState.mode=b.dataset.m; rerenderSim(); }));
   view.querySelectorAll('.tpdot').forEach(c=>c.addEventListener('click',()=>{ simState.tp=c.dataset.tp; rerenderSim(); }));
+  view.querySelectorAll('.bd[data-tp]').forEach(c=>c.addEventListener('click',()=>{ simState.tp=c.dataset.tp; rerenderSim(); }));
   const db=view.querySelector('#simDiagBtn');
   if(db) db.addEventListener('click',()=>{ simDiagType=(view.querySelector('#simType')||{}).value||''; simDiagFault=(view.querySelector('#simFaultQ')||{}).value||''; simDiagnose(); rerenderSim(); });
   view.querySelectorAll('[data-simg]').forEach(b=>b.addEventListener('click',()=>{ const g=SIM_GUIDED[b.dataset.simg]; simState.fault=b.dataset.simg; simState.mode=g.mode; simState.tp=g.tp; rerenderSim(); const gr=document.querySelector('.simgrid'); if(gr) gr.scrollIntoView({block:'start'}); }));
@@ -1662,10 +1758,84 @@ const MAINT_GUIDES=[
     ]},
 ];
 let maintQ='';
+
+/* ================= القطع الإلكترونية: رسومات SVG من رسمنا ================= */
+const SVG_RES = '<svg viewBox="0 0 160 100"><rect x="0" y="0" width="160" height="100" fill="#0a1220"/><line x1="8" y1="50" x2="42" y2="50" stroke="#94a3b8" stroke-width="3"/><line x1="118" y1="50" x2="152" y2="50" stroke="#94a3b8" stroke-width="3"/><rect x="42" y="34" width="76" height="32" rx="9" fill="#d9c9a3" stroke="#a08b5f"/><rect x="56" y="34" width="7" height="32" fill="#7f1d1d"/><rect x="66" y="34" width="7" height="32" fill="#111827"/><rect x="76" y="34" width="7" height="32" fill="#dc2626"/><rect x="90" y="34" width="7" height="32" fill="#f0b429"/><text x="80" y="86" text-anchor="middle" fill="#8fa0c2" font-size="10">R</text></svg>';
+const SVG_CAPEL = '<svg viewBox="0 0 160 100"><rect x="0" y="0" width="160" height="100" fill="#0a1220"/><line x1="30" y1="18" x2="30" y2="50" stroke="#94a3b8" stroke-width="3"/><line x1="30" y1="50" x2="52" y2="50" stroke="#94a3b8" stroke-width="3"/><line x1="108" y1="50" x2="130" y2="50" stroke="#94a3b8" stroke-width="3"/><line x1="130" y1="50" x2="130" y2="82" stroke="#94a3b8" stroke-width="3"/><rect x="52" y="26" width="56" height="52" rx="8" fill="#1e40af" stroke="#1e3a8a"/><ellipse cx="80" cy="26" rx="28" ry="7" fill="#cbd5e1"/><rect x="52" y="40" width="14" height="38" fill="#e2e8f0" opacity=".9"/><text x="59" y="60" text-anchor="middle" fill="#1e40af" font-size="13" font-weight="700">-</text><text x="120" y="20" text-anchor="middle" fill="#f87171" font-size="15" font-weight="700">+</text></svg>';
+const SVG_CAPCER = '<svg viewBox="0 0 160 100"><rect x="0" y="0" width="160" height="100" fill="#0a1220"/><line x1="10" y1="50" x2="46" y2="50" stroke="#94a3b8" stroke-width="3"/><line x1="114" y1="50" x2="150" y2="50" stroke="#94a3b8" stroke-width="3"/><ellipse cx="80" cy="50" rx="34" ry="30" fill="#c2410c" stroke="#7c2d12" stroke-width="2"/><ellipse cx="80" cy="50" rx="20" ry="17" fill="#ea580c"/><text x="80" y="55" text-anchor="middle" fill="#fff7ed" font-size="11" font-weight="700">104</text></svg>';
+const SVG_DIODE = '<svg viewBox="0 0 160 100"><rect x="0" y="0" width="160" height="100" fill="#0a1220"/><line x1="8" y1="50" x2="52" y2="50" stroke="#94a3b8" stroke-width="3"/><line x1="108" y1="50" x2="152" y2="50" stroke="#94a3b8" stroke-width="3"/><rect x="52" y="38" width="56" height="24" rx="5" fill="#111827" stroke="#334155"/><rect x="94" y="38" width="8" height="24" fill="#e2e8f0"/><text x="40" y="34" text-anchor="middle" fill="#8fa0c2" font-size="10">A</text><text x="122" y="34" text-anchor="middle" fill="#8fa0c2" font-size="10">K</text></svg>';
+const SVG_SCHOTTKY = '<svg viewBox="0 0 160 100"><rect x="0" y="0" width="160" height="100" fill="#0a1220"/><line x1="8" y1="50" x2="52" y2="50" stroke="#94a3b8" stroke-width="3"/><line x1="108" y1="50" x2="152" y2="50" stroke="#94a3b8" stroke-width="3"/><rect x="52" y="38" width="56" height="24" rx="5" fill="#111827" stroke="#334155"/><rect x="92" y="38" width="10" height="24" fill="#e2e8f0"/><path d="M94 44h6v6h-6M94 54h6" stroke="#111827" stroke-width="1.6" fill="none"/><text x="40" y="34" text-anchor="middle" fill="#8fa0c2" font-size="10">A</text><text x="124" y="34" text-anchor="middle" fill="#8fa0c2" font-size="10">K</text></svg>';
+const SVG_LED = '<svg viewBox="0 0 160 100"><rect x="0" y="0" width="160" height="100" fill="#0a1220"/><line x1="18" y1="66" x2="62" y2="66" stroke="#94a3b8" stroke-width="3"/><line x1="98" y1="66" x2="142" y2="66" stroke="#94a3b8" stroke-width="3"/><path d="M62 66V46a18 18 0 0136 0v20z" fill="#dc2626" opacity=".85" stroke="#7f1d1d"/><path d="M62 66V46a18 18 0 0136 0v20z" fill="url(#g)" opacity=".35"/><ellipse cx="80" cy="38" rx="8" ry="5" fill="#fecaca" opacity=".8"/><path d="M104 40l12-8M104 48l14-4" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/><text x="50" y="84" text-anchor="middle" fill="#8fa0c2" font-size="10">K</text><text x="112" y="84" text-anchor="middle" fill="#8fa0c2" font-size="10">A</text></svg>';
+const SVG_TO92 = '<svg viewBox="0 0 160 100"><rect x="0" y="0" width="160" height="100" fill="#0a1220"/><path d="M56 26h48v28a24 24 0 01-48 0z" fill="#111827" stroke="#334155" stroke-width="1.5"/><path d="M56 26h48v6H56z" fill="#1f2937"/><line x1="64" y1="70" x2="58" y2="92" stroke="#94a3b8" stroke-width="3"/><line x1="80" y1="72" x2="80" y2="92" stroke="#94a3b8" stroke-width="3"/><line x1="96" y1="70" x2="102" y2="92" stroke="#94a3b8" stroke-width="3"/><text x="52" y="96" text-anchor="middle" fill="#7ef29a" font-size="10">E</text><text x="80" y="96" text-anchor="middle" fill="#7ef29a" font-size="10">B</text><text x="108" y="96" text-anchor="middle" fill="#7ef29a" font-size="10">C</text><text x="80" y="20" text-anchor="middle" fill="#8fa0c2" font-size="9">TO-92</text></svg>';
+const SVG_TO220 = '<svg viewBox="0 0 160 100"><rect x="0" y="0" width="160" height="100" fill="#0a1220"/><rect x="48" y="16" width="64" height="46" rx="4" fill="#111827" stroke="#334155"/><circle cx="80" cy="28" r="6" fill="#0a1220" stroke="#475569"/><line x1="62" y1="62" x2="62" y2="90" stroke="#94a3b8" stroke-width="3.4"/><line x1="80" y1="62" x2="80" y2="90" stroke="#94a3b8" stroke-width="3.4"/><line x1="98" y1="62" x2="98" y2="90" stroke="#94a3b8" stroke-width="3.4"/><text x="62" y="99" text-anchor="middle" fill="#7ef29a" font-size="9">1</text><text x="80" y="99" text-anchor="middle" fill="#7ef29a" font-size="9">2</text><text x="98" y="99" text-anchor="middle" fill="#7ef29a" font-size="9">3</text><text x="80" y="13" text-anchor="middle" fill="#8fa0c2" font-size="9">TO-220</text></svg>';
+const SVG_DIP8 = '<svg viewBox="0 0 160 100"><rect x="0" y="0" width="160" height="100" fill="#0a1220"/><rect x="36" y="26" width="88" height="48" rx="5" fill="#111827" stroke="#334155"/><path d="M74 26a6 6 0 0012 0" fill="#0a1220" stroke="#475569"/><circle cx="46" cy="34" r="2.6" fill="#8fa0c2"/><g stroke="#94a3b8" stroke-width="3">'
+ + '<line x1="48" y1="26" x2="48" y2="14"/><line x1="64" y1="26" x2="64" y2="14"/><line x1="96" y1="26" x2="96" y2="14"/><line x1="112" y1="26" x2="112" y2="14"/>'
+ + '<line x1="48" y1="74" x2="48" y2="86"/><line x1="64" y1="74" x2="64" y2="86"/><line x1="96" y1="74" x2="96" y2="86"/><line x1="112" y1="74" x2="112" y2="86"/></g>'
+ + '<text x="80" y="54" text-anchor="middle" fill="#8fa0c2" font-size="10">DIP-8</text><text x="40" y="12" text-anchor="middle" fill="#7ef29a" font-size="9">1</text></svg>';
+const SVG_SOIC8 = '<svg viewBox="0 0 160 100"><rect x="0" y="0" width="160" height="100" fill="#0a1220"/><rect x="38" y="34" width="84" height="32" rx="3" fill="#111827" stroke="#334155"/><circle cx="46" cy="42" r="2.2" fill="#8fa0c2"/><g stroke="#94a3b8" stroke-width="2.6">'
+ + '<path d="M48 34v-6h8v6M68 34v-6h8v6M88 34v-6h8v6M108 34v-6h8v6M48 66v6h8v-6M68 66v6h8v-6M88 66v6h8v-6M108 66v6h8v-6" fill="none"/></g>'
+ + '<text x="80" y="55" text-anchor="middle" fill="#8fa0c2" font-size="10">SOIC-8</text></svg>';
+const SVG_XTAL = '<svg viewBox="0 0 160 100"><rect x="0" y="0" width="160" height="100" fill="#0a1220"/><line x1="12" y1="50" x2="46" y2="50" stroke="#94a3b8" stroke-width="3"/><line x1="114" y1="50" x2="148" y2="50" stroke="#94a3b8" stroke-width="3"/><rect x="46" y="30" width="68" height="40" rx="12" fill="#cbd5e1" stroke="#94a3b8"/><rect x="56" y="38" width="48" height="24" rx="8" fill="#e2e8f0" opacity=".7"/><text x="80" y="55" text-anchor="middle" fill="#334155" font-size="10" font-weight="700">27.000</text></svg>';
+const SVG_TRAFO = '<svg viewBox="0 0 160 100"><rect x="0" y="0" width="160" height="100" fill="#0a1220"/><rect x="30" y="20" width="100" height="60" rx="4" fill="#1f2937" stroke="#475569"/><rect x="34" y="24" width="10" height="52" fill="#374151"/><rect x="116" y="24" width="10" height="52" fill="#374151"/><path d="M60 30c10 0 10 40 0 40M72 30c10 0 10 40 0 40" stroke="#f0b429" stroke-width="3" fill="none"/><path d="M92 30c10 0 10 40 0 40M104 30c10 0 10 40 0 40" stroke="#2dd4bf" stroke-width="3" fill="none"/><line x1="20" y1="34" x2="34" y2="34" stroke="#94a3b8" stroke-width="2.6"/><line x1="20" y1="66" x2="34" y2="66" stroke="#94a3b8" stroke-width="2.6"/><line x1="126" y1="34" x2="140" y2="34" stroke="#94a3b8" stroke-width="2.6"/><line x1="126" y1="66" x2="140" y2="66" stroke="#94a3b8" stroke-width="2.6"/><text x="80" y="92" text-anchor="middle" fill="#f87171" font-size="9">الجانب الساخن ⚠</text></svg>';
+const SVG_FUSE = '<svg viewBox="0 0 160 100"><rect x="0" y="0" width="160" height="100" fill="#0a1220"/><line x1="10" y1="50" x2="40" y2="50" stroke="#94a3b8" stroke-width="3"/><line x1="120" y1="50" x2="150" y2="50" stroke="#94a3b8" stroke-width="3"/><rect x="40" y="38" width="80" height="24" rx="10" fill="#e2e8f0" opacity=".35" stroke="#cbd5e1"/><rect x="36" y="36" width="12" height="28" rx="3" fill="#94a3b8"/><rect x="112" y="36" width="12" height="28" rx="3" fill="#94a3b8"/><path d="M50 50h20M90 50h20" stroke="#f0b429" stroke-width="2.4"/><path d="M70 50h20" stroke="#f0b429" stroke-width="2.4" stroke-dasharray="3 3"/></svg>';
+const SVG_INDUCTOR = '<svg viewBox="0 0 160 100"><rect x="0" y="0" width="160" height="100" fill="#0a1220"/><line x1="12" y1="58" x2="44" y2="58" stroke="#94a3b8" stroke-width="3"/><line x1="116" y1="58" x2="148" y2="58" stroke="#94a3b8" stroke-width="3"/><path d="M44 58a9 9 0 0118 0M62 58a9 9 0 0118 0M80 58a9 9 0 0118 0M98 58a9 9 0 0118 0" fill="none" stroke="#f0b429" stroke-width="3"/><rect x="50" y="66" width="60" height="6" rx="3" fill="#475569"/><text x="80" y="88" text-anchor="middle" fill="#8fa0c2" font-size="9">كور حديدي</text></svg>';
+const SVG_OPTO = '<svg viewBox="0 0 160 100"><rect x="0" y="0" width="160" height="100" fill="#0a1220"/><rect x="46" y="28" width="68" height="44" rx="4" fill="#111827" stroke="#334155"/><circle cx="56" cy="36" r="2.4" fill="#8fa0c2"/><g stroke="#94a3b8" stroke-width="3"><line x1="58" y1="28" x2="58" y2="16"/><line x1="78" y1="28" x2="78" y2="16"/><line x1="82" y1="72" x2="82" y2="84"/><line x1="102" y1="72" x2="102" y2="84"/></g><path d="M62 44l10 0-3-4m3 4l-3 4" stroke="#f0b429" stroke-width="2" fill="none"/><path d="M92 56l-10 0 3-4m-3 4l3 4" stroke="#2dd4bf" stroke-width="2" fill="none"/><text x="80" y="52" text-anchor="middle" fill="#8fa0c2" font-size="8">PC817</text></svg>';
+
+const PARTS=[
+ {n:'مقاومة كربونية',e:'Resistor · 1/4W',svg:SVG_RES,pins:'طرفين، مفيش قطبية — اتجاهها مش مهم',f:'قيمتها بتتغير مع السخونة أو بتبقى مفتوحة (OL) لما تحرق من حمل زايد',t:'أوم على الطرفين بعد فصل طرف واحد من البورد، وقارن بالألوان أو بالمخطط.'},
+ {n:'مكثف إلكتروليتي',e:'Electrolytic Capacitor',svg:SVG_CAPEL,pins:'طرف موجب (+) وطرف سالب (−) — القطبية مهمة',f:'انتفاخ من فوق، تسريب، أو قصر داخلي بيسحب خط الباور',t:'أوم: المفروض يطلع مقاومة بتزيد لحد OL وهو بيرتفع. صفر ثابت = مقصور.'},
+ {n:'مكثف سيراميك',e:'Ceramic Capacitor',svg:SVG_CAPCER,pins:'طرفين، مفيش قطبية',f:'قصر داخلي شائع في خطوط التغذية، وبيسحب المنظم لتحت',t:'جرس/أوم على الطرفين والجهاز مفصول: أي صوت مستمر = قصر، ارفعه وجرب تاني.'},
+ {n:'دايود عادي',e:'Diode · 1N4007',svg:SVG_DIODE,pins:'أنود (A) وكاثود (K) — الخط الأبيض ناحية الكاثود',f:'قصر (صفر بالاتجاهين) أو مفتوح (OL بالاتجاهين)',t:'وضع الدايود: 0.5–0.7V في اتجاه، وOL في العكس = سليم.'},
+ {n:'دايود شوتكي',e:'Schottky Diode',svg:SVG_SCHOTTKY,pins:'أنود وكاثود — الكاثود عليه علامة',f:'قصر بعد حمل زايد، وبيسخن بسرعة',t:'وضع الدايود: هبوط منخفض 0.15–0.3V في اتجاه وOL في العكس.'},
+ {n:'ليد',e:'LED',svg:SVG_LED,pins:'أنود (الرجل الطويلة) وكاثود',f:'بيضعف أو بيموت من غير أثر ظاهري',t:'وضع الدايود: هبوط 1.6–2.2V في اتجاه (بعض المقاييس بتنوّره خفيف).'},
+ {n:'ترانزستور صغير',e:'Transistor · TO-92',svg:SVG_TO92,pins:'E (باعث) · B (قاعدة) · C (مجمع)',f:'قصر بين C وE، أو B مفتوحة — شائع في دوائر التشغيل',t:'وضع الدايود: B→E و B→C هبوط 0.6V في اتجاه وOL في العكس.'},
+ {n:'منظم جهد 3 أطراف',e:'Regulator · 7805 / AMS1117',svg:SVG_TO220,pins:'1 الدخل IN · 2 الأرضي GND · 3 الخرج OUT',f:'خرج ناقص أو صفر مع سخونة، أو قصر على الخرج',t:'فولت DC: دخل أعلى من الخرج بـ 1.5–2V على الأقل، والخرج ثابت. مع الحمل بيسخن = استبدله.'},
+ {n:'موسفيت باور',e:'MOSFET · TO-220',svg:SVG_TO220,pins:'G (بوابة) · D (مصرف) · S (مصدر)',f:'قصر بين D وS بيخلي الجهاز ميت أو بيفصل',t:'أوم/دايود بين D وS: صفر = مقصور. البوابة معزولة، أي تسريب بينها وبين الأطراف = تالف.'},
+ {n:'أي سي DIP',e:'IC · DIP-8',svg:SVG_DIP8,pins:'8 أطراف، رقم 1 عند النقطة أو النقرة',f:'بيسخن زيادة، أو خط تغذيته مقصور، أو خرجه ثابت',t:'اتأكد الأول من التغذية على طرف VCC والأرضي، وبعدين شوف الإشارات على الأطراف.'},
+ {n:'أي سي SMD',e:'IC · SOIC-8',svg:SVG_SOIC8,pins:'8 أطراف صغيرة، رقم 1 عند النقطة',f:'شروخ لحام أو قصر بين أطراف متجاورة',t:'عدسة مكبرة + جرس بين كل طرف واللي جنبه، وقيس التغذية على الطرف الصح.'},
+ {n:'كريستالة',e:'Crystal Oscillator',svg:SVG_XTAL,pins:'طرفين (أحيانًا 4 بأرضي)',f:'الجهاز بيفضل واقف على اللوجو أو بيعيد التشغيل',t:'أفضل قياس أوسيلوسكوب. بالأفوميتر: اتأكد مفيش قصر، والأطراف ملحومة كويس.'},
+ {n:'محول نبضات',e:'SMPS Transformer',svg:SVG_TRAFO,pins:'ملفات ابتدائي وثانوي — الجانبين معزولين',f:'ملف مفتوح أو لحام بارد على أطرافه',t:'⚠ جانب ساخن: قياس ملفات المحول بمعدات عزل وبجهاز مفصول ومفرّغ، لفني مؤهل بس.'},
+ {n:'فيوز',e:'Fuse',svg:SVG_FUSE,pins:'طرفين',f:'بيقطع من تيار عالي أو قصر بعدّه',t:'جرس على الطرفين: مفيش صوت = مقطوع. متحطش فيوز أعلى من المكتوب.'},
+ {n:'كويل / إندكتور',e:'Inductor',svg:SVG_INDUCTOR,pins:'طرفين',f:'سلك مقطوع أو لحام بارد، وبيسبب فولت ناقص',t:'أوم: قيمة صغيرة جدًا (قريب من صفر). OL = الملف مقطوع.'},
+ {n:'أوبتوكابلر',e:'Optocoupler · PC817',svg:SVG_OPTO,pins:'1 أنود الليد · 2 كاثود · 3 باعث · 4 مجمع',f:'بيقطع التغذية الراجعة في الباور فيعمل فولت مش مستقر',t:'وضع الدايود بين 1 و2: هبوط ~1.1V في اتجاه. الباقي محتاج تجربة تشغيل.'}
+];
+function partCard(p){
+  return '<div class="partcard">'+p.svg+
+    '<div class="pn">'+esc(p.n)+'</div><div class="pe">'+esc(p.e)+'</div>'+
+    '<div class="pp"><b>الأطراف:</b> '+esc(p.pins)+'</div>'+
+    '<div class="pf"><b>أشهر عطل:</b> '+esc(p.f)+'</div>'+
+    '<div class="pt"><b>إزاي تفحصه:</b> '+esc(p.t)+'</div>'+
+    '<div class="pbtn"><a class="btn btn-gold" href="#/sim">🧪 اختبر القياس في المحاكي</a></div></div>';
+}
+let partQ='';
+function partsFiltered(){
+  const q=partQ.trim().toLowerCase();
+  if(!q) return PARTS;
+  return PARTS.filter(p=>(p.n+' '+p.e+' '+p.pins+' '+p.f+' '+p.t).toLowerCase().includes(q));
+}
+function partsGridHtml(){
+  const list=partsFiltered();
+  if(!list.length) return '<div class="pempty">مفيش قطعة بالاسم ده. جرّب كلمة تانية زي resistor أو مكثف أو دايود.</div>';
+  return list.map(partCard).join('');
+}
+window.partsFilter=function(v){
+  partQ=v||'';
+  const g=document.getElementById('partsgrid');
+  if(g) g.innerHTML=partsGridHtml();
+};
+function viewParts(){
+  const list=partsFiltered();
+  return '<div class="card"><h2>القطع الإلكترونية<span class="sub">'+PARTS.length+' قطعة: شكلها وأطرافها وأشهر عطل فيها وإزاي تفحصها</span></h2>'+
+    '<div class="caption">رسومات توضيحية من رسمنا للتعرف على الشكل والأطراف — مش صور فوتوغرافية ولا مخططات موديل بعينه. أي قياس على الجانب الساخن لفني مؤهل بجهاز مفصول ومفرّغ.</div>'+
+    '<div class="psearch"><input type="text" id="partsQ" inputmode="search" placeholder="دوّر على القطعة — مقاومة، مكثف، diode، TO-92…" value="'+esc(partQ)+'" oninput="partsFilter(this.value)"></div>'+
+    '<div class="partsgrid" id="partsgrid">'+(list.length?list.map(partCard).join(''):'<div class="pempty">مفيش قطعة بالاسم ده.</div>')+'</div></div>';
+}
+
 function viewMaint(){
   return '<div class="card"><h2>قسم الصيانة<span class="sub">مخططات وأدلة أعطال بالعربي، بتتوسع باستمرار</span></h2>'+
     '<div class="field"><input type="text" id="maintQ" placeholder="ابحث بالعرض أو الموديل أو كلمة: ميت، لوجو، ريستارت..." value="'+esc(maintQ)+'"></div>'+
     '<a href="#/sim" class="btn btn-gold big" style="display:block;text-align:center;text-decoration:none">🧪 افتح محاكي الملتيميتر التفاعلي</a></div>'+
+    viewParts()+
     '<div class="callout danger"><b>تحذير أمان</b>مرحلة الباور فيها جهد 220 فولت وتيار قاتل حتى بعد فصل الكهربة (مكثف التخزين مشحون بـ 310 فولت DC). أعطال الجانب الساخن لفني مؤهل بس، على جهاز مفصول ومفرّغ وبمعدات عزل ووثائق خدمة الموديل. الفحوص اللي هنا على الجانب البارد منخفض الجهد بس.</div>'+
     '<div id="maintList">'+maintListHtml()+'</div>';
 }
@@ -1707,6 +1877,8 @@ const ICO_CHIP='<svg viewBox="0 0 48 48" fill="none"><rect x="13" y="13" width="
 const ICO_UPD='<svg viewBox="0 0 48 48" fill="none"><path d="M24 8v20m0 0l-8-8m8 8l8-8" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 37h28" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>';
 const ICO_CONVERT='<svg viewBox="0 0 48 48" fill="none"><path d="M10 17h24l-6-6M38 31H14l6 6" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICO_INFO='<svg viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="17" stroke="#fff" stroke-width="2.6"/><path d="M24 21v11" stroke="#fff" stroke-width="3" stroke-linecap="round"/><circle cx="24" cy="15" r="2" fill="#fff"/></svg>';
+const ICO_METER='<svg viewBox="0 0 48 48" fill="none"><rect x="7" y="9" width="34" height="30" rx="5" stroke="#fff" stroke-width="2.6"/><rect x="12" y="14" width="24" height="9" rx="2" fill="#fff"/><circle cx="24" cy="31" r="5.5" stroke="#fff" stroke-width="2.4"/><path d="M24 31l3.5-3.5" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>';
+const ICO_TOOL='<svg viewBox="0 0 48 48" fill="none"><path d="M30 8a9 9 0 00-8.4 12.2L9 32.8 15.2 39l12.6-12.6A9 9 0 1030 8z" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><circle cx="30" cy="17" r="3" fill="#fff"/></svg>';
 function viewHome(){
   const c=edCounts();
   return '<div class="homehero"><div class="inner">'+
@@ -1719,6 +1891,9 @@ function viewHome(){
     tile('/library','gold',ICO_FOLDER,'المكتبة','سوفتات وفلاشات وملفات قنوات متخزنة جوه البرنامج')+
     tile('/loaders','blue',ICO_CHIP,'اللودرات','مرجع اللودرات حسب المعالج بخطوات الشحن')+
     tile('/updates','teal',ICO_UPD,'التحديثات','سوفتات وتحويلات وملفات قنوات بتحميل مباشر، بتتجدد باستمرار')+
+    tile('/maint','red',ICO_TOOL,'الصيانة','أعطال ومخططات وأدلة قياس بالعربي، والقطع الإلكترونية بأشكالها')+
+    tile('/sim','teal',ICO_METER,'القياسات والاختبارات','محاكي ملتيميتر تفاعلي: لوحة ونقاط قياس وقراءات حية')+
+    tile('/lab','purple',ICO_CHIP,'مختبر السوفت','تعديل وتفحيص السوفتات وملفات القنوات')+
     tile('/convert','purple',ICO_CONVERT,'التحويل','إيه الممكن في التحويل بين الأجهزة بصراحة')+
     tile('/about','slate',ICO_INFO,'حول البرنامج','التثبيت والحفظ وتوصيل OTG')+
   '</div>'+
@@ -1762,7 +1937,7 @@ window.addEventListener('hashchange', render);
 /* الفكرة: الصفحة نفسها بتقارن رقم بنيتها بالبنية المنشورة على السيرفر.
    لو فيه أحدث: بتنضّف الكاش والـ service worker وتعيد التحميل بعنوان جديد،
    فمستحيل تفضل واقفة على نسخة قديمة زي ما حصل قبل كده. */
-var AJS_BUILD='v36';
+var AJS_BUILD='v37';
 var AJS_REMOTE='https://omarsat8013-create.github.io/abujabal-sat/';
 var AJS_UPDATING=false;
 function ajsLoadRemoteVersion(done){
