@@ -1,7 +1,7 @@
 /* ابوجبل سات - service worker v36
    القاعدة: صفحة HTML عمرها ما تيجي من الكاش لو النت شغال.
    كاش بس للملفات الثابتة وللعرض وقت انقطاع النت. */
-const CACHE='abujabal-sat-v49';
+const CACHE='abujabal-sat-v50';
 const ASSETS=['./','index.html','manifest.webmanifest','version.json','version.js','icon-192.png','icon-512.png','apple-touch-icon.png','hero.jpg','lab.js?v=25','satdb.json','vendor/sql-wasm.js?v=1','vendor/sql-wasm.wasm?v=1'];
 
 self.addEventListener('install',e=>{

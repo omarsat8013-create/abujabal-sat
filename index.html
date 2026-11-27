@@ -750,8 +750,8 @@ function downloadBlob(blob, name){
   setTimeout(()=>URL.revokeObjectURL(url),4000);
 }
 /* ================= router ================= */
-const APP_VER='3.2.9';
-const APP_BUILD='v49 · 27/11/2026';
+const APP_VER='3.3.0';
+const APP_BUILD='v50 · 27/11/2026';
 const TABS=[
   { path:'/',        label:'الرئيسية' },
   { path:'/editor',  label:'المحرر' },
@@ -2910,9 +2910,9 @@ function binMoveName(off,dir){
   const j=i+dir;
   if(j<0||j>=runs.length){ toast(dir<0?'ده أول اسم في الملف':'ده آخر اسم في الملف'); return; }
   const A=runs[i], B=runs[j];
-  const a=binPadTo(A.t,A.l), b=binPadTo(B.t,B.l);
-  if(!a||!b){ toast('مش قادر أبدّل الاسمين — واحد منهم مش بيتكتب في ترميز الملف ده بنفس الطول'); return; }
-  bin.cur.set(a,A.o); bin.cur.set(b,B.o);
+  const aInB=binPadTo(A.t,B.l), bInA=binPadTo(B.t,A.l);
+  if(!aInB||!bInA){ toast('مش قادر أبدّل الاسمين — واحد منهم أطول من مكان التاني في ترميز الملف ده'); return; }
+  bin.cur.set(bInA,A.o); bin.cur.set(aInB,B.o);
   toast('اتبدّل «'+A.t.trim()+'» مع «'+B.t.trim()+'»');
   render();
 }
@@ -3030,7 +3030,7 @@ function binGoto(){
 /* الفكرة: الصفحة نفسها بتقارن رقم بنيتها بالبنية المنشورة على السيرفر.
    لو فيه أحدث: بتنضّف الكاش والـ service worker وتعيد التحميل بعنوان جديد،
    فمستحيل تفضل واقفة على نسخة قديمة زي ما حصل قبل كده. */
-var AJS_BUILD='v49';
+var AJS_BUILD='v50';
 var AJS_REMOTE='https://omarsat8013-create.github.io/abujabal-sat/';
 var AJS_UPDATING=false;
 function ajsLoadRemoteVersion(done){
