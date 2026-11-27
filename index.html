@@ -430,6 +430,49 @@ body.boldtable table.grid td{font-weight:700}
 .tile.blue{background:linear-gradient(135deg,#2563eb,#1e3a8a)}
 .tile.purple{background:linear-gradient(135deg,#7c3aed,#4c1d95)}
 .tile.slate{background:linear-gradient(135deg,#334155,#0f172a)}
+
+/* ===== محرر الباينري لملفات القنوات ===== */
+.updbtns{display:flex;gap:8px;flex-wrap:wrap}
+.binbar{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.binttl{flex:1;min-width:0}
+.binttl .bn2{font-size:15px;font-weight:700;direction:ltr;text-align:start;word-break:break-all}
+.binttl .bs2{font-size:11.5px;color:var(--mut);margin-top:2px}
+.binttl .chg{color:var(--gold)}
+.binkv{border:1px solid var(--line2);border-radius:12px;overflow:hidden;display:block}
+.binkv>div{display:flex;gap:10px;justify-content:space-between;align-items:flex-start;padding:8px 12px;font-size:12.5px;border-bottom:1px solid var(--line2)}
+.binkv>div:last-child{border-bottom:0}
+.binkv>div>span{color:var(--mut);flex:0 0 auto}
+.binkv>div>b{font-weight:700;text-align:end;min-width:0;word-break:break-all}
+.binkv b.sha{font-size:10.5px;max-width:64%}
+.binacts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.binsearch{margin-bottom:10px}
+.binsearch input{width:100%;box-sizing:border-box;background:#0d1730;border:1px solid var(--line2);color:var(--txt);border-radius:10px;padding:10px 12px;font-family:inherit;font-size:14px;min-height:44px}
+.binlist{display:flex;flex-direction:column;gap:6px}
+.binfile{display:flex;justify-content:space-between;align-items:center;gap:8px;appearance:none;background:#0d1730;border:1px solid var(--line2);color:var(--txt);border-radius:10px;padding:10px 12px;font-family:inherit;font-size:13px;min-height:44px;cursor:pointer;text-align:start;width:100%}
+.binfile .bn{direction:ltr;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.binfile .bs{font-size:11px;color:var(--mut);white-space:nowrap}
+.bingrp{margin-bottom:12px}
+.bgh{font-size:12.5px;font-weight:700;color:var(--teal);margin-bottom:6px}
+.bgh .cnt{font-weight:400;color:var(--mut);font-size:11px}
+.runlist{display:flex;flex-direction:column;gap:4px;max-height:360px;overflow:auto}
+.runrow{display:flex;align-items:center;gap:8px;appearance:none;background:#0d1730;border:1px solid var(--line2);color:var(--txt);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:12.5px;min-height:42px;cursor:pointer;text-align:start;width:100%}
+.runrow .ro{font-size:10.5px;color:var(--gold);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;white-space:nowrap}
+.runrow .rt{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.runrow .rl{font-size:10px;color:var(--mut);white-space:nowrap}
+.hexwrap{overflow-x:auto;border:1px solid var(--line2);border-radius:10px;background:#080f1f;padding:6px;direction:ltr}
+.hx{display:flex;align-items:center;gap:2px;direction:ltr;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1;padding:1px 0}
+.hxo{color:#64748b;width:46px;flex:0 0 46px}
+.hxb{appearance:none;background:transparent;border:0;color:#cbd5e1;font-family:inherit;font-size:11px;padding:5px 2px;min-width:19px;min-height:24px;border-radius:4px;cursor:pointer}
+.hxb.chg{background:#78350f;color:#fde68a}
+.hxb.empty{min-width:19px}
+.hxt{color:#0ea5a3;margin-inline-start:6px;white-space:pre;font-size:10.5px}
+.binpager{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.difflist{display:flex;flex-direction:column;gap:3px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;max-height:260px;overflow:auto}
+.drow{display:flex;gap:12px}
+.drow .ro{color:var(--gold)}
+.drow .dw{color:#fca5a5}
+.card ol.steps{margin:8px 0 0;padding-inline-start:18px}
+.card ol.steps li{margin-bottom:6px;font-size:13px;line-height:1.7}
 </style>
 </head>
 <body>
@@ -512,11 +555,11 @@ const UPDATES=[
   { type:'ملف قنوات', name:'ملف قنوات بي أوت كيو BOUTQ — عربي+إنجليزي متحرك', note:'ملف DB بصيغة الجهاز (SQLite متفحصة) لأجهزة بي أوت كيو، نسخة عربي+إنجليزي بالقنوات المتحركة. من مكتبة مصراوي سات نوفمبر 2026', dl:'dl/boutq-channels-ar-en-animated.db', size:'668 ك.ب' },
   { type:'ملف قنوات', name:'ملف قنوات بي أوت كيو BOUTQ — عربي ثابت', note:'ملف DB بصيغة الجهاز لأجهزة بي أوت كيو، نسخة عربي بالترتيب الثابت. من مكتبة مصراوي سات نوفمبر 2026', dl:'dl/boutq-channels-ar-static.db', size:'208 ك.ب' },
   { type:'ملف قنوات', name:'ملف قنوات بي أوت كيو BOUTQ — إنجليزي ثابت', note:'ملف DB بصيغة الجهاز لأجهزة بي أوت كيو، نسخة إنجليزي بالترتيب الثابت. من مكتبة مصراوي سات نوفمبر 2026', dl:'dl/boutq-channels-en-static.db', size:'176 ك.ب' },
-  { type:'ملف قنوات', name:'قوائم قنوات DK — 6 ملفات (صيغة db15)', note:'من مكتبتك على ميديافاير (27/11/2026): DK_Combo4M · DK_Combo8M · DK_Normal · DK_V1 · DK_V2 · DK_V3. توقيع الملفات db15S، وصيغة مختلفة عن ملفات HS 1032/HSB 133 اللي في البرنامج. جواها أقمار زي نايل سات ويوتل سات ونور سات وجولف سات وقنوات عربية وإنجليزية. موديل الجهاز مش مكتوب جوه الملف، فجرّب على جهاز واحد الأول واحتفظ بنسخة من ملفك القديم — متجربتش على جهاز.', dl:'dl/chan/dk-menu-channels-6.zip', size:'157 ك.ب' },
-  { type:'ملف قنوات', name:'قوائم قنوات HSP — 6 ملفات (صيغة db15)', note:'HSP_Combo2517 · HSP_Combo8M · HSP_V1 · HSP_V2 · HSP_V3_EG (مصر) · HSP_V3_JD (الأردن). نفس عائلة db15S وفيها قنوات عربية وإنجليزية. موديل الجهاز مش مكتوب جوه الملف — جرّب على جهاز واحد الأول، ومتجربتش على جهاز.', dl:'dl/chan/hsp-menu-channels-6.zip', size:'149 ك.ب' },
-  { type:'ملف قنوات', name:'قوائم قنوات PUB — ملفين (صيغة db15)', note:'PUB_V1 · PUB_V2. نفس عائلة db15S. موديل الجهاز مش مكتوب جوه الملف — جرّب على جهاز واحد الأول، ومتجربتش على جهاز.', dl:'dl/chan/pub-menu-channels-2.zip', size:'49 ك.ب' },
-  { type:'ملف قنوات', name:'قوائم RedLine 128/256 — ملفين (متطابقين)', note:'RedLine_128.bin وRedLine_256.bin متطابقين بايت ببايت (نفس بصمة sha256) — الملف واحد اتحفظ باسمين. db15S. موديل الجهاز مش مكتوب جوه الملف — متجربش على جهاز.', dl:'dl/chan/redline-menu-channels-2.zip', size:'49 ك.ب' },
-  { type:'ملف قنوات', name:'قوائم Golden / Gray — ملفين', note:'GrayMenu_V1 توقيعه db15S زي الباقي، لكن GoldenMenu_V1 هيدره مختلف وفيه SIPSATA — يعني مش نفس الصيغة بالظبط، خده كملف منفصل ومتجربش على جهاز.', dl:'dl/chan/menus-golden-gray-2.zip', size:'49 ك.ب' },
+  { type:'ملف قنوات', name:'قوائم قنوات DK — 6 ملفات (صيغة db15)', note:'من مكتبتك على ميديافاير (27/11/2026): DK_Combo4M · DK_Combo8M · DK_Normal · DK_V1 · DK_V2 · DK_V3. توقيع الملفات db15S، وصيغة مختلفة عن ملفات HS 1032/HSB 133 اللي في البرنامج. جواها أقمار زي نايل سات ويوتل سات ونور سات وجولف سات وقنوات عربية وإنجليزية. موديل الجهاز مش مكتوب جوه الملف، فجرّب على جهاز واحد الأول واحتفظ بنسخة من ملفك القديم — متجربتش على جهاز.', dl:'dl/chan/dk-menu-channels-6.zip', bin:'dk', size:'157 ك.ب' },
+  { type:'ملف قنوات', name:'قوائم قنوات HSP — 6 ملفات (صيغة db15)', note:'HSP_Combo2517 · HSP_Combo8M · HSP_V1 · HSP_V2 · HSP_V3_EG (مصر) · HSP_V3_JD (الأردن). نفس عائلة db15S وفيها قنوات عربية وإنجليزية. موديل الجهاز مش مكتوب جوه الملف — جرّب على جهاز واحد الأول، ومتجربتش على جهاز.', dl:'dl/chan/hsp-menu-channels-6.zip', bin:'hsp', size:'149 ك.ب' },
+  { type:'ملف قنوات', name:'قوائم قنوات PUB — ملفين (صيغة db15)', note:'PUB_V1 · PUB_V2. نفس عائلة db15S. موديل الجهاز مش مكتوب جوه الملف — جرّب على جهاز واحد الأول، ومتجربتش على جهاز.', dl:'dl/chan/pub-menu-channels-2.zip', bin:'pub', size:'49 ك.ب' },
+  { type:'ملف قنوات', name:'قوائم RedLine 128/256 — ملفين (متطابقين)', note:'RedLine_128.bin وRedLine_256.bin متطابقين بايت ببايت (نفس بصمة sha256) — الملف واحد اتحفظ باسمين. db15S. موديل الجهاز مش مكتوب جوه الملف — متجربش على جهاز.', dl:'dl/chan/redline-menu-channels-2.zip', bin:'rl', size:'49 ك.ب' },
+  { type:'ملف قنوات', name:'قوائم Golden / Gray — ملفين', note:'GrayMenu_V1 توقيعه db15S زي الباقي، لكن GoldenMenu_V1 هيدره مختلف وفيه SIPSATA — يعني مش نفس الصيغة بالظبط، خده كملف منفصل ومتجربش على جهاز.', dl:'dl/chan/menus-golden-gray-2.zip', bin:'gm', size:'49 ك.ب' },
   { type:'سوفت وير', name:'Sunplus Loader v1.5.0.8 (صن بلص 1506/1507)', note:'لودر شحن وسحب السوفت وملفات القنوات لمعالجات صن بلص 1506 و1507 (داكي وفانيلا والشعبي). برنامج ويندوز + شرح مصور. أداة فنيين مجانية، مصدرها dwdvb.com', dl:'dl/sunplus-loader-1.5.0.8.rar', size:'404 ك.ب', family:'sunplus' },
   { type:'سوفت وير', name:'لودر M3510C (معالجات علي)', note:'لودر RS232 كامل بملفات إعداد DDR لكل موديلات علي M35xx/M36xx/M38xx. أداة فنيين مجانية، مصدرها dwdvb.com', dl:'dl/m3510c-loader.rar', size:'824 ك.ب', family:'ali' },
   { type:'سوفت وير', name:'Erom Upgrade لعلي 351x', note:'أداة إنقاذ وشحن فلاشة معالجات علي 351x بعد سوفت غلط أو لمبة حمرا، مع ملف eromclient.abs. أداة فنيين مجانية، مصدرها dwdvb.com', dl:'dl/erom-upgrade-ali-351x.rar', size:'204 ك.ب', family:'ali' },
@@ -549,15 +592,17 @@ function viewUpdates(){
   '<div class="card">'+
   shown.map(u=>'<div class="loader"><div class="head"><span class="nm">'+esc(u.name)+'</span><span class="badge">'+esc(u.type)+(u.family?' · '+esc(familyName(u.family)):'')+'</span></div>'+
     (u.note?'<div class="does">'+esc(u.note)+'</div>':'')+
-    '<div style="margin-top:10px">'+(u.dl?
+    '<div style="margin-top:10px" class="updbtns">'+(u.dl?
       '<a class="btn btn-primary" href="'+esc(u.dl)+'" download>⬇ تحميل مباشر'+(u.size?' ('+esc(u.size)+')':'')+'</a>':
-      '<span class="badge">⏳ قريباً، في قايمة الرفع</span>')+'</div></div>').join('')+
+      '<span class="badge">⏳ قريباً، في قايمة الرفع</span>')+
+      (u.bin?'<button type="button" class="btn btn-sec" data-binopen="'+esc(u.bin)+'">🧩 افتح وحرّر جوه البرنامج</button>':'')+'</div></div>').join('')+
   '</div>'+
   '<div class="card"><h2>محتاج ملف معين؟</h2><p>لو محتاج سوفت أو تحويلة أو ملف قنوات باسمه ومعالجه، ابعته وهيتضاف لقايمة الرفع بأولوية، وأول ما يترفع هيظهر هنا بزرار تحميل مباشر.</p></div>';
 }
 function bindUpdates(){
   const f=$('#updFilter');
   if(f) f.addEventListener('click',e=>{ const b=e.target.closest('button'); if(b){ updFilter=b.dataset.v; render(); } });
+  document.querySelectorAll('[data-binopen]').forEach(b=>b.addEventListener('click',()=>{ binFilter=b.dataset.binopen; bin=null; go('/bin'); }));
 }
 /* ================= editor data ================= */
 const CATS=['الكل','ديني','أطفال','رياضي','دراما','أخبار','أفلام','موسيقى','وثائقي','ترفيه','تعليم','دولي','محلي','أخرى'];
@@ -683,8 +728,8 @@ function downloadBlob(blob, name){
   setTimeout(()=>URL.revokeObjectURL(url),4000);
 }
 /* ================= router ================= */
-const APP_VER='3.2.1';
-const APP_BUILD='v41 · 27/11/2026';
+const APP_VER='3.2.2';
+const APP_BUILD='v42 · 27/11/2026';
 const TABS=[
   { path:'/',        label:'الرئيسية' },
   { path:'/editor',  label:'المحرر' },
@@ -699,7 +744,7 @@ const TABS=[
 ];
 function currentPath(){
   const h=location.hash.replace(/^#/,'');
-  return (TABS.some(t=>t.path===h)||h==='/sim')?h:'/';
+  return (TABS.some(t=>t.path===h)||h==='/sim'||h==='/bin')?h:'/';
 }
 function go(path){ if(location.hash==='#'+path) render(); else location.hash=path; }
 function renderTabs(){
@@ -958,6 +1003,7 @@ function viewEditor(){
       '<button type="button" class="btn btn-gold sm" data-act="f-save">💾 حفظ</button>'+
       '<button type="button" class="btn btn-sec sm" data-act="f-export">⬆ تحويل إلى</button>'+
       '<button type="button" class="btn btn-primary sm" data-act="adv-open">☰ الأدوات المتقدمة</button>'+
+      '<button type="button" class="btn btn-sec sm" data-act="bin-open">🧩 محرر الباينري</button>'+
     '</div></div></div>'+
   '<div class="menubar" id="menubar">'+
     menuHtml('ملف',[['f-open','📂 فتح ملف قنوات…'],['f-save','💾 حفظ الملف'],['f-export','⬆ تصدير لصيغة جهاز…'],'sep',['f-backup','⬇ نسخة احتياطية كاملة (المشروع + المكتبة)'],['f-restore','⬆ استعادة نسخة احتياطية…'],'sep',['f-new','🗒 ملف جديد']])+
@@ -1180,6 +1226,7 @@ function arabizeFromFile(file){
   rd.readAsText(file);
 }
 function openChannelFile(file){
+  if(/\.(bin|abs|sdx|chl|db)$/i.test(file.name||'')){ binOpenLocal(file); go('/bin'); return; }
   const rd=new FileReader();
   rd.onload=()=>{
     try{
@@ -1305,6 +1352,7 @@ function editorClick(e){
   const el=e.target.closest('[data-act]');
   if(!el) return;
   const act=el.dataset.act, id=el.dataset.id;
+  if(act==='bin-open'){ go('/bin'); return; }
   if(act==='menu'){
     const m=el.parentElement, was=m.classList.contains('open');
     closeMenus(); if(!was) m.classList.add('open');
@@ -2291,15 +2339,443 @@ function render(){
   else if(p==='/about'){ view.innerHTML=viewAbout(); const b=$('#installBtn'); if(b) b.addEventListener('click',doInstall); }
   else if(p==='/lab'){ view.innerHTML=viewLab(); bindLab(); }
   else if(p==='/editor'){ view.innerHTML=viewEditor(); bindEditor(); }
+  else if(p==='/bin'){ view.innerHTML='<div class="narrow">'+binView()+'</div>'; bindBin(); }
   else { view.innerHTML=viewHome(); bindHome(); }
   enhanceDiagrams();
 }
 window.addEventListener('hashchange', render);
+/* ================= محرر الباينري لملفات القنوات (.bin) ================= */
+const BIN_GROUPS=[['dk','داكي DK'],['hsp','فانيلا HSP'],['pub','PUB'],['rl','RedLine'],['gm','Golden / Gray']];
+const BIN_FILES=[
+  {g:'dk',n:'DK_Combo4M.bin',s:113148},
+  {g:'dk',n:'DK_Combo8M.bin',s:117144},
+  {g:'dk',n:'DK_Normal.bin',s:95064},
+  {g:'dk',n:'DK_V1.bin',s:99060},
+  {g:'dk',n:'DK_V2.bin',s:103056},
+  {g:'dk',n:'DK_V3.bin',s:107052},
+  {g:'gm',n:'GoldenMenu_V1.bin',s:89396},
+  {g:'gm',n:'GrayMenu_V1.bin',s:90732},
+  {g:'hsp',n:'HSP_Combo2517.bin',s:111836},
+  {g:'hsp',n:'HSP_Combo8M.bin',s:115136},
+  {g:'hsp',n:'HSP_V1.bin',s:90732},
+  {g:'hsp',n:'HSP_V2.bin',s:94728},
+  {g:'hsp',n:'HSP_V3_EG.bin',s:95064},
+  {g:'hsp',n:'HSP_V3_JD.bin',s:98724},
+  {g:'pub',n:'PUB_V1.bin',s:90720},
+  {g:'pub',n:'PUB_V2.bin',s:89388},
+  {g:'rl',n:'RedLine_128.bin',s:105696},
+  {g:'rl',n:'RedLine_256.bin',s:105696},];
+let bin=null, binQ='', binPage=0, binFilter='';
+const BIN_PAGE_BYTES=768, BIN_COLS=8;
+/* ---- الترميز: UTF-8 أو ISO-8859-6 (عربي 8-بت) ---- */
+let _iso6tab=null,_iso6rev=null,_iso6ok=null;
+function iso6(){
+  if(_iso6ok===null){
+    _iso6tab=new Array(256); _iso6rev={}; _iso6ok=false;
+    try{
+      const td=new TextDecoder('iso-8859-6');
+      for(let i=0;i<256;i++){
+        let ch='';
+        try{ ch=td.decode(new Uint8Array([i])); }catch(e){ ch=''; }
+        _iso6tab[i]=ch;
+        if(ch && _iso6rev[ch]===undefined) _iso6rev[ch]=i;
+      }
+      _iso6ok=true;
+    }catch(e){ _iso6ok=false; }
+  }
+  return {tab:_iso6tab,rev:_iso6rev,ok:_iso6ok};
+}
+function binTextish(ch){
+  if(!ch) return false;
+  if(ch===' '||ch==='.'||ch==='-'||ch==='_'||ch==='/'||ch==='&'||ch==='('||ch===')'||ch==='+'||ch===':'||ch==='\x27') return true;
+  return /[A-Za-z0-9\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/.test(ch);
+}
+function binDecode(b,enc){
+  const chars=[],offs=[];
+  if(enc==='iso-8859-6'){
+    const t=iso6().tab;
+    for(let i=0;i<b.length;i++){ const ch=t?t[b[i]]:''; chars.push(ch||'\uFFFD'); offs.push(i); }
+  }else{
+    const td=new TextDecoder('utf-8',{fatal:false});
+    let i=0;
+    while(i<b.length){
+      const c=b[i]; let n=1;
+      if(c>=0xF0) n=4; else if(c>=0xE0) n=3; else if(c>=0xC0) n=2;
+      if(i+n>b.length) n=1;
+      let ch='';
+      try{ ch=td.decode(b.subarray(i,i+n)); }catch(e){ ch=''; }
+      if(!ch || ch.length!==1){ ch='\uFFFD'; n=1; }
+      chars.push(ch); offs.push(i); i+=n;
+    }
+  }
+  return {chars,offs};
+}
+function binRuns(b,enc){
+  const d=binDecode(b,enc), chars=d.chars, offs=d.offs, out=[];
+  let i=0;
+  while(i<chars.length){
+    if(binTextish(chars[i])){
+      let j=i, s='';
+      while(j<chars.length && binTextish(chars[j])){ s+=chars[j]; j++; }
+      const end=(j<chars.length)?offs[j]:b.length;
+      const byteLen=end-offs[i];
+      if(j-i>=4 && byteLen>=4 && /[A-Za-z\u0600-\u06FF]/.test(s)) out.push({o:offs[i],l:byteLen,t:s});
+      i=j;
+    }else i++;
+  }
+  return out;
+}
+function binDetect(b){
+  const u=binRuns(b,'utf-8').length;
+  const a=iso6().ok?binRuns(b,'iso-8859-6').length:0;
+  if(a>u) return 'iso-8859-6';
+  return 'utf-8';
+}
+function binNorm(s){
+  return String(s).toLowerCase()
+    .replace(/\u0640/g,'')
+    .replace(/[\u064B-\u0652\u0670]/g,'')
+    .replace(/[\u0623\u0625\u0622]/g,'\u0627')
+    .replace(/\u0629/g,'\u0647')
+    .replace(/\u0649/g,'\u064A')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+function binEncName(e){ return e==='iso-8859-6'?'ISO-8859-6 (عربي 8-بت)':'UTF-8'; }
+function binEncode(str,enc){
+  if(enc==='iso-8859-6'){
+    const rev=iso6().rev, out=[];
+    for(const ch of str){
+      const v=rev[ch];
+      if(v===undefined) return null;
+      out.push(v);
+    }
+    return new Uint8Array(out);
+  }
+  return new TextEncoder().encode(str);
+}
+function binByteHex(v){ return (v<16?'0':'')+v.toString(16); }
+function binSha(b){
+  if(!(window.crypto&&crypto.subtle&&crypto.subtle.digest)) return Promise.resolve('');
+  return crypto.subtle.digest('SHA-256',b).then(d=>Array.from(new Uint8Array(d)).map(binByteHex).join('')).catch(()=>'');
+}
+function binB64(b){
+  let s=''; const CH=0x8000;
+  for(let i=0;i<b.length;i+=CH) s+=String.fromCharCode.apply(null,b.subarray(i,Math.min(i+CH,b.length)));
+  return btoa(s);
+}
+function binDiffList(){
+  const out=[];
+  if(!bin) return out;
+  const a=bin.orig, c=bin.cur;
+  for(let i=0;i<a.length;i++){ if(a[i]!==c[i]) out.push(i); }
+  return out;
+}
+/* ---- فتح ملف ---- */
+function binOpen(bytes,name){
+  const b=bytes instanceof Uint8Array?bytes:new Uint8Array(bytes);
+  bin={ name:name||'file.bin', orig:b, cur:b.slice(), enc:binDetect(b), sha0:'', diff:0, off:0 };
+  binPage=0; binQ='';
+  binSha(b).then(h=>{ if(bin){ bin.sha0=h; if(currentPath()==='/bin') render(); } });
+  render();
+  toast('اتفتح: '+bin.name);
+}
+function binOpenHosted(n){
+  toast('بفتح '+n);
+  fetch('dl/chan/raw/'+encodeURIComponent(n)).then(r=>{
+    if(!r.ok) throw new Error('http '+r.status);
+    return r.arrayBuffer();
+  }).then(ab=>binOpen(new Uint8Array(ab),n)).catch(()=>toast('مش قادر أحمّل الملف من البرنامج، جرّب تختاره من جهازك'));
+}
+function binOpenLocal(file){
+  const rd=new FileReader();
+  rd.onload=()=>{ binOpen(new Uint8Array(rd.result),file.name); };
+  rd.onerror=()=>toast('مش قادر أقرأ الملف');
+  rd.readAsArrayBuffer(file);
+}
+function binOpenLib(id,name){
+  if(!db){ toast('مكتبتك مش متاحة دلوقتي'); return; }
+  idbGet(id).then(blob=>{
+    if(!blob){ toast('الملف مش متخزن جوه البرنامج'); return; }
+    return blob.arrayBuffer().then(ab=>binOpen(new Uint8Array(ab),name));
+  }).catch(()=>toast('حصلت مشكلة في قراءة الملف'));
+}
+/* ---- عرض ---- */
+function binPicker(){
+  let h='<div class="callout danger"><b>اقرأ ده الأول</b>ده محرر بايتات لملفات القنوات: بيوريك محتوى الملف زي ما هو وتعدّل فيه. تعديل غلط في ملف قنوات ممكن يخلّي الرسيفر مش راضي يقرأ الملف أو يعلّق، ومحدش يقدر يضمن إن الملف هيشتغل غير لما تجربه على جهاز. البرنامج بيحفظ نسخة جديدة باسم مختلف وبيسب الأصل زي ما هو.</div>';
+  h+='<div class="card"><h2>افتح ملف من جهازك<span class="sub">أي ملف .bin من فلاشة أو من تنزيلات الموبايل</span></h2>'+
+    '<label class="drop"><input type="file" id="binPickFile" class="hidden-input" accept=".bin,application/octet-stream,*/*" aria-label="اختار ملف باينري من جهازك">'+
+    '<span class="t">اختار ملف .bin</span><span class="s">هيتقرأ جوه البرنامج ومش هيتعدّل على جهازك غير لما تحفظ نسخة جديدة</span></label></div>';
+  const lib=(catalog||[]).filter(f=>f.hasFile);
+  if(lib.length){
+    h+='<div class="card"><h2>من مكتبتك<span class="sub">الملفات اللي سجلتها في المكتبة ومتخزنة جوه البرنامج</span></h2><div class="binlist">'+
+      lib.map(f=>'<button type="button" class="binfile" data-binlib="'+esc(f.id)+'" data-binname="'+esc(f.name)+'"><span class="bn">'+esc(f.name)+'</span><span class="bs">'+(f.size?fmtSize(f.size):'')+'</span></button>').join('')+
+      '</div></div>';
+  }
+  const grps=binFilter?BIN_GROUPS.filter(g=>g[0]===binFilter):BIN_GROUPS;
+  const gname=(BIN_GROUPS.find(g=>g[0]===binFilter)||['',''])[1];
+  h+='<div class="card"><h2>من ملفات التطبيق<span class="sub">'+(binFilter?('مجموعة '+esc(gname)+' — ملفات القنوات المرفوعة في قسم التحديثات'):'ملفات القنوات المرفوعة في قسم التحديثات (صيغة db15S وملفات المنيو)')+'</span></h2>';
+  if(binFilter) h+='<div class="binacts" style="margin:0 0 10px"><button type="button" class="btn btn-ghost sm" data-b="allgrp">اعرض كل المجموعات</button></div>';
+  grps.forEach(g=>{
+    const fs=BIN_FILES.filter(f=>f.g===g[0]);
+    if(!fs.length) return;
+    h+='<div class="bingrp"><div class="bgh">'+esc(g[1])+' <span class="cnt">'+fs.length+' ملف</span></div><div class="binlist">'+
+      fs.map(f=>'<button type="button" class="binfile" data-binh="'+esc(f.n)+'"><span class="bn">'+esc(f.n)+'</span><span class="bs">'+fmtSize(f.s)+'</span></button>').join('')+
+      '</div></div>';
+  });
+  h+='<div class="caption">الملفات دي نفس اللي في قسم التحديثات، بس مفتوحة جاهزة للتعديل من غير ما تنزّلها الأول.</div></div>';
+  h+='<div class="card"><h2>البرنامج بيعرف إيه بالظبط؟<span class="sub">عشان تعرف حدود المحرر قبل ما تعدّل</span></h2><ol class="steps">'+
+    '<li><b>متحقق:</b> إن الملف من عائلة db15S (أول 5 بايت)، وإن الحقل عند الإزاحة 12..15 قيمته 725 في 17 ملف من 18 من نفس العائلة، وإن الترميز UTF-8 أو ISO-8859-6.</li>'+
+    '<li><b>متحقق:</b> النصوص المقروءة جوه الملف (أسماء قنوات عربية وإنجليزية) بمواضعها وطولها بالبايت.</li>'+
+    '<li><b>مش متحقق:</b> معنى باقي الحقول الرقمية، مفيش checksum معروف في الصيغة دي فمش بنتحقق من سلامة الملف بعد التعديل، ومفيش ضمان إن الملف هيشتغل على أي جهاز.</li></ol></div>';
+  return h;
+}
+function binEditor(){
+  const b=bin, diff=binDiffList().length;
+  b.diff=diff;
+  const enc=binEncName(b.enc);
+  const magic=Array.from(b.cur.subarray(0,5)).map(x=>String.fromCharCode(x)).join('');
+  const w=Array.from(b.cur.subarray(12,16)).map(x=>String.fromCharCode(x)).join('');
+  const hdrOk=(b.cur[12]===0xD5&&b.cur[13]===0x02);
+  const magicBad=(magic!=='db15S');
+  let h='<div class="binbar"><button type="button" class="btn btn-sec sm" data-b="back">→ الملفات</button>'+
+    '<div class="binttl"><div class="bn2">'+esc(b.name)+'</div><div class="bs2">'+fmtSize(b.cur.length)+' · '+enc+' · '+(diff?('<b class="chg">'+diff+' بايت متغير</b>'):'من غير تعديل')+'</div></div></div>';
+  h+='<div class="callout danger"><b>قبل أي حفظ</b>أي تعديل هنا على مسؤوليتك: ملف قنوات غلط ممكن يعلّق الرسيفر أو يخليه مش قادر يقرأ الملف. احتفظ بنسخة من ملفك القديم، وجرّب على جهاز واحد الأول. البرنامج بيحفظ نسخة جديدة وبيسب الأصل زي ما هو.</div>';
+  h+='<div class="card"><h2>معلومات الملف<span class="sub">اللي البرنامج متأكد منه فعلًا</span></h2><div class="binkv">'+
+    '<div><span>التوقيع (أول 5 بايت)</span><b dir="ltr">'+esc(magic)+'</b></div>'+
+    '<div><span>الحقل عند 12..15</span><b dir="ltr">'+(hdrOk?'725 (0x02D5)':esc(w))+'</b></div>'+
+    '<div><span>الحجم</span><b dir="ltr">'+b.cur.length.toLocaleString('en-US')+'</b></div>'+
+    '<div><span>الترميز</span><b>'+esc(enc)+'</b></div>'+
+    '<div><span>sha256 للأصل</span><b dir="ltr" class="sha">'+(b.sha0?esc(b.sha0.slice(0,32))+'…':'—')+'</b></div>'+
+    '<div><span>بايتات متغيرة</span><b dir="ltr">'+diff+'</b></div>'+
+    '</div>'+
+    (magicBad?'<div class="callout danger" style="margin-top:10px"><b>توقيع الملف اتغيّر</b>أول 5 بايت المفروض تكون db15S. دلوقتي بقت «'+esc(magic)+'»، والملف بالشكل ده غالبًا مش هيتقري على أي جهاز. اضغط «رجّع الأصل» لو مش قاصد.</div>':'')+
+    '<div class="binacts">'+
+      '<button type="button" class="btn btn-primary" data-b="save">حفظ نسخة جديدة</button>'+
+      '<button type="button" class="btn btn-sec" data-b="restore">رجّع الأصل</button>'+
+      '<button type="button" class="btn btn-ghost" data-b="orig">نزّل نسخة من الأصل</button>'+
+    '</div>'+
+    '<div class="caption">مفيش checksum معروف في الصيغة دي، فالبرنامج مش بيقدر يتأكد إن الملف سليم بعد التعديل. اللي بيوريك حجمه وبصمته وعدد البايتات اللي اتغيرت وبس.</div></div>';
+  h+='<div class="card"><h2>نصوص الملف<span class="sub">أسماء قنوات عربية وإنجليزية — التعديل بنفس عدد البايتات بس</span></h2>'+
+    '<div class="binsearch"><input type="text" id="binQ" placeholder="ابحث باسم القناة (عربي أو إنجليزي)" value="'+esc(binQ)+'"></div>';
+  const runs=binRuns(b.cur,b.enc);
+  const q=binNorm(binQ);
+  const shown=runs.filter(r=>!q||binNorm(r.t).indexOf(q)>=0);
+  const LIM=60;
+  h+='<div class="runlist">';
+  if(!shown.length){
+    h+='<div class="caption">مفيش نص مطابق. جرّب كلمة تانية أو افتح تبويب البايتات.</div>';
+  }else{
+    shown.slice(0,LIM).forEach(r=>{
+      h+='<button type="button" class="runrow" data-run="'+r.o+'" data-runl="'+r.l+'"><span class="ro" dir="ltr">'+r.o.toString(16).toUpperCase().padStart(6,'0')+'</span><span class="rt">'+esc(r.t.trim())+'</span><span class="rl">'+r.l+' ب</span></button>';
+    });
+    if(shown.length>LIM) h+='<div class="caption">فيه '+shown.length+' نص مطابق، ظاهر منهم '+LIM+'. اكتب بحث أدق.</div>';
+  }
+  h+='</div><div class="caption">البرنامج بيتأكد إن ده نص مقروء وطوله بالبايت، لكنه مش بيعرف أي نص بالظبط هو اسم القناة ولا معنى باقي الحقول.</div></div>';
+  /* hex */
+  const total=Math.ceil(b.cur.length/BIN_PAGE_BYTES)||1;
+  if(binPage>=total) binPage=total-1;
+  if(binPage<0) binPage=0;
+  const start=binPage*BIN_PAGE_BYTES, end=Math.min(start+BIN_PAGE_BYTES,b.cur.length);
+  const d=binDecode(b.cur,b.enc);
+  const cmap={};
+  for(let i=0;i<d.chars.length;i++) cmap[d.offs[i]]=d.chars[i];
+  h+='<div class="card"><h2>البايتات<span class="sub">اضغط على أي بايت تعدّله — الصفحة '+ (binPage+1) +' من '+total+'</span></h2>'+
+    '<div class="hexwrap">';
+  for(let o=start;o<end;o+=BIN_COLS){
+    let line='<div class="hx"><span class="hxo" dir="ltr">'+o.toString(16).toUpperCase().padStart(6,'0')+'</span>';
+    let prev='';
+    for(let k=0;k<BIN_COLS;k++){
+      const p=o+k;
+      if(p>=end){ line+='<span class="hxb empty"></span>'; continue; }
+      const v=b.cur[p], chg=b.orig[p]!==v;
+      line+='<button type="button" class="hxb'+(chg?' chg':'')+'" data-byte="'+p+'" dir="ltr">'+binByteHex(v)+'</button>';
+      const c=cmap[p]||'.';
+      prev+= (binTextish(c)&&c.trim())?c:'.';
+    }
+    line+='<span class="hxt" dir="ltr">'+esc(prev)+'</span></div>';
+    h+=line;
+  }
+  h+='</div><div class="binpager">'+
+    '<button type="button" class="btn btn-sec sm" data-b="prev"'+(binPage<=0?' disabled':'')+'>السابق</button>'+
+    '<button type="button" class="btn btn-sec sm" data-b="next"'+(binPage>=total-1?' disabled':'')+'>التالي</button>'+
+    '<button type="button" class="btn btn-ghost sm" data-b="goto">اذهب لإزاحة</button>'+
+    '</div></div>';
+  if(diff){
+    const list=binDiffList();
+    h+='<div class="card"><h2>التغييرات<span class="sub">'+list.length+' بايت — من الأصل للجديد</span></h2><div class="difflist">'+
+      list.slice(0,60).map(o=>'<div class="drow"><span class="ro" dir="ltr">'+o.toString(16).toUpperCase().padStart(6,'0')+'</span><span class="dw" dir="ltr">'+binByteHex(b.orig[o])+' → '+binByteHex(b.cur[o])+'</span></div>').join('')+
+      (list.length>60?'<div class="caption">و'+(list.length-60)+' بايت كمان.</div>':'')+
+      '</div><div class="binacts"><button type="button" class="btn btn-danger" data-b="restore">رجّع الأصل وامسح التعديلات</button></div></div>';
+  }
+  return h;
+}
+function binView(){ return bin?binEditor():binPicker(); }
+function bindBin(){
+  const v=$('#view');
+  const pf=$('#binPickFile');
+  if(pf) pf.addEventListener('change',()=>{ if(pf.files&&pf.files[0]) binOpenLocal(pf.files[0]); pf.value=''; });
+  document.querySelectorAll('[data-binh]').forEach(b=>b.addEventListener('click',()=>binOpenHosted(b.dataset.binh)));
+  document.querySelectorAll('[data-binlib]').forEach(b=>b.addEventListener('click',()=>binOpenLib(b.dataset.binlib,b.dataset.binname)));
+  const q=$('#binQ');
+  if(q) q.addEventListener('input',()=>{ binQ=q.value; render(); const q2=$('#binQ'); if(q2){ q2.focus(); try{ q2.setSelectionRange(q2.value.length,q2.value.length); }catch(e){} } });
+  if(v&&!v.dataset.binBound){
+    v.dataset.binBound='1';
+    v.addEventListener('click',e=>{
+      const by=e.target.closest('[data-byte]');
+      if(by){ binEditByte(parseInt(by.dataset.byte,10)); return; }
+      const rn=e.target.closest('[data-run]');
+      if(rn){ binEditRun(parseInt(rn.dataset.run,10),parseInt(rn.dataset.runl,10)); return; }
+      const bb=e.target.closest('[data-b]');
+      if(!bb) return;
+      const a=bb.dataset.b;
+      if(a==='back'){ bin=null; go('/bin'); return; }
+      if(a==='allgrp'){ binFilter=''; render(); return; }
+      if(a==='prev'){ binPage=Math.max(0,binPage-1); render(); return; }
+      if(a==='next'){ binPage++; render(); return; }
+      if(a==='goto'){ binGoto(); return; }
+      if(a==='restore'){ binRestore(); return; }
+      if(a==='save'){ binSave(); return; }
+      if(a==='orig'){ binDownloadOrig(); return; }
+    });
+  }
+}
+/* ---- تعديل بايت ---- */
+function binEditByte(off){
+  if(!bin) return;
+  const cur=bin.cur[off], orig=bin.orig[off];
+  const hdr=(off>=12&&off<=15);
+  const body='<div class="binkv"><div><span>الإزاحة</span><b dir="ltr">0x'+off.toString(16).toUpperCase()+' ('+off+')</b></div>'+
+    '<div><span>القيمة الحالية</span><b dir="ltr">0x'+binByteHex(cur)+' ('+cur+')</b></div>'+
+    '<div><span>القيمة في الأصل</span><b dir="ltr">0x'+binByteHex(orig)+' ('+orig+')</b></div></div>'+
+    (hdr?'<div class="callout warn" style="margin-top:10px"><b>حقل ثابت في العائلة</b>ده واحد من الحقول الأربعة عند 12..15، قيمته 725 في 17 ملف من نفس العائلة. تعديله غالبًا يخلّي الملف مش مقروء.</div>':'')+
+    '<div class="field"><label>القيمة الجديدة (هيكس من 00 لـ FF)</label><input type="text" id="byteVal" dir="ltr" inputmode="text" autocomplete="off" value="'+binByteHex(cur)+'"></div>';
+  openModal('تعديل بايت',body,'طبّق',(m)=>{
+    const el=m.querySelector('#byteVal');
+    const s=(el?el.value:'').trim().replace(/^0x/i,'');
+    if(!/^[0-9a-fA-F]{1,2}$/.test(s)){ toast('اكتب قيمة هيكس من 00 لـ FF'); return false; }
+    const v=parseInt(s,16);
+    bin.cur[off]=v;
+    toast('اتغير البايت عند 0x'+off.toString(16).toUpperCase());
+    render();
+  });
+}
+/* ---- تعديل نص بنفس عدد البايتات ---- */
+function binEditRun(off,len){
+  if(!bin) return;
+  const raw=bin.cur.subarray(off,off+len);
+  const txt=(bin.enc==='iso-8859-6')?Array.from(raw).map(v=>iso6().tab[v]||'').join(''):new TextDecoder('utf-8').decode(raw);
+  const body='<div class="binkv"><div><span>الإزاحة</span><b dir="ltr">0x'+off.toString(16).toUpperCase()+'</b></div>'+
+    '<div><span>عدد البايتات المطلوب</span><b dir="ltr">'+len+'</b></div></div>'+
+    '<div class="field"><label>النص</label><input type="text" id="runVal" value="'+esc(txt)+'"></div>'+
+    '<div class="caption" id="runCnt">المكتوب: —</div>'+
+    '<div class="callout note"><b>ليه نفس عدد البايتات؟</b>عشان حجم الملف ما يتغيرش ومواضع باقي البيانات ما تتزحلقش. لو النص أقصر، املأ الباقي بتطويل (ـ) زي ما الملف نفسه عامل، أو بمسافات.</div>'+
+    '<div class="binacts"><button type="button" class="btn btn-sec sm" id="runPad">املأ الباقي بتطويل</button></div>';
+  openModal('تعديل نص',body,'طبّق',(m)=>{
+    const el=m.querySelector('#runVal');
+    const s=el?el.value:'';
+    const enc=binEncode(s,bin.enc);
+    if(!enc){ toast('فيه حرف مش موجود في ترميز الملف ده ('+binEncName(bin.enc)+')'); return false; }
+    if(enc.length!==len){ toast('لازم '+len+' بايت بالظبط، المكتوب '+enc.length+' بايت'); return false; }
+    for(let i=0;i<len;i++) bin.cur[off+i]=enc[i];
+    toast('اتغيّر النص عند 0x'+off.toString(16).toUpperCase());
+    render();
+  });
+  setTimeout(()=>{
+    const el=$('#runVal'), cnt=$('#runCnt'), pad=$('#runPad');
+    const upd=()=>{
+      if(!el||!cnt) return;
+      const e=binEncode(el.value,bin.enc);
+      const n=e?e.length:-1;
+      cnt.innerHTML=(n<0?'فيه حرف مش مدعوم في الترميز ده':('المكتوب: <b dir="ltr">'+n+'</b> بايت · المطلوب <b dir="ltr">'+len+'</b> بايت'+(n===len?' — تمام ✔':(n<len?' — ناقص '+(len-n)+' بايت':' — زيادة '+(n-len)+' بايت'))));
+      if(pad) pad.style.display=(n>=0&&n<len)?'':'none';
+    };
+    if(el){ el.addEventListener('input',upd); upd(); }
+    if(pad&&el) pad.addEventListener('click',()=>{
+      let s=el.value;
+      while(true){
+        const e=binEncode(s,bin.enc);
+        if(!e) break;
+        const rem=len-e.length;
+        if(rem<=0) break;
+        const t=binEncode('\u0640',bin.enc);
+        if(!t||!t.length||rem<t.length) break;
+        s+='\u0640';
+      }
+      el.value=s; upd();
+    });
+  },30);
+}
+/* ---- حفظ / رجوع ---- */
+function binRestore(){
+  if(!bin) return;
+  openModal('رجّع الأصل','<div class="callout warn"><b>هيتمسح كل تعديل</b>هترجع نسخة الملف الأصلية اللي اتفتحت، وكل البايتات المتغيرة هتترجع زي ما كانت. الأصل نفسه مش هيتغير على جهازك.</div>','رجّع الأصل',()=>{
+    bin.cur=bin.orig.slice(); render(); toast('رجعت نسخة الأصل');
+  });
+}
+function binDownloadOrig(){
+  if(!bin) return;
+  const n=bin.name.replace(/\.bin$/i,'')+'_asl.bin';
+  binWrite(bin.orig,n);
+}
+function binSave(){
+  if(!bin) return;
+  const diff=binDiffList().length;
+  if(!diff){ toast('مفيش أي تعديل عشان يتحفظ'); return; }
+  const ts=new Date();
+  const pad2=x=>(x<10?'0':'')+x;
+  const stamp=ts.getFullYear()+pad2(ts.getMonth()+1)+pad2(ts.getDate())+'-'+pad2(ts.getHours())+pad2(ts.getMinutes());
+  const name=bin.name.replace(/\.bin$/i,'')+'_edited_'+stamp+'.bin';
+  binSha(bin.cur).then(sha1=>{
+    const magicChanged=(bin.cur[0]!==bin.orig[0]||bin.cur[1]!==bin.orig[1]||bin.cur[2]!==bin.orig[2]||bin.cur[3]!==bin.orig[3]||bin.cur[4]!==bin.orig[4]);
+    const body=(magicChanged?'<div class="callout danger"><b>توقيع الملف متغيّر في النسخة دي</b>أول 5 بايت مش db15S زي الأصل. الملف بالشكل ده غالبًا مش هيتقري على أي جهاز. متحفظوش غير لو متأكد إن ده قصدك.</div>':'')+
+      '<div class="callout danger"><b>قبل الحفظ — اقرأ التحذير</b>ملف قنوات فيه بايتات غلط ممكن يخلّي الرسيفر مش قادر يقرأ الملف أو يعلّق. البرنامج مش بيتحقق من سلامة الملف بعد التعديل (مفيش checksum معروف في الصيغة دي)، فالتجربة على جهاز واحد الأول هي الفيصل. الأصل مش هيتغير.</div>'+
+      '<div class="binkv">'+
+      '<div><span>الملف الجديد</span><b dir="ltr">'+esc(name)+'</b></div>'+
+      '<div><span>الحجم قبل / بعد</span><b dir="ltr">'+bin.orig.length+' / '+bin.cur.length+'</b></div>'+
+      '<div><span>بايتات متغيرة</span><b dir="ltr">'+diff+'</b></div>'+
+      '<div><span>sha256 الأصل</span><b dir="ltr" class="sha">'+esc(bin.sha0||'—')+'</b></div>'+
+      '<div><span>sha256 الجديد</span><b dir="ltr" class="sha">'+esc(sha1||'—')+'</b></div>'+
+      '</div>'+
+      '<div class="caption">الحجم زي ما هو ('+(bin.orig.length===bin.cur.length?'متساوي ✔':'مختلف ✖')+')، والتغيير في '+diff+' بايت بس. لو الأرقام دي مش متوقعة، ارجع وألغي.</div>';
+    openModal('حفظ نسخة جديدة',body,'احفظ النسخة الجديدة',()=>{
+      binWrite(bin.cur,name);
+    });
+  });
+}
+function binWrite(bytes,name){
+  const viaBridge=!!(window.AbuJabalBridge&&window.AbuJabalBridge.saveFile);
+  try{
+    if(viaBridge){
+      window.AbuJabalBridge.saveFile(binB64(bytes),name);
+      toast('بيتحفظ في التنزيلات: '+name);
+    }else{
+      downloadBlob(new Blob([bytes],{type:'application/octet-stream'}),name);
+      toast('اتنزّل: '+name);
+    }
+  }catch(e){ toast('حصلت مشكلة في الحفظ'); }
+}
+function binGoto(){
+  if(!bin) return;
+  const body='<div class="field"><label>الإزاحة (هيكس زي 2A00 أو رقم عادي)</label><input type="text" id="gotoVal" dir="ltr" inputmode="text" placeholder="0x2A00"></div>';
+  openModal('اذهب لإزاحة',body,'روح',(m)=>{
+    const el=m.querySelector('#gotoVal');
+    let s=(el?el.value:'').trim();
+    let v;
+    if(/^0x/i.test(s)) v=parseInt(s.slice(2),16);
+    else if(/^[0-9a-fA-F]+$/.test(s)&&/[a-fA-F]/.test(s)) v=parseInt(s,16);
+    else v=parseInt(s,10);
+    if(!isFinite(v)||v<0||v>=bin.cur.length){ toast('إزاحة غلط'); return false; }
+    binPage=Math.floor(v/BIN_PAGE_BYTES);
+    render();
+  });
+}
+
 /* ================= نسخة البرنامج والتحديث الذاتي ================= */
 /* الفكرة: الصفحة نفسها بتقارن رقم بنيتها بالبنية المنشورة على السيرفر.
    لو فيه أحدث: بتنضّف الكاش والـ service worker وتعيد التحميل بعنوان جديد،
    فمستحيل تفضل واقفة على نسخة قديمة زي ما حصل قبل كده. */
-var AJS_BUILD='v41';
+var AJS_BUILD='v42';
 var AJS_REMOTE='https://omarsat8013-create.github.io/abujabal-sat/';
 var AJS_UPDATING=false;
 function ajsLoadRemoteVersion(done){
