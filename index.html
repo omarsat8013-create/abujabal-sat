@@ -745,8 +745,8 @@ function downloadBlob(blob, name){
   setTimeout(()=>URL.revokeObjectURL(url),4000);
 }
 /* ================= router ================= */
-const APP_VER='3.2.6';
-const APP_BUILD='v46 · 27/11/2026';
+const APP_VER='3.2.7';
+const APP_BUILD='v47 · 27/11/2026';
 const TABS=[
   { path:'/',        label:'الرئيسية' },
   { path:'/editor',  label:'المحرر' },
@@ -2780,9 +2780,19 @@ async function zipOpenEntry(i){
     const bytes=await zipEntryBytes(z.ab,e);
     const base=String(e.name).split('/').pop();
     if(/\.(bin|abs|sdx|chl|db)$/i.test(base)){ zipState=null; binOpen(bytes,base); return; }
-    zipState=null;
-    try{ openChannelFile(new File([bytes],base)); }catch(err){}
-    go('/editor');
+    if(/\.(csv|json)$/i.test(base)){
+      zipState=null;
+      try{ openChannelFile(new File([bytes],base)); }catch(err){}
+      go('/editor');
+      return;
+    }
+    if(/\.(txt|md|nfo)$/i.test(base)){
+      let t='';
+      try{ t=new TextDecoder('utf-8').decode(bytes); }catch(err){}
+      openModal('معاينة '+base,'<div class="hexview" dir="auto" style="white-space:pre-wrap;direction:rtl;text-align:right;font-family:inherit;font-size:13px">'+esc(t.slice(0,4000))+'</div>','تمام',()=>{});
+      return;
+    }
+    toast('الملف ده ('+base.split('.').pop()+') مش من نوع الملفات اللي البرنامج بيفتحها');
   }catch(err){ toast('مش قادر أفتح الملف: '+(err.message||err)); }
 }
 function binView(){ if(zipState) return zipView(); return bin?binEditor():binPicker(); }
@@ -2958,7 +2968,7 @@ function binGoto(){
 /* الفكرة: الصفحة نفسها بتقارن رقم بنيتها بالبنية المنشورة على السيرفر.
    لو فيه أحدث: بتنضّف الكاش والـ service worker وتعيد التحميل بعنوان جديد،
    فمستحيل تفضل واقفة على نسخة قديمة زي ما حصل قبل كده. */
-var AJS_BUILD='v46';
+var AJS_BUILD='v47';
 var AJS_REMOTE='https://omarsat8013-create.github.io/abujabal-sat/';
 var AJS_UPDATING=false;
 function ajsLoadRemoteVersion(done){
