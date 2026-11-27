@@ -745,8 +745,8 @@ function downloadBlob(blob, name){
   setTimeout(()=>URL.revokeObjectURL(url),4000);
 }
 /* ================= router ================= */
-const APP_VER='3.2.7';
-const APP_BUILD='v47 · 27/11/2026';
+const APP_VER='3.2.8';
+const APP_BUILD='v48 · 27/11/2026';
 const TABS=[
   { path:'/',        label:'الرئيسية' },
   { path:'/editor',  label:'المحرر' },
@@ -2424,6 +2424,8 @@ function binDecode(b,enc){
   if(enc==='iso-8859-6'){
     const t=iso6().tab;
     for(let i=0;i<b.length;i++){ const ch=t?t[b[i]]:''; chars.push(ch||'\uFFFD'); offs.push(i); }
+  }else if(enc==='utf-16le'){
+    for(let i=0;i+1<b.length;i+=2){ const cp=b[i]|(b[i+1]<<8); chars.push(String.fromCharCode(cp)); offs.push(i); }
   }else{
     const td=new TextDecoder('utf-8',{fatal:false});
     let i=0;
@@ -2467,8 +2469,10 @@ function binRuns(b,enc){
   return out;
 }
 function binDetect(b){
-  const u=binRuns(b,'utf-8').length;
-  const a=iso6().ok?binRuns(b,'iso-8859-6').length:0;
+  const u=binRuns(b,'utf-8').filter(r=>binLooksName(r.t)).length;
+  const a=iso6().ok?binRuns(b,'iso-8859-6').filter(r=>binLooksName(r.t)).length:0;
+  const w=binRuns(b,'utf-16le').filter(r=>binLooksName(r.t)).length;
+  if(w>u&&w>a) return 'utf-16le';
   if(a>u) return 'iso-8859-6';
   return 'utf-8';
 }
@@ -2482,8 +2486,21 @@ function binNorm(s){
     .replace(/\s+/g,' ')
     .trim();
 }
-function binEncName(e){ return e==='iso-8859-6'?'ISO-8859-6 (عربي 8-بت)':'UTF-8'; }
+function binEncName(e){
+  if(e==='iso-8859-6') return 'ISO-8859-6 (عربي 8-بت)';
+  if(e==='utf-16le') return 'UTF-16LE (أسماء 16-بت)';
+  return 'UTF-8';
+}
 function binEncode(str,enc){
+  if(enc==='utf-16le'){
+    const out=[];
+    for(const ch of str){
+      const cp=ch.codePointAt(0);
+      if(cp>0xFFFF) return null;
+      out.push(cp&0xFF,(cp>>8)&0xFF);
+    }
+    return new Uint8Array(out);
+  }
   if(enc==='iso-8859-6'){
     const rev=iso6().rev, out=[];
     for(const ch of str){
@@ -2582,7 +2599,7 @@ function binPicker(){
     '<div class="binacts"><button type="button" class="btn btn-sec sm" data-b="diag">اختبر التحميل والقراءة</button></div>'+
     '<div class="caption">بيحمّل ملف واحد صغير من ملفات البرنامج ويعدّ الأسماء اللي بيلاقيها. لو فشل، الرسالة هتظهر هنا.</div></div>';
   h+='<div class="card"><h2>البرنامج بيعرف إيه بالظبط؟<span class="sub">عشان تعرف حدود المحرر قبل ما تعدّل</span></h2><ol class="steps">'+
-    '<li><b>متحقق:</b> إن الملف من عائلة db15S (أول 5 بايت)، وإن الحقل عند الإزاحة 12..15 قيمته 725 في 17 ملف من 18 من نفس العائلة، وإن الترميز UTF-8 أو ISO-8859-6.</li>'+
+    '<li><b>متحقق:</b> إن الملف من عائلة db15S (أول 5 بايت)، وإن الحقل عند الإزاحة 12..15 قيمته 725 في 17 ملف من 18 من نفس العائلة، وإن الترميز UTF-8 أو ISO-8859-6 أو UTF-16LE (ملفات HS/HSB/TRUMAN بتخزّن الأسماء 16-بت).</li>'+
     '<li><b>متحقق:</b> النصوص المقروءة جوه الملف (أسماء قنوات عربية وإنجليزية) بمواضعها وطولها بالبايت.</li>'+
     '<li><b>مش متحقق:</b> معنى باقي الحقول الرقمية، مفيش checksum معروف في الصيغة دي فمش بنتحقق من سلامة الملف بعد التعديل، ومفيش ضمان إن الملف هيشتغل على أي جهاز.</li></ol></div>';
   return h;
@@ -2594,19 +2611,22 @@ function binEditor(){
   const magic=Array.from(b.cur.subarray(0,5)).map(x=>String.fromCharCode(x)).join('');
   const w=Array.from(b.cur.subarray(12,16)).map(x=>String.fromCharCode(x)).join('');
   const hdrOk=(b.cur[12]===0xD5&&b.cur[13]===0x02);
-  const magicBad=(magic!=='db15S');
+  const magic0=Array.from((b.orig||b.cur).subarray(0,5)).map(x=>String.fromCharCode(x)).join('');
+  const isDb15=(magic0==='db15S');
+  const magicBad=(isDb15&&magic!=='db15S');
   let h='<div class="binbar"><button type="button" class="btn btn-sec sm" data-b="back">→ الملفات</button>'+
     '<div class="binttl"><div class="bn2">'+esc(b.name)+'</div><div class="bs2">'+fmtSize(b.cur.length)+' · '+enc+' · '+(diff?('<b class="chg">'+diff+' بايت متغير</b>'):'من غير تعديل')+'</div></div></div>';
   h+='<div class="callout danger"><b>قبل أي حفظ</b>أي تعديل هنا على مسؤوليتك: ملف قنوات غلط ممكن يعلّق الرسيفر أو يخليه مش قادر يقرأ الملف. احتفظ بنسخة من ملفك القديم، وجرّب على جهاز واحد الأول. البرنامج بيحفظ نسخة جديدة وبيسب الأصل زي ما هو.</div>';
   h+='<div class="card"><h2>معلومات الملف<span class="sub">اللي البرنامج متأكد منه فعلًا</span></h2><div class="binkv">'+
     '<div><span>التوقيع (أول 5 بايت)</span><b dir="ltr">'+esc(magic)+'</b></div>'+
-    '<div><span>الحقل عند 12..15</span><b dir="ltr">'+(hdrOk?'725 (0x02D5)':esc(w))+'</b></div>'+
+    (isDb15?('<div><span>الحقل عند 12..15</span><b dir="ltr">'+(hdrOk?'725 (0x02D5)':esc(w))+'</b></div>'):'')+
     '<div><span>الحجم</span><b dir="ltr">'+b.cur.length.toLocaleString('en-US')+'</b></div>'+
     '<div><span>الترميز</span><b>'+esc(enc)+'</b></div>'+
     '<div><span>sha256 للأصل</span><b dir="ltr" class="sha">'+(b.sha0?esc(b.sha0.slice(0,32))+'…':'—')+'</b></div>'+
     '<div><span>بايتات متغيرة</span><b dir="ltr">'+diff+'</b></div>'+
     '</div>'+
     (magicBad?'<div class="callout danger" style="margin-top:10px"><b>توقيع الملف اتغيّر</b>أول 5 بايت المفروض تكون db15S. دلوقتي بقت «'+esc(magic)+'»، والملف بالشكل ده غالبًا مش هيتقري على أي جهاز. اضغط «رجّع الأصل» لو مش قاصد.</div>':'')+
+    (!isDb15?'<div class="callout note" style="margin-top:10px"><b>الصيغة دي مش db15S</b>توقيعها «'+esc(magic0)+'» وده ملف قنوات من عائلة تانية. البرنامج بيعرض الأسماء المقروءة جواها (عربي وإنجليزي) وبيسيب باقي البايتات زي ما هي، ومش بيعرف معنى الحقول الرقمية جواها.</div>':'')+
     '<div class="binacts">'+
       '<button type="button" class="btn btn-primary" data-b="save">حفظ نسخة جديدة</button>'+
       '<button type="button" class="btn btn-sec" data-b="restore">رجّع الأصل</button>'+
@@ -2857,7 +2877,7 @@ function binEditByte(off){
 function binEditRun(off,len){
   if(!bin) return;
   const raw=bin.cur.subarray(off,off+len);
-  const txt=(bin.enc==='iso-8859-6')?Array.from(raw).map(v=>iso6().tab[v]||'').join(''):new TextDecoder('utf-8').decode(raw);
+  const txt=(bin.enc==='iso-8859-6')?Array.from(raw).map(v=>iso6().tab[v]||'').join(''):(bin.enc==='utf-16le'?Array.from({length:Math.floor(raw.length/2)},(_,i)=>String.fromCharCode(raw[2*i]|(raw[2*i+1]<<8))).join(''):new TextDecoder('utf-8').decode(raw));
   const body='<div class="binkv"><div><span>الإزاحة</span><b dir="ltr">0x'+off.toString(16).toUpperCase()+'</b></div>'+
     '<div><span>عدد البايتات المطلوب</span><b dir="ltr">'+len+'</b></div></div>'+
     '<div class="field"><label>النص</label><input type="text" id="runVal" value="'+esc(txt)+'"></div>'+
@@ -2968,7 +2988,7 @@ function binGoto(){
 /* الفكرة: الصفحة نفسها بتقارن رقم بنيتها بالبنية المنشورة على السيرفر.
    لو فيه أحدث: بتنضّف الكاش والـ service worker وتعيد التحميل بعنوان جديد،
    فمستحيل تفضل واقفة على نسخة قديمة زي ما حصل قبل كده. */
-var AJS_BUILD='v47';
+var AJS_BUILD='v48';
 var AJS_REMOTE='https://omarsat8013-create.github.io/abujabal-sat/';
 var AJS_UPDATING=false;
 function ajsLoadRemoteVersion(done){
