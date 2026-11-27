@@ -729,8 +729,8 @@ function downloadBlob(blob, name){
   setTimeout(()=>URL.revokeObjectURL(url),4000);
 }
 /* ================= router ================= */
-const APP_VER='3.2.3';
-const APP_BUILD='v43 · 27/11/2026';
+const APP_VER='3.2.4';
+const APP_BUILD='v44 · 27/11/2026';
 const TABS=[
   { path:'/',        label:'الرئيسية' },
   { path:'/editor',  label:'المحرر' },
@@ -2366,7 +2366,7 @@ const BIN_FILES=[
   {g:'pub',n:'PUB_V2.bin',s:89388},
   {g:'rl',n:'RedLine_128.bin',s:105696},
   {g:'rl',n:'RedLine_256.bin',s:105696},];
-let bin=null, binQ='', binPage=0, binFilter='', binLimit=40;
+let bin=null, binQ='', binPage=0, binFilter='', binLimit=60, binKind='all';
 const BIN_PAGE_BYTES=768, BIN_COLS=8;
 /* ---- الترميز: UTF-8 أو ISO-8859-6 (عربي 8-بت) ---- */
 let _iso6tab=null,_iso6rev=null,_iso6ok=null;
@@ -2410,6 +2410,18 @@ function binDecode(b,enc){
     }
   }
   return {chars,offs};
+}
+function binLetters(s){
+  let n=0;
+  for(const ch of s){ if(/[A-Za-z\u0600-\u06FF]/.test(ch)) n++; }
+  return n;
+}
+function binLooksName(s){
+  const t=String(s).replace(/\u0640/g,'').trim();
+  if(t.length<4) return false;
+  if(binLetters(t)<4) return false;
+  const junk=(t.match(/[^A-Za-z\u0600-\u06FF0-9 ]/g)||[]).length;
+  return junk*2 <= t.length;
 }
 function binRuns(b,enc){
   const d=binDecode(b,enc), chars=d.chars, offs=d.offs, out=[];
@@ -2476,7 +2488,7 @@ function binDiffList(){
 function binOpen(bytes,name){
   const b=bytes instanceof Uint8Array?bytes:new Uint8Array(bytes);
   bin={ name:name||'file.bin', orig:b, cur:b.slice(), enc:binDetect(b), sha0:'', diff:0, off:0 };
-  binPage=0; binQ=''; binLimit=40;
+  binPage=0; binQ=''; binLimit=60; binKind='all';
   binSha(b).then(h=>{ if(bin){ bin.sha0=h; if(currentPath()==='/bin') render(); } });
   render();
   toast('اتفتح: '+bin.name);
@@ -2557,12 +2569,20 @@ function binEditor(){
       '<button type="button" class="btn btn-ghost" data-b="orig">نزّل نسخة من الأصل</button>'+
     '</div>'+
     '<div class="caption">مفيش checksum معروف في الصيغة دي، فالبرنامج مش بيقدر يتأكد إن الملف سليم بعد التعديل. اللي بيوريك حجمه وبصمته وعدد البايتات اللي اتغيرت وبس.</div></div>';
-  const runs=binRuns(b.cur,b.enc);
+  const runsAll=binRuns(b.cur,b.enc);
+  const runs=runsAll.filter(r=>binLooksName(r.t));
+  const isAr=t=>/[\u0600-\u06FF]/.test(t);
   const q=binNorm(binQ);
-  const shown=runs.filter(r=>!q||binNorm(r.t).indexOf(q)>=0);
+  let shown=runs.filter(r=>!q||binNorm(r.t).indexOf(q)>=0);
+  if(binKind==='ar') shown=shown.filter(r=>isAr(r.t));
+  if(binKind==='en') shown=shown.filter(r=>!isAr(r.t));
   const LIM=Math.max(40,binLimit);
-  h+='<div class="card" id="chListCard"><h2>قائمة القنوات في الملف<span class="sub">'+runs.length+' اسم — بترتيب الملف، اضغط أي اسم تعدّله</span></h2>'+
-    '<div class="binsearch"><input type="text" id="binQ" placeholder="ابحث باسم القناة (عربي أو إنجليزي)" value="'+esc(binQ)+'"></div>';
+  const nAr=runs.filter(r=>isAr(r.t)).length, nEn=runs.length-nAr;
+  h+='<div class="card" id="chListCard"><h2>قائمة القنوات في الملف<span class="sub">'+runs.length+' اسم مقروء (منهم '+nAr+' عربي و'+nEn+' إنجليزي) — بترتيب الملف، اضغط أي اسم تعدّله</span></h2>'+
+    '<div class="binsearch"><input type="text" id="binQ" placeholder="ابحث باسم القناة (عربي أو إنجليزي)" value="'+esc(binQ)+'"></div>'+
+    '<div class="choices" id="binKind" style="margin:0 0 10px">'+
+      [['all','الكل'],['ar','عربي'],['en','إنجليزي']].map(k=>'<button type="button" data-kind="'+k[0]+'" class="'+(binKind===k[0]?'on':'')+'">'+k[1]+'</button>').join('')+
+    '</div>';
   h+='<div class="runlist" id="chRunList">';
   if(!runs.length){
     h+='<div class="caption">البرنامج ملقاش أسماء مقروءة في الملف ده. ممكن يكون مشفّر أو بصيغة تانية، وفي الحالة دي استخدم تبويب البايتات.</div>';
@@ -2574,7 +2594,7 @@ function binEditor(){
     });
     if(shown.length>LIM) h+='<button type="button" class="btn btn-sec sm" data-b="more" style="margin-top:8px">عرض '+Math.min(80,shown.length-LIM)+' اسم كمان (فيه '+shown.length+')</button>';
   }
-  h+='</div><div class="caption">دي كل الأسماء المقروءة اللي البرنامج لقاها جوه الملف (قنوات وأقمار ومزودين) بترتيبها وموضعها. الصيغة مش مفكوكة بالكامل، فالحقول الرقمية زي التردد وSID مش معروضة، والتعديل بيتم على الاسم بنفس عدد البايتات.</div></div>';
+  h+='</div><div class="caption">دي كل الأسماء المقروءة اللي البرنامج لقاها جوه الملف (قنوات وأقمار ومزودين) بترتيبها وموضعها، بدون الخربشة القصيرة. الصيغة مش مفكوكة بالكامل، فالحقول الرقمية زي التردد وSID مش معروضة، والتعديل بيتم على الاسم بنفس عدد البايتات.</div></div>';
   /* hex */
   const total=Math.ceil(b.cur.length/BIN_PAGE_BYTES)||1;
   if(binPage>=total) binPage=total-1;
@@ -2620,6 +2640,8 @@ function bindBin(){
   if(pf) pf.addEventListener('change',()=>{ if(pf.files&&pf.files[0]) binOpenLocal(pf.files[0]); pf.value=''; });
   document.querySelectorAll('[data-binh]').forEach(b=>b.addEventListener('click',()=>binOpenHosted(b.dataset.binh)));
   document.querySelectorAll('[data-binlib]').forEach(b=>b.addEventListener('click',()=>binOpenLib(b.dataset.binlib,b.dataset.binname)));
+  const kb=$('#binKind');
+  if(kb) kb.addEventListener('click',e=>{ const btn=e.target.closest('button'); if(btn){ binKind=btn.dataset.kind; render(); } });
   const q=$('#binQ');
   if(q) q.addEventListener('input',()=>{ binQ=q.value; render(); const q2=$('#binQ'); if(q2){ q2.focus(); try{ q2.setSelectionRange(q2.value.length,q2.value.length); }catch(e){} } });
   if(v&&!v.dataset.binBound){
@@ -2779,7 +2801,7 @@ function binGoto(){
 /* الفكرة: الصفحة نفسها بتقارن رقم بنيتها بالبنية المنشورة على السيرفر.
    لو فيه أحدث: بتنضّف الكاش والـ service worker وتعيد التحميل بعنوان جديد،
    فمستحيل تفضل واقفة على نسخة قديمة زي ما حصل قبل كده. */
-var AJS_BUILD='v43';
+var AJS_BUILD='v44';
 var AJS_REMOTE='https://omarsat8013-create.github.io/abujabal-sat/';
 var AJS_UPDATING=false;
 function ajsLoadRemoteVersion(done){
