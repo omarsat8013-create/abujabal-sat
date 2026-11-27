@@ -329,6 +329,41 @@ body.boldtable table.grid td{font-weight:700}
   .partcard{padding:10px}
   .partcard .pn{font-size:14px}.partcard .pe{font-size:11.5px}
   .partcard .pp,.partcard .pf,.partcard .pt{font-size:12px}}
+/* ===== مرجع القياسات الصحية ===== */
+.hblock{margin-top:14px;border-top:1px dashed var(--line2);padding-top:12px}
+.hhead{font-weight:800;font-size:15px;margin-bottom:8px}
+.hhead .sub{display:block;font-weight:400;font-size:11.5px;color:var(--mut);margin-top:3px;line-height:1.55}
+.hlist{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.hchip{appearance:none;border:1px solid var(--line2);background:#15213c;color:var(--txt);border-radius:999px;padding:7px 12px;font-size:12.5px;font-family:inherit;cursor:pointer;min-height:38px}
+.hchip.on{background:#0d9488;border-color:#0f766e;font-weight:700}
+.hempty{font-size:12.5px;color:var(--mut);line-height:1.7;padding:8px 0}
+.hcard{background:#0d1730;border:1px solid var(--line2);border-radius:14px;padding:12px}
+.hh{display:flex;align-items:flex-start;gap:10px;justify-content:space-between;margin-bottom:10px}
+.hht{flex:1}
+.hcard .hn{font-weight:800;font-size:15px;line-height:1.35}
+.hcard .he{font-size:11px;color:var(--mut);direction:ltr;text-align:right;margin-top:2px}
+.htag{flex:0 0 auto;font-size:10px;border:1px solid #713f12;background:#1c1407;color:var(--gold);border-radius:999px;padding:3px 9px;white-space:nowrap}
+.hsec{border-top:1px solid #1b2a4a;padding-top:9px;margin-top:9px}
+.hsec:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.hsec b{display:block;font-size:12.5px;color:var(--teal);margin-bottom:5px}
+.hsec p{margin:0;font-size:12.5px;line-height:1.75;color:#cfdcf5}
+.htab{width:100%;border-collapse:collapse;font-size:12px}
+.htab th{text-align:right;color:var(--mut);font-weight:600;font-size:10.5px;padding:3px 4px;border-bottom:1px solid #1b2a4a}
+.htab td{padding:6px 4px;border-bottom:1px solid #16233d;line-height:1.5;vertical-align:top}
+.htab td.hv{color:#7ef29a;font-weight:700;direction:ltr;text-align:right;white-space:nowrap}
+.htab td.ht{color:var(--mut);font-size:11px}
+.hbad b{color:#f87171}
+.hbad ul{margin:0;padding-inline-start:18px}
+.hbad li{font-size:12.5px;line-height:1.75;color:#fca5a5;margin-bottom:4px}
+.htip b{color:var(--gold)}
+.hlinks{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.hbtn{flex:1;min-width:140px;min-height:44px;appearance:none;border:1px solid var(--line2);background:#15213c;color:var(--txt);border-radius:11px;font-size:12.5px;font-family:inherit;cursor:pointer;padding:8px 10px}
+.hbtn:active{background:#1e2c4e}
+.hnote{margin-top:11px;font-size:11px;color:var(--mut);line-height:1.7;border-top:1px dashed #1b2a4a;padding-top:9px}
+.susp{appearance:none;width:100%;text-align:right;border:1px solid #2b3f6b;background:#111e38;color:#cfdcf5;border-radius:10px;padding:9px 10px;font-size:12.5px;font-family:inherit;line-height:1.6;cursor:pointer;min-height:44px}
+.susp:active{background:#16294a}
+.susp .sarrow{display:block;font-size:10.5px;color:var(--teal);margin-top:2px}
+.steps li{margin-bottom:7px}
 /* ===== board list (phone-friendly board map) ===== */
 .boardlist{display:none}
 .bnode{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:12px;background:#101c3a;border:1px solid var(--line2);margin-bottom:8px}
@@ -622,8 +657,8 @@ function downloadBlob(blob, name){
   setTimeout(()=>URL.revokeObjectURL(url),4000);
 }
 /* ================= router ================= */
-const APP_VER='3.1.7';
-const APP_BUILD='v37 · 27/11/2026';
+const APP_VER='3.1.8';
+const APP_BUILD='v38 · 27/11/2026';
 const TABS=[
   { path:'/',        label:'الرئيسية' },
   { path:'/editor',  label:'المحرر' },
@@ -1391,17 +1426,17 @@ const SIM_MEAS={
 };
 const SIM_FAULTS=[
   {id:'healthy',name:'لوحة سليمة (للمقارنة)',ok:true,suspects:[],over:{}},
-  {id:'f5vsb',name:'فولت الاستعداد 5V ناقص',suspects:['منظم الاستعداد نفسه','دايود الاستعداد','مكثف فلترة الخط (قصر)','قصر على خط الـ 5V في الحمل','ولو الكل سليم: العطل في مرحلة التقطيع (جانب ساخن) = فني مؤهل بوثائق الموديل'],
+  {id:'f5vsb',name:'فولت الاستعداد 5V ناقص',suspects:['منظم الاستعداد نفسه','دايود الاستعداد','مكثف فلترة الخط (قصر)','قصر على خط الـ 5V في الحمل','ولو الكل سليم: العطل في مرحلة التقطيع (جانب ساخن) = فني مؤهل بوثائق الموديل'],srefs:['reg5v','diode','capel',null,'trafo'],
    over:{tp5vsb:{dcv:{f:'0.00',fnote:'صفر على خرج الاستعداد = المنظم مش بيطلع أو في قصر ساحبه للأرضي. قس مقاومة الخط وافحص المشتبه بهم.'},
                   ohm:{f:'0.4',fnote:'قصر كامل على خط الـ 5V — دور على مكثف الفلترة أو الحمل المقصور.'}}}},
-  {id:'f33',name:'خط 3.3V ميت (قصر)',suspects:['مكثف فلترة خط 3.3V مقصور','الحمل على الخط (فلاشة SPI أو IO المعالج)','منظم 3.3V نفسه'],
+  {id:'f33',name:'خط 3.3V ميت (قصر)',suspects:['مكثف فلترة خط 3.3V مقصور','الحمل على الخط (فلاشة SPI أو IO المعالج)','منظم 3.3V نفسه'],srefs:['capcer','flash','reg33'],
    over:{tp33:{dcv:{f:'0.02',fnote:'الخرج صفر عمليًا — المنظم بيحمي نفسه من قصر أو ميت.'},
                ohm:{f:'0.4',fnote:'قصر على الخط. ارفع مكثفات الفلترة واحدة واحدة لحد ما القصر يروح.'},
                buzz:{f:'صوت 🔔',fnote:'الجرس بيصوت = قصر مؤكد على خط 3.3V.'}}}},
-  {id:'fschot',name:'دايود شوتكي مقصور',suspects:['الدايود نفسه (يتلف من حمل زائد أو قصر في الخرج)','بعد التبديل: اتأكد مفيش قصر في الخط قبل التشغيل'],
+  {id:'fschot',name:'دايود شوتكي مقصور',suspects:['الدايود نفسه (يتلف من حمل زائد أو قصر في الخرج)','بعد التبديل: اتأكد مفيش قصر في الخط قبل التشغيل'],srefs:['schottky',null],
    over:{tpschot:{diode:{f:'0.00 / 0.00',fnote:'صفر بالاتجاهين = الدايود مقصور تمامًا.'},
                   buzz:{f:'صوت 🔔',fnote:'جرس بالاتجاهين = قصر.'}}}},
-  {id:'flnb',name:'فولت LNB ناقص',suspects:['منظم LNB (أشهر عطل بعد قصر في كابل الطبق)','قصر مستمر في كابل/فيشة الطبق','لحام فيشة F البارد','لو الفولت موجود والإشارة مفيش: التيونر أو السوفت'],
+  {id:'flnb',name:'فولت LNB ناقص',suspects:['منظم LNB (أشهر عطل بعد قصر في كابل الطبق)','قصر مستمر في كابل/فيشة الطبق','لحام فيشة F البارد','لو الفولت موجود والإشارة مفيش: التيونر أو السوفت'],srefs:['lnb',null,null,'tuner'],
    over:{tplnb:{dcv:{f:'0.00',fnote:'مفيش تغذية للطبق — منظم الـ LNB مش بيطلع. قبل التبديل اتأكد إن الكابل مفيهوش قصر وإلا الجديد هيتلف برضه.'}}}},
 ];
 let simState={fault:'healthy',mode:'dcv',tp:null};
@@ -1442,7 +1477,7 @@ function simDiagHtml(){
       return '<div class="callout" style="margin-top:8px"><b>'+rank+': '+esc(c.name)+'</b>'+btn+'</div>';
     }).join('');
     const topSim=r.results.find(c=>c.kind==='sim');
-    if(topSim){ const f=SIM_FAULTS.find(x=>x.id===topSim.id); if(f&&f.suspects.length) h+='<div class="simsuspect" style="margin-top:6px"><b>المشتبه بهم بالترتيب:</b><ol class="steps" style="margin-top:4px">'+f.suspects.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ol></div>'; }
+    if(topSim){ const f=SIM_FAULTS.find(x=>x.id===topSim.id); if(f&&f.suspects.length) h+='<div class="simsuspect" style="margin-top:6px"><b>المشتبه بهم بالترتيب:</b><ol class="steps" style="margin-top:4px">'+f.suspects.map((s,i)=>suspectItemHtml(s,i,f.srefs)).join('')+'</ol></div>'; }
   }
   return h;
 }
@@ -1548,7 +1583,8 @@ function viewSim(){
     '</div>'+ simDiagHtml() +
     '<div class="caption" style="margin-top:8px">أو اختار عطل جاهز للتدريب:</div>'+
     '<div class="simfaults">'+SIM_FAULTS.map(f=>'<button type="button" data-f="'+f.id+'" class="'+(f.ok?'ok':'')+(simState.fault===f.id?' on':'')+'">'+esc(f.name)+'</button>').join('')+'</div>'+
-    (simFault().suspects.length?'<div class="simsuspect"><b>أكثر المشتبه بهم شيوعًا للعطل ده:</b><ol class="steps" style="margin-top:4px">'+simFault().suspects.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ol></div>':'')+
+    (simFault().suspects.length?'<div class="simsuspect"><b>أكثر المشتبه بهم شيوعًا للعطل ده:</b><div class="caption" style="margin:2px 0 6px">دوس على أي مشتبه به تشوف قياساته الصحية وقراية العطل.</div><ol class="steps" style="margin-top:4px">'+simFault().suspects.map((s,i)=>suspectItemHtml(s,i,simFault().srefs)).join('')+'</ol></div>':'')+
+    healthSectionHtml()+
   '</div>'+
     '<div class="simgrid">'+
     '<div class="mdiagram boardwrap" style="margin:0">'+simBoardSvg()+'<div class="mdisc">لوحة نموذجية عامة من رسمنا — الدواير الخضرا نقاط قياس تفاعلية. المنطقة الحمرا المنقّطة خارج المحاكاة.</div></div>'+
@@ -1566,6 +1602,16 @@ function bindSim(){
   view.querySelectorAll('[data-m]').forEach(b=>b.addEventListener('click',()=>{ simState.mode=b.dataset.m; rerenderSim(); }));
   view.querySelectorAll('.tpdot').forEach(c=>c.addEventListener('click',()=>{ simState.tp=c.dataset.tp; rerenderSim(); }));
   view.querySelectorAll('.bd[data-tp]').forEach(c=>c.addEventListener('click',()=>{ simState.tp=c.dataset.tp; rerenderSim(); }));
+  if(!view.__hbind){ view.__hbind=1; view.addEventListener('click',function(e){
+    const t=e.target.closest?e.target.closest('[data-hp]'):null;
+    if(t){ healthOpen(t.getAttribute('data-hp'),true); return; }
+    const g=e.target.closest?e.target.closest('[data-hpgo]'):null;
+    if(g){ healthGo(g.getAttribute('data-hpgo')); return; }
+    const d=e.target.closest?e.target.closest('[data-hpart]'):null;
+    if(d){ openPartDrawing(+d.getAttribute('data-hpart')); return; }
+    const m=e.target.closest?e.target.closest('[data-hsim]'):null;
+    if(m){ healthSimPoint(m.getAttribute('data-hsim')); }
+  }); }
   const db=view.querySelector('#simDiagBtn');
   if(db) db.addEventListener('click',()=>{ simDiagType=(view.querySelector('#simType')||{}).value||''; simDiagFault=(view.querySelector('#simFaultQ')||{}).value||''; simDiagnose(); rerenderSim(); });
   view.querySelectorAll('[data-simg]').forEach(b=>b.addEventListener('click',()=>{ const g=SIM_GUIDED[b.dataset.simg]; simState.fault=b.dataset.simg; simState.mode=g.mode; simState.tp=g.tp; rerenderSim(); const gr=document.querySelector('.simgrid'); if(gr) gr.scrollIntoView({block:'start'}); }));
@@ -1782,30 +1828,287 @@ const SVG_INDUCTOR = '<svg viewBox="0 0 160 100"><rect x="0" y="0" width="160" h
 const SVG_OPTO = '<svg viewBox="0 0 160 100"><rect x="0" y="0" width="160" height="100" fill="#0a1220"/><rect x="46" y="28" width="68" height="44" rx="4" fill="#111827" stroke="#334155"/><circle cx="56" cy="36" r="2.4" fill="#8fa0c2"/><g stroke="#94a3b8" stroke-width="3"><line x1="58" y1="28" x2="58" y2="16"/><line x1="78" y1="28" x2="78" y2="16"/><line x1="82" y1="72" x2="82" y2="84"/><line x1="102" y1="72" x2="102" y2="84"/></g><path d="M62 44l10 0-3-4m3 4l-3 4" stroke="#f0b429" stroke-width="2" fill="none"/><path d="M92 56l-10 0 3-4m-3 4l3 4" stroke="#2dd4bf" stroke-width="2" fill="none"/><text x="80" y="52" text-anchor="middle" fill="#8fa0c2" font-size="8">PC817</text></svg>';
 
 const PARTS=[
- {n:'مقاومة كربونية',e:'Resistor · 1/4W',svg:SVG_RES,pins:'طرفين، مفيش قطبية — اتجاهها مش مهم',f:'قيمتها بتتغير مع السخونة أو بتبقى مفتوحة (OL) لما تحرق من حمل زايد',t:'أوم على الطرفين بعد فصل طرف واحد من البورد، وقارن بالألوان أو بالمخطط.'},
- {n:'مكثف إلكتروليتي',e:'Electrolytic Capacitor',svg:SVG_CAPEL,pins:'طرف موجب (+) وطرف سالب (−) — القطبية مهمة',f:'انتفاخ من فوق، تسريب، أو قصر داخلي بيسحب خط الباور',t:'أوم: المفروض يطلع مقاومة بتزيد لحد OL وهو بيرتفع. صفر ثابت = مقصور.'},
- {n:'مكثف سيراميك',e:'Ceramic Capacitor',svg:SVG_CAPCER,pins:'طرفين، مفيش قطبية',f:'قصر داخلي شائع في خطوط التغذية، وبيسحب المنظم لتحت',t:'جرس/أوم على الطرفين والجهاز مفصول: أي صوت مستمر = قصر، ارفعه وجرب تاني.'},
- {n:'دايود عادي',e:'Diode · 1N4007',svg:SVG_DIODE,pins:'أنود (A) وكاثود (K) — الخط الأبيض ناحية الكاثود',f:'قصر (صفر بالاتجاهين) أو مفتوح (OL بالاتجاهين)',t:'وضع الدايود: 0.5–0.7V في اتجاه، وOL في العكس = سليم.'},
- {n:'دايود شوتكي',e:'Schottky Diode',svg:SVG_SCHOTTKY,pins:'أنود وكاثود — الكاثود عليه علامة',f:'قصر بعد حمل زايد، وبيسخن بسرعة',t:'وضع الدايود: هبوط منخفض 0.15–0.3V في اتجاه وOL في العكس.'},
- {n:'ليد',e:'LED',svg:SVG_LED,pins:'أنود (الرجل الطويلة) وكاثود',f:'بيضعف أو بيموت من غير أثر ظاهري',t:'وضع الدايود: هبوط 1.6–2.2V في اتجاه (بعض المقاييس بتنوّره خفيف).'},
- {n:'ترانزستور صغير',e:'Transistor · TO-92',svg:SVG_TO92,pins:'E (باعث) · B (قاعدة) · C (مجمع)',f:'قصر بين C وE، أو B مفتوحة — شائع في دوائر التشغيل',t:'وضع الدايود: B→E و B→C هبوط 0.6V في اتجاه وOL في العكس.'},
- {n:'منظم جهد 3 أطراف',e:'Regulator · 7805 / AMS1117',svg:SVG_TO220,pins:'1 الدخل IN · 2 الأرضي GND · 3 الخرج OUT',f:'خرج ناقص أو صفر مع سخونة، أو قصر على الخرج',t:'فولت DC: دخل أعلى من الخرج بـ 1.5–2V على الأقل، والخرج ثابت. مع الحمل بيسخن = استبدله.'},
- {n:'موسفيت باور',e:'MOSFET · TO-220',svg:SVG_TO220,pins:'G (بوابة) · D (مصرف) · S (مصدر)',f:'قصر بين D وS بيخلي الجهاز ميت أو بيفصل',t:'أوم/دايود بين D وS: صفر = مقصور. البوابة معزولة، أي تسريب بينها وبين الأطراف = تالف.'},
- {n:'أي سي DIP',e:'IC · DIP-8',svg:SVG_DIP8,pins:'8 أطراف، رقم 1 عند النقطة أو النقرة',f:'بيسخن زيادة، أو خط تغذيته مقصور، أو خرجه ثابت',t:'اتأكد الأول من التغذية على طرف VCC والأرضي، وبعدين شوف الإشارات على الأطراف.'},
- {n:'أي سي SMD',e:'IC · SOIC-8',svg:SVG_SOIC8,pins:'8 أطراف صغيرة، رقم 1 عند النقطة',f:'شروخ لحام أو قصر بين أطراف متجاورة',t:'عدسة مكبرة + جرس بين كل طرف واللي جنبه، وقيس التغذية على الطرف الصح.'},
- {n:'كريستالة',e:'Crystal Oscillator',svg:SVG_XTAL,pins:'طرفين (أحيانًا 4 بأرضي)',f:'الجهاز بيفضل واقف على اللوجو أو بيعيد التشغيل',t:'أفضل قياس أوسيلوسكوب. بالأفوميتر: اتأكد مفيش قصر، والأطراف ملحومة كويس.'},
- {n:'محول نبضات',e:'SMPS Transformer',svg:SVG_TRAFO,pins:'ملفات ابتدائي وثانوي — الجانبين معزولين',f:'ملف مفتوح أو لحام بارد على أطرافه',t:'⚠ جانب ساخن: قياس ملفات المحول بمعدات عزل وبجهاز مفصول ومفرّغ، لفني مؤهل بس.'},
- {n:'فيوز',e:'Fuse',svg:SVG_FUSE,pins:'طرفين',f:'بيقطع من تيار عالي أو قصر بعدّه',t:'جرس على الطرفين: مفيش صوت = مقطوع. متحطش فيوز أعلى من المكتوب.'},
- {n:'كويل / إندكتور',e:'Inductor',svg:SVG_INDUCTOR,pins:'طرفين',f:'سلك مقطوع أو لحام بارد، وبيسبب فولت ناقص',t:'أوم: قيمة صغيرة جدًا (قريب من صفر). OL = الملف مقطوع.'},
- {n:'أوبتوكابلر',e:'Optocoupler · PC817',svg:SVG_OPTO,pins:'1 أنود الليد · 2 كاثود · 3 باعث · 4 مجمع',f:'بيقطع التغذية الراجعة في الباور فيعمل فولت مش مستقر',t:'وضع الدايود بين 1 و2: هبوط ~1.1V في اتجاه. الباقي محتاج تجربة تشغيل.'}
+ {id:'res',n:'مقاومة كربونية',e:'Resistor · 1/4W',svg:SVG_RES,pins:'طرفين، مفيش قطبية — اتجاهها مش مهم',f:'قيمتها بتتغير مع السخونة أو بتبقى مفتوحة (OL) لما تحرق من حمل زايد',t:'أوم على الطرفين بعد فصل طرف واحد من البورد، وقارن بالألوان أو بالمخطط.'},
+ {id:'capel',n:'مكثف إلكتروليتي',e:'Electrolytic Capacitor',svg:SVG_CAPEL,pins:'طرف موجب (+) وطرف سالب (−) — القطبية مهمة',f:'انتفاخ من فوق، تسريب، أو قصر داخلي بيسحب خط الباور',t:'أوم: المفروض يطلع مقاومة بتزيد لحد OL وهو بيرتفع. صفر ثابت = مقصور.'},
+ {id:'capcer',n:'مكثف سيراميك',e:'Ceramic Capacitor',svg:SVG_CAPCER,pins:'طرفين، مفيش قطبية',f:'قصر داخلي شائع في خطوط التغذية، وبيسحب المنظم لتحت',t:'جرس/أوم على الطرفين والجهاز مفصول: أي صوت مستمر = قصر، ارفعه وجرب تاني.'},
+ {id:'diode',n:'دايود عادي',e:'Diode · 1N4007',svg:SVG_DIODE,pins:'أنود (A) وكاثود (K) — الخط الأبيض ناحية الكاثود',f:'قصر (صفر بالاتجاهين) أو مفتوح (OL بالاتجاهين)',t:'وضع الدايود: 0.5–0.7V في اتجاه، وOL في العكس = سليم.'},
+ {id:'schottky',n:'دايود شوتكي',e:'Schottky Diode',svg:SVG_SCHOTTKY,pins:'أنود وكاثود — الكاثود عليه علامة',f:'قصر بعد حمل زايد، وبيسخن بسرعة',t:'وضع الدايود: هبوط منخفض 0.15–0.3V في اتجاه وOL في العكس.'},
+ {id:'led',n:'ليد',e:'LED',svg:SVG_LED,pins:'أنود (الرجل الطويلة) وكاثود',f:'بيضعف أو بيموت من غير أثر ظاهري',t:'وضع الدايود: هبوط 1.6–2.2V في اتجاه (بعض المقاييس بتنوّره خفيف).'},
+ {id:'tr',n:'ترانزستور صغير',e:'Transistor · TO-92',svg:SVG_TO92,pins:'E (باعث) · B (قاعدة) · C (مجمع)',f:'قصر بين C وE، أو B مفتوحة — شائع في دوائر التشغيل',t:'وضع الدايود: B→E و B→C هبوط 0.6V في اتجاه وOL في العكس.'},
+ {id:'reg',n:'منظم جهد 3 أطراف',e:'Regulator · 7805 / AMS1117',svg:SVG_TO220,pins:'1 الدخل IN · 2 الأرضي GND · 3 الخرج OUT',f:'خرج ناقص أو صفر مع سخونة، أو قصر على الخرج',t:'فولت DC: دخل أعلى من الخرج بـ 1.5–2V على الأقل، والخرج ثابت. مع الحمل بيسخن = استبدله.'},
+ {id:'mosfet',n:'موسفيت باور',e:'MOSFET · TO-220',svg:SVG_TO220,pins:'G (بوابة) · D (مصرف) · S (مصدر)',f:'قصر بين D وS بيخلي الجهاز ميت أو بيفصل',t:'أوم/دايود بين D وS: صفر = مقصور. البوابة معزولة، أي تسريب بينها وبين الأطراف = تالف.'},
+ {id:'dip',n:'أي سي DIP',e:'IC · DIP-8',svg:SVG_DIP8,pins:'8 أطراف، رقم 1 عند النقطة أو النقرة',f:'بيسخن زيادة، أو خط تغذيته مقصور، أو خرجه ثابت',t:'اتأكد الأول من التغذية على طرف VCC والأرضي، وبعدين شوف الإشارات على الأطراف.'},
+ {id:'soic',n:'أي سي SMD',e:'IC · SOIC-8',svg:SVG_SOIC8,pins:'8 أطراف صغيرة، رقم 1 عند النقطة',f:'شروخ لحام أو قصر بين أطراف متجاورة',t:'عدسة مكبرة + جرس بين كل طرف واللي جنبه، وقيس التغذية على الطرف الصح.'},
+ {id:'xtal',n:'كريستالة',e:'Crystal Oscillator',svg:SVG_XTAL,pins:'طرفين (أحيانًا 4 بأرضي)',f:'الجهاز بيفضل واقف على اللوجو أو بيعيد التشغيل',t:'أفضل قياس أوسيلوسكوب. بالأفوميتر: اتأكد مفيش قصر، والأطراف ملحومة كويس.'},
+ {id:'trafo',n:'محول نبضات',e:'SMPS Transformer',svg:SVG_TRAFO,pins:'ملفات ابتدائي وثانوي — الجانبين معزولين',f:'ملف مفتوح أو لحام بارد على أطرافه',t:'⚠ جانب ساخن: قياس ملفات المحول بمعدات عزل وبجهاز مفصول ومفرّغ، لفني مؤهل بس.'},
+ {id:'fuse',n:'فيوز',e:'Fuse',svg:SVG_FUSE,pins:'طرفين',f:'بيقطع من تيار عالي أو قصر بعدّه',t:'جرس على الطرفين: مفيش صوت = مقطوع. متحطش فيوز أعلى من المكتوب.'},
+ {id:'ind',n:'كويل / إندكتور',e:'Inductor',svg:SVG_INDUCTOR,pins:'طرفين',f:'سلك مقطوع أو لحام بارد، وبيسبب فولت ناقص',t:'أوم: قيمة صغيرة جدًا (قريب من صفر). OL = الملف مقطوع.'},
+ {id:'opto',n:'أوبتوكابلر',e:'Optocoupler · PC817',svg:SVG_OPTO,pins:'1 أنود الليد · 2 كاثود · 3 باعث · 4 مجمع',f:'بيقطع التغذية الراجعة في الباور فيعمل فولت مش مستقر',t:'وضع الدايود بين 1 و2: هبوط ~1.1V في اتجاه. الباقي محتاج تجربة تشغيل.'}
 ];
-function partCard(p){
+/* ===== مرجع القياسات الصحية لكل قطعة (قيم نموذجية عامة لبوردة رسيفر ميني) ===== */
+const HEALTH=[
+{id:'reg5v',pi:7,sim:'tp5vsb',n:'منظم الاستعداد 5V',e:'Standby regulator · 78L05 / AMS1117-5.0',
+ al:['منظم الاستعداد','منظم الاستعداد نفسه','منظم 5v','استعداد','78l05','ams1117','standby','5v regulator','reg5v'],
+ rails:[['IN — الدخل (بعد دايود الشوتكي)','9 – 15V','تيبيكال 12V'],['OUT — الخرج','5.00V','4.75 – 5.25V'],['GND — الأرضي','0V','—']],
+ dtest:'OUT ناحية الأرضي: هبوط 0.5 – 0.7V في اتجاه واحد، و OL في العكس. IN ناحية OUT: 0.5 – 0.7V في اتجاه واحد.',
+ ohm:'OUT للأرضي: أكبر من 1kΩ (سليم). أقل من 30Ω يبقى القصر على الخط نفسه مش المنظم.',
+ rip:'أقل من 50mV على خط 5V',
+ bad:['خرج 0V والمنظم سخن = ميت أو في قصر على الحمل','خرج بين 3 و4.5V مع سخونة = انهيار تحت الحمل','القراءة بتترعش بين 4 و5V = مكثف الفلترة اللي قبله بايظ'],
+ tip:'قبل التبديل: ارفع الحمل وقيس تاني — منظم سليم بيدّي 5V على حمل خفيف.'},
+{id:'reg33',pi:7,sim:'tp33',n:'منظم 3.3V',e:'3.3V regulator · AMS1117-3.3 / 1117-33',
+ al:['منظم 3.3v','منظم 3.3','منظم 3v3','1117-33','ams1117-3.3','3.3v regulator','reg33'],
+ rails:[['IN — الدخل (من خط 5V)','5.00V','4.75 – 5.25V (لازم 4.4V على الأقل)'],['OUT — الخرج','3.30V','3.20 – 3.40V'],['GND','0V','—']],
+ dtest:'OUT ناحية الأرضي: 0.5 – 0.7V في اتجاه، OL في العكس.',
+ ohm:'OUT للأرضي: 200Ω – 3kΩ حسب الحمل على الخط. أقل من 20Ω = قصر على خط 3.3V.',
+ rip:'أقل من 30mV على خط 3.3V',
+ bad:['خرج 0V مع دخل 5V سليم = المنظم ميت','خرج 1.5 – 2.5V = انهيار أو قصر جزئي على الحمل','سخن جدًا مع خرج سليم = حمل زايد على الخط'],
+ tip:'لو الدخل 5V مش موجود، المشكلة مش في المنظم — ارجع لخط الاستعداد.'},
+{id:'regddr',pi:7,sim:null,n:'منظم DDR',e:'DDR termination / VDD regulator',
+ al:['منظم ddr','ddr','vdd','vref','1.5v','1.8v','regddr'],
+ rails:[['VDD (حسب نوع الرام)','1.35 – 1.8V','DDR3 1.5V · DDR3L 1.35V · DDR2 1.8V'],['VREF','نص VDD','0.675 / 0.75 / 0.9V'],['VTT (لو موجود)','نص VDD','±0.05V']],
+ dtest:'الخرج ناحية الأرضي: 0.3 – 0.6V في اتجاه، OL في العكس.',
+ ohm:'الخرج للأرضي: أكبر من 100Ω.',
+ rip:'أقل من 30mV — التمويج العالي هنا بيعمل ريستارت وتهنيج',
+ bad:['خرج 0V = المنظم ميت أو الرام مقصورة','خرج ثابت 1.8V على بورد DDR3 = منظم غلط أو إعداد غلط','VREF مش نص VDD = مقاومة تقسيم بايظة'],
+ tip:'قبل ما تحكم على المنظم اتأكد من نوع الرام المركّبة على البورد.'},
+{id:'schottky',pi:4,sim:'tpschot',n:'دايود شوتكي (خرج الباور)',e:'Schottky rectifier · SB / SS series',
+ al:['دايود شوتكي','دايود الشوتكي','شوتكي','schottky','sb','ss34','tpschot'],
+ rails:[['الكاثود (الخرج)','11.5 – 12.5V','±0.5V'],['الأنود','0V','في وضع التشغيل العادي']],
+ dtest:'أنود ← كاثود: 0.15 – 0.35V (شوتكي أقل من الدايود العادي). كاثود ← أنود: OL.',
+ ohm:'أنود للأرضي: أكبر من 1kΩ. الكاثود للأرضي: حسب الحمل على خط 12V (مش أقل من 100Ω في السليم).',
+ rip:'أقل من 150mV على خط 12V',
+ bad:['0.00V بالاتجاهين = مقصور (أشهر عطل بعد قصر في الخرج)','OL بالاتجاهين = مفتوح، والجهاز بيبقى ميت خالص','هبوط أعلى من 0.6V = دايود تالف بيسخن'],
+ tip:'قبل ما تركّب دايود جديد: اتأكد مفيش قصر على خط 12V، وإلا الجديد هيتلف.'},
+{id:'capel',pi:1,sim:'tp5vsb',n:'مكثف فلترة إلكتروليتي',e:'Electrolytic filter capacitor',
+ al:['مكثف فلترة','مكثف فلترة الخط','مكثف إلكتروليتي','مكثف الكتروليتي','مكثف','electrolytic','cap','capel'],
+ rails:[['الجهد عليه في التشغيل','نفس جهد الخط','5V على خط 5V · 12V على خط 12V'],['القطبية','الموجب على الخط','السالب على الأرضي']],
+ dtest:'وضع الدايود: بيعمل شحن سريع وبعدها OL — مش قصر ومش صفر ثابت.',
+ ohm:'وضع الأوم: المؤشر/القراءة بتطلع من صفر وتزيد لحد OL = شحن سليم. مقاومة ثابتة قريبة من صفر = مقصور. ESR المطلوب أقل من 1Ω (470 – 1000µF).',
+ rip:'أقل من 50mV على خط 5V — مكثف بايظ بيرفع التمويج فوق 200mV',
+ bad:['قمة المكثف منتفخة أو فيها تسريب = غيّره على طول','ESR أعلى من 2 – 3Ω = بايظ حتى لو شكله سليم','صفر أوم بالاتجاهين = قصر بيسحب المنظم للأرضي'],
+ tip:'المكثفات دي أشهر سبب لـ"الجهاز بيفصل بعد شوية" — بدّلها بنفس الفولت أو أعلى، ونفس السعة أو قريبة منها.'},
+{id:'capcer',pi:2,sim:'tp33',n:'مكثف سيراميك (فلترة الخط)',e:'Ceramic capacitor · 104 / 103',
+ al:['مكثف سيراميك','سيراميك','مكثف فلترة خط 3.3v','104','103','ceramic','capcer'],
+ rails:[['الجهد عليه','نفس جهد الخط','0V على خط مقصور'],['القطبية','مفيش','—']],
+ dtest:'OL بالاتجاهين (مفيش هبوط). أي هبوط أو صفر = مقصور.',
+ ohm:'أكبر من 1MΩ. صفر أوم = قصر داخلي.',
+ rip:'وظيفته تنزيل التمويج — لو مقصور بيبان كقصر على الخط كله',
+ bad:['صفر أوم = قصر (شائع جدًا على خطوط 3.3V)','شروخ في اللحام = قراءة متقطعة مع الاهتزاز','مقصور بيسخّن المنظم والخط مع بعض'],
+ tip:'لما تلاقي قصر على خط تغذية: ارفع مكثفات السيراميك واحدة واحدة — أول واحد يروح القصر هو المتهم.'},
+{id:'lnb',pi:7,sim:'tplnb',n:'منظم / مولد تغذية LNB',e:'LNB supply · 13V / 18V boost',
+ al:['منظم lnb','مولد lnb','تغذية lnb','lnb','13v','18v','tplnb'],
+ rails:[['خرج LNB — رأسي (V)','13.0V','12.5 – 13.5V'],['خرج LNB — أفقي (H)','18.0V','17.5 – 18.5V'],['التيار على الحمل','200 – 500mA','حسب الطبق والـ LNB']],
+ dtest:'الخرج ناحية الأرضي: 0.3 – 0.6V في اتجاه، OL في العكس (وممكن يبان زي مكثف بيعمل شحن).',
+ ohm:'الخرج للأرضي: أكبر من 500Ω مع كابل سليم. أقل من 20Ω = قصر في الكابل أو الفيشة.',
+ rip:'تغذية DC — التمويج بيتقاس بسكوب لو متاح. مفيش قياس نغمة 22kHz بالملتيميتر العادي.',
+ bad:['0V مع كابل سليم = المنظم ميت','الفولت بيقع لـ 8 – 10V لما توصل الكابل = منظم ضعيف أو كابل بيسحب','13/18V مش بيتغيروا مع تبديل القناة = دايرة التبديل مش شغالة'],
+ tip:'افصل كابل الطبق وقيس الأول: لو الفولت رجع طبيعي يبقى القصر في الكابل/الـ LNB مش في البورد.'},
+{id:'tuner',pi:9,sim:null,n:'التيونر',e:'Tuner can',
+ al:['التيونر','تيونر','tuner','tplnb'],
+ rails:[['تغذية التيونر','3.3V','3.2 – 3.4V'],['نواة التيونر','1.1 – 1.3V','حسب الموديل'],['خط AGC','1 – 2V','بيتغير مع قوة الإشارة']],
+ dtest:'أطراف التغذية ناحية الأرضي: 0.3 – 0.6V في اتجاه، OL في العكس.',
+ ohm:'أطراف التغذية للأرضي: مش أقل من 50Ω. صفر = قصر جوه التيونر.',
+ rip:'أقل من 30mV على خط 3.3V اللي بيغذيه',
+ bad:['مفيش إشارة مع إن كل الفولتات سليمة = التيونر أو السوفت','سحب زيادة على 3.3V = التيونر بيسخن','AGC ثابت على 0V = مفيش إشارة داخلة أصلًا (كابل/طبق)'],
+ tip:'قبل ما تحكم على التيونر: جرّب كابل وطبق تانيين، وشوف قائمة القنوات بتتلقط ولا لأ.'},
+{id:'soc',pi:9,sim:null,n:'المعالج SoC',e:'Main SoC (GX / Sunplus / Ali)',
+ al:['المعالج','المعالج soc','soc','معالج','gx6605','sunplus','ali','processor'],
+ rails:[['نواة المعالج Core','1.0 – 1.2V','±0.05V'],['IO','3.3V','3.2 – 3.4V'],['أرضي','0V','—']],
+ dtest:'نواة المعالج ناحية الأرضي: 0.2 – 0.5V في اتجاه. صفر ثابت = قصر جوه الشيب.',
+ ohm:'نواة المعالج للأرضي: أكبر من 20Ω. صفر أو أقل من 5Ω = الشيب مقصور (أو مكثف الفلترة بتاعه).',
+ rip:'أقل من 30mV على خط النواة — التمويج العالي بيعمل تهنيج وريستارت',
+ bad:['قصر على خط النواة = الشيب غالبًا راح','سخونة شديدة مع إن الجهاز واقف = تسريب داخلي','الجهاز بيعيد التشغيل بعد دقيقة = تغذية النواة بتقع تحت الحمل'],
+ tip:'لو الشيب مقصور: ارفع مكثفات الفلترة حواليه الأول — ممكن تكون هي السبب مش الشيب.'},
+{id:'flash',pi:10,sim:null,n:'فلاشة SPI',e:'SPI flash · 25Q / 25X series',
+ al:['فلاشة','فلاشة spi','الفلاشة','spi flash','25q','25x','flash'],
+ rails:[['VCC','3.30V','3.20 – 3.40V'],['CS / CLK (وهي واقفة)','3.3V','لازم تكون High في وضع الخمول'],['GND','0V','—']],
+ dtest:'VCC ناحية الأرضي: 0.4 – 0.6V في اتجاه، OL في العكس.',
+ ohm:'VCC للأرضي: أكبر من 100Ω. صفر = قصر (ممكن يكون مكثف جنبها).',
+ rip:'أقل من 30mV على VCC',
+ bad:['الجهاز واقف على اللوجو = الفلاشة فاضية أو تالفة','سحب زيادة على 3.3V = الفلاشة بتحرق','CS مش High وهي واقفة = المعالج مش واصلها'],
+ tip:'القراءة الصح للفلاشة محتاجة مبرمجة/جهاز — الملتيميتر بيقولك بس هل هي مقصورة أو ميتة.'},
+{id:'ddr',pi:10,sim:null,n:'رام DDR',e:'DDR SDRAM',
+ al:['رام','الرام','ddr','ram','sdram'],
+ rails:[['VDD','1.35 – 1.8V','حسب النوع'],['VREF','نص VDD','±0.03V'],['VTT','نص VDD','±0.05V']],
+ dtest:'أطراف التغذية ناحية الأرضي: 0.3 – 0.5V في اتجاه.',
+ ohm:'VDD للأرضي: مش أقل من 50Ω.',
+ rip:'أقل من 30mV',
+ bad:['قصر على VDD = رام أو منظم DDR','الجهاز بيقلب ألوان أو بيهنج = رام أو لحام BGA','VREF غلط = مقاومة تقسيم بايظة'],
+ tip:'قبل الحكم على الرام: جرّب تسخين خفيف/إعادة لحام على الأطراف لو عندك خبرة، أو غيّرها.'},
+{id:'xtal',pi:11,sim:null,n:'كريستالة',e:'Crystal · 27.000 MHz',
+ al:['كريستالة','كريستال','xtal','crystal','27mhz','27.000'],
+ rails:[['جهد DC على الطرفين','0V','مفيش جهد مستمر — طبيعي'],['الطرفين للأرضي','مفتوح','—']],
+ dtest:'OL بالاتجاهين (مفيش هبوط). أي هبوط = مش كريستالة سليمة.',
+ ohm:'OL (مفتوح) على الطرفين. صفر = مقصورة.',
+ rip:'مفيش — دي بتتقاس بسكوب أو عدّاد ترددات',
+ bad:['الجهاز واقف على اللوجو أو بيعيد التشغيل = كريستالة أو مكثفاتها','لحام بارد على طرف = تشغيل متقطع مع الاهتزاز','مفيش ذبذبة على السكوب = كريستالة ميتة'],
+ tip:'الملتيميتر مش بيثبت إن الكريستالة شغالة — بيشك فيها بس. الحكم النهائي بسكوب أو تبديل.'},
+{id:'fuse',pi:13,sim:null,n:'فيوز',e:'Fuse',
+ al:['فيوز','fuse','f1'],
+ rails:[['على الطرفين','0V','فرق جهد صفر في السليم'],['الاستمرارية','صوت جرس','0Ω']],
+ dtest:'جرس/أوم: 0Ω وصوت = سليم.',
+ ohm:'0Ω. أي قراءة عالية أو OL = مقطوع.',
+ rip:'مفيش',
+ bad:['OL = مقطوع (غيّره بنفس القيمة بس)','مقطوع مرة ورا مرة = في قصر بعده متصلحش','متحطش سلك أو فيوز أعلى من المكتوب'],
+ tip:'كل فيوز بيقطع لسبب — دوّر على القصر اللي قطّعه قبل ما تحط جديد.'},
+{id:'ind',pi:14,sim:null,n:'كويل / إندكتور',e:'Inductor / choke',
+ al:['كويل','إندكتور','ملف','inductor','choke','coil'],
+ rails:[['على الطرفين','0V','مفيش فرق جهد في السليم'],['الأوم','0.1 – 2Ω','قريب من الصفر']],
+ dtest:'جرس: صوت (0Ω تقريبًا).',
+ ohm:'0.1 – 2Ω حسب حجمه. OL = مقطوع. أعلى من 10Ω = لحام بارد أو سلك تالف.',
+ rip:'مفيش — بس بيقلل تمويج خط التغذية',
+ bad:['OL = مقطوع والخط اللي عليه بيقع','لحام بارد = فولت ناقص ومتقطع','سخونة زيادة = بيسحب تيار أكتر من الطبيعي'],
+ tip:'الكويلات في خطوط التغذية بتفصل بصمت — قيس الأوم قبل أي حكم على المنظم.'},
+{id:'opto',pi:15,sim:null,n:'أوبتوكابلر',e:'Optocoupler · PC817',
+ al:['أوبتوكابلر','اوبتوكابلر','opto','pc817','817'],
+ rails:[['الطرف 1 → 2 (الليد)','0.9 – 1.2V','هبوط في وضع الدايود'],['الطرف 4 → 3','OL','مفيش توصيل بين الجانبين'],['جانب الابتدائي','⚠ جانب ساخن','فني مؤهل بوثائق الموديل']],
+ dtest:'1 ← 2: 0.9 – 1.2V في اتجاه و OL في العكس. 3 و4: OL بالاتجاهين.',
+ ohm:'جانب الليد: زي دايود. جانب الترانزستور: OL بالاتجاهين.',
+ rip:'مفيش — وظيفته يرجع التغذية الراجعة',
+ bad:['OL على 1-2 = الليد جواه ميت، والباور بيطلع فولت غلط أو بيفصل','توصيل بين 3 و4 = الجهاز بيبقى ميت أو الفولت بيطير','لحام بارد = باور متقطع'],
+ tip:'⚠ جانبه التاني على الجانب الساخن — القياس عليه لفني مؤهل والجهاز مفصول ومفرّغ.'},
+{id:'mosfet',pi:8,sim:null,n:'موسفيت باور',e:'Power MOSFET · TO-220',
+ al:['موسفيت','mosfet','to-220','irf'],
+ rails:[['D → S (وهو مقفول)','OL','مفيش توصيل'],['G → S','OL','مفيش توصيل'],['دايود الجسم S → D','0.4 – 0.6V','في اتجاه واحد']],
+ dtest:'S ← D: 0.4 – 0.6V (دايود الجسم) في اتجاه و OL في العكس. G مع أي طرف: OL.',
+ ohm:'D للأرضي: مش أقل من 100Ω. صفر = مقصور.',
+ rip:'مفيش — بس بيشتغل في مرحلة التقطيع',
+ bad:['D-S صفر = مقصور والجهاز ميت أو الفيوز بيقطع','G-S مقصور = الموسفيت اتضرب','سخن بسرعة مع إن الجهاز واقف = تسريب'],
+ tip:'⚠ الموسفيت في الغالب على الجانب الساخن — القياس والتبديل لفني مؤهل والجهاز مفصول.'},
+{id:'trafo',pi:12,sim:null,n:'محول نبضات (جانب ساخن)',e:'SMPS transformer',
+ al:['محول','محول نبضات','ترانس','smps','transformer','مرحلة التقطيع'],
+ rails:[['الجانب الساخن','⚠ خارج النطاق','مفيش قيم هنا — قياس حي على الجانب الساخن ممنوع'],
+        ['ملفات الابتدائي/الثانوي','مفتوح بينهم','العزل لازم يكون سليم']],
+ dtest:'ملف مفتوح = لحام بارد أو سلك مقطوع. العزل بين الابتدائي والثانوي لازم يكون OL.',
+ ohm:'مقاومة الملفات صغيرة (أقل من 5Ω عادة). أي OL = ملف مقطوع.',
+ rip:'مفيش — التمويج هنا بيتقاس بسكوب من ناحية الخرج بس',
+ bad:['الفيوز بيقطع كل مرة = قصر في الابتدائي أو الموسفيت','صوت صرير + مفيش خرج = المحول أو دايرة التقطيع','سخونة شديدة = حمل زايد أو ملف تالف'],
+ tip:'⚠ الجانب الساخن مش مجال تدريب. أي قياس أو تبديل هنا لفني مؤهل والجهاز مفصول ومفرّغ من الكهرباء.'},
+{id:'tr',pi:6,sim:null,n:'ترانزستور صغير (TO-92)',e:'Transistor · TO-92',
+ al:['ترانزستور','transistor','to-92','8050','8550'],
+ rails:[['B → E','0.6 – 0.7V','في وضع الدايود'],['B → C','OL','في وضع الدايود'],['C → E','OL','مفيش توصيل']],
+ dtest:'B ← E: 0.6 – 0.7V في اتجاه و OL في العكس. B ← C: OL. C ← E: OL.',
+ ohm:'بين C وE: OL. صفر = مقصور.',
+ rip:'مفيش',
+ bad:['C-E صفر = مقصور (بيسحب خط التشغيل)','B-E OL بالاتجاهين = مفتوح','قراءة غير ثابتة = لحام بارد أو ترانزستور بيسخن'],
+ tip:'قيس وهو مرفوع من البورد لو تقدر — القراءة على البورد بتتأثر بالدايرات اللي حواليه.'},
+{id:'diode',pi:3,sim:'tpschot',n:'دايود عادي (استعداد/حماية)',e:'Diode · 1N4007 / 4148',
+ al:['دايود الاستعداد','دايود عادي','دايود','1n4007','4148','diode'],
+ rails:[['A → K','0.5 – 0.7V','هبوط في وضع الدايود'],['K → A','OL','مفيش توصيل']],
+ dtest:'أنود ← كاثود: 0.5 – 0.7V (4148 ممكن 0.55V). كاثود ← أنود: OL.',
+ ohm:'أنود للأرضي: مش أقل من 1kΩ عادة.',
+ rip:'مفيش — بس بيحمي الخط',
+ bad:['صفر بالاتجاهين = مقصور','OL بالاتجاهين = مفتوح والخط مش واصل','هبوط أعلى من 1V = دايود تعبان'],
+ tip:'لو قراءة الدايود على البورد غريبة، ارفع طرف واحد وقيس تاني عشان تستبعد تأثير الدايرة.'},
+{id:'res',pi:0,sim:null,n:'مقاومة',e:'Resistor',
+ al:['مقاومة','مقاومه','resistor','res'],
+ rails:[['القراءة المتوقعة','±5%','حسب الألوان أو المكتوب'],['فرق الجهد','حسب الدايرة','—']],
+ dtest:'مش بيتقاس بوضع الدايود — استخدم الأوم.',
+ ohm:'قيمتها ±5% (ذهبي) أو ±1% (بني). أعلى بكتير = مفتوحة، أقل بكتير = فيها حمل على التوازي.',
+ rip:'مفيش',
+ bad:['OL = مفتوحة (شائعة في مقاومات التغذية)','قيمة أعلى من المكتوب = تلف من سخونة','قيمة أقل = حمل على التوازي مش عيب فيها'],
+ tip:'قيسها مرفوعة من ناحية لو القراءة على البورد مش منطقية.'},
+{id:'led',pi:5,sim:null,n:'ليد',e:'LED',
+ al:['ليد','led','ليد البانل'],
+ rails:[['A → K','1.6 – 2.2V','هبوط في وضع الدايود (أحمر)'],['K → A','OL','مفيش توصيل']],
+ dtest:'أنود ← كاثود: 1.6 – 2.2V (أحمر) أو 2.6 – 3.2V (أزرق/أبيض). العكس OL.',
+ ohm:'OL بالاتجاهين في وضع الأوم.',
+ rip:'مفيش',
+ bad:['OL بالاتجاهين = ليد ميت','هبوط أقل من 1V = ليد مضروب','شغال بس ضعيف = مقاومة السلسلة اتغيرت'],
+ tip:'ليد البانل مش شغال؟ قيس الفولت على طرفيه الأول — ممكن المشكلة في السوكتش أو المقاومة.'},
+];
+
+/* ===== واجهة مرجع القياسات ===== */
+let healthSel='', healthQ='';
+function healthFind(id){ for(const h of HEALTH){ if(h.id===id) return h; } return null; }
+function healthMatch(q){
+  const s=(q||'').trim().toLowerCase();
+  if(!s) return [];
+  const out=[];
+  for(const h of HEALTH){
+    const hay=(h.n+' '+h.e+' '+h.al.join(' ')).toLowerCase();
+    if(hay.indexOf(s)>=0) out.push(h);
+  }
+  return out.slice(0,8);
+}
+function healthChipsHtml(){
+  const m=healthMatch(healthQ);
+  if(!healthQ.trim()) return '';
+  if(!m.length) return '<div class="hempty">مفيش قطعة بالاسم ده. جرّب: منظم، دايود، مكثف، فلاشة، كريستالة، أو بالإنجليزي regulator / diode.</div>';
+  return m.map(h=>'<button type="button" class="hchip'+(healthSel===h.id?' on':'')+'" data-hp="'+h.id+'">'+esc(h.n)+'</button>').join('');
+}
+function healthCardHtml(h){
+  const rows=h.rails.map(r=>'<tr><td>'+esc(r[0])+'</td><td class="hv">'+esc(r[1])+'</td><td class="ht">'+esc(r[2])+'</td></tr>').join('');
+  const bad=h.bad.map(b=>'<li>'+esc(b)+'</li>').join('');
+  let links='';
+  if(typeof h.pi==='number') links+='<button type="button" class="hbtn" data-hpart="'+h.pi+'">📐 رسمة القطعة</button>';
+  if(h.sim) links+='<button type="button" class="hbtn" data-hsim="'+h.sim+'">🔌 نقطة القياس في المحاكي</button>';
+  return '<div class="hcard">'+
+    '<div class="hh"><div class="hht"><div class="hn">'+esc(h.n)+'</div><div class="he">'+esc(h.e)+'</div></div><span class="htag">قيم نموذجية عامة</span></div>'+
+    '<div class="hsec"><b>الفولت المتوقع على كل طرف / نقطة</b><table class="htab"><thead><tr><th>الطرف</th><th>القيمة</th><th>السماحية</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+    '<div class="hsec"><b>وضع الدايود (▷|)</b><p>'+esc(h.dtest)+'</p></div>'+
+    '<div class="hsec"><b>وضع الأوم / المقاومة (Ω)</b><p>'+esc(h.ohm)+'</p></div>'+
+    '<div class="hsec"><b>التمويج (ريبل)</b><p>'+esc(h.rip)+'</p></div>'+
+    '<div class="hsec hbad"><b>القراءة البايظة شكلها إيه</b><ul>'+bad+'</ul></div>'+
+    '<div class="hsec htip"><b>نصيحة فحص</b><p>'+esc(h.tip)+'</p></div>'+
+    (links?'<div class="hlinks">'+links+'</div>':'')+
+    '<div class="hnote">قيم نموذجية عامة لبوردة رسيفر ميني — مش قراءة موديلك بالظبط. قارنها بوثائق الموديل أو بدليل الصيانة. مفيش أي قياس حي على جانب الكهرباء الرئيسي.</div>'+
+  '</div>';
+}
+function healthBodyHtml(){
+  const h=healthFind(healthSel);
+  if(!h) return '<div class="hempty">اكتب اسم القطعة فوق، أو دوس على أي مشتبه به في القائمة — هتلاقي القياسات الصحية المتوقعة والقراءة البايظة اللي تدل على العطل.</div>';
+  return healthCardHtml(h);
+}
+function healthUpdate(){
+  const l=document.getElementById('hlist'); if(l) l.innerHTML=healthChipsHtml();
+  const b=document.getElementById('hbody'); if(b) b.innerHTML=healthBodyHtml();
+}
+window.healthSearch=function(v){ healthQ=v||''; healthUpdate(); };
+window.healthOpen=function(id,scroll){
+  healthSel=id; healthQ='';
+  const q=document.getElementById('healthQ'); if(q) q.value='';
+  healthUpdate();
+  if(scroll){ const c=document.getElementById('healthCard'); if(c) c.scrollIntoView({block:'start'}); }
+};
+window.healthGo=function(id){
+  healthSel=id; healthQ='';
+  go('/sim');
+  setTimeout(function(){ const c=document.getElementById('healthCard'); if(c) c.scrollIntoView({block:'start'}); },300);
+};
+window.openPartDrawing=function(pi){
+  go('/maint');
+  setTimeout(function(){ const c=document.querySelectorAll('.partcard')[pi]; if(c) c.scrollIntoView({block:'start'}); },300);
+};
+window.healthSimPoint=function(tp){
+  simState.tp=tp;
+  for(const k in SIM_GUIDED){ if(SIM_GUIDED[k].tp===tp){ simState.mode=SIM_GUIDED[k].mode; break; } }
+  rerenderSim();
+  setTimeout(function(){ const m=document.querySelector('.meter'); if(m) m.scrollIntoView({block:'start'}); },250);
+};
+function healthSectionHtml(){
+  return '<div class="hblock" id="healthCard">'+
+    '<div class="hhead">القياسات المرجعية للقطعة<span class="sub">اكتب اسم القطعة، أو دوس على أي مشتبه به فوق — القيم الصحية المتوقعة والقراءة اللي بتدل على العطل</span></div>'+
+    '<div class="psearch"><input type="text" id="healthQ" inputmode="search" placeholder="منظم الاستعداد · دايود · مكثف · فلاشة · regulator" value="'+esc(healthQ)+'" oninput="healthSearch(this.value)"></div>'+
+    '<div class="hlist" id="hlist">'+healthChipsHtml()+'</div>'+
+    '<div id="hbody">'+healthBodyHtml()+'</div></div>';
+}
+function suspectItemHtml(s,i,refs){
+  const ref=(refs||[])[i];
+  if(ref) return '<li><button type="button" class="susp" data-hp="'+ref+'">'+esc(s)+' <span class="sarrow">‹ القياسات</span></button></li>';
+  return '<li>'+esc(s)+'</li>';
+}
+
+function partCard(p,i){
   return '<div class="partcard">'+p.svg+
     '<div class="pn">'+esc(p.n)+'</div><div class="pe">'+esc(p.e)+'</div>'+
     '<div class="pp"><b>الأطراف:</b> '+esc(p.pins)+'</div>'+
     '<div class="pf"><b>أشهر عطل:</b> '+esc(p.f)+'</div>'+
     '<div class="pt"><b>إزاي تفحصه:</b> '+esc(p.t)+'</div>'+
-    '<div class="pbtn"><a class="btn btn-gold" href="#/sim">🧪 اختبر القياس في المحاكي</a></div></div>';
+    '<div class="pbtn"><div style="display:flex;gap:8px;flex-wrap:wrap">'+
+      '<a class="btn btn-gold" style="flex:1;text-align:center" href="#/sim">🧪 المحاكي</a>'+
+      (HEALTH.some(x=>x.pi===i)?'<button type="button" class="btn btn-sec" style="flex:1;text-align:center" data-hpgo="'+HEALTH.filter(x=>x.pi===i)[0].id+'">📊 القياسات المرجعية</button>':'')+
+    '</div></div></div>';
 }
 let partQ='';
 function partsFiltered(){
@@ -1937,7 +2240,7 @@ window.addEventListener('hashchange', render);
 /* الفكرة: الصفحة نفسها بتقارن رقم بنيتها بالبنية المنشورة على السيرفر.
    لو فيه أحدث: بتنضّف الكاش والـ service worker وتعيد التحميل بعنوان جديد،
    فمستحيل تفضل واقفة على نسخة قديمة زي ما حصل قبل كده. */
-var AJS_BUILD='v37';
+var AJS_BUILD='v38';
 var AJS_REMOTE='https://omarsat8013-create.github.io/abujabal-sat/';
 var AJS_UPDATING=false;
 function ajsLoadRemoteVersion(done){
