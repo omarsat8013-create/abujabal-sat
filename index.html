@@ -2065,7 +2065,12 @@ function healthUpdate(){
   const l=document.getElementById('hlist'); if(l) l.innerHTML=healthChipsHtml();
   const b=document.getElementById('hbody'); if(b) b.innerHTML=healthBodyHtml();
 }
-window.healthSearch=function(v){ healthQ=v||''; healthUpdate(); };
+window.healthSearch=function(v){
+  healthQ=v||'';
+  const m=healthMatch(healthQ);
+  if(healthQ.trim() && m.length && !m.some(h=>h.id===healthSel)) healthSel=m[0].id;
+  healthUpdate();
+};
 window.healthOpen=function(id,scroll){
   healthSel=id; healthQ='';
   const q=document.getElementById('healthQ'); if(q) q.value='';
